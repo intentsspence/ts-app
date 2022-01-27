@@ -2,6 +2,8 @@
 
 defcon = 5
 phasing_player = 'USA'
+country_dict = {}
+
 
 
 def adjust_defcon(adjustment_value):
@@ -92,6 +94,7 @@ class TwilightStruggleGame(CardGame):
 
         for line in lines:
             country = TwilightStruggleCountry(*line.split(','))
+            country_dict.update({country.name: country})
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
