@@ -26,8 +26,6 @@ def adjust_defcon(adjustment_value):
 
         global game_active
         game_active = False
-    # Check to see if the defcon has ended the game
-    # TODO - Add game ending conditions if defcon = 1
 
 
 class CardGame:
@@ -204,10 +202,14 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to modify the score
     def check_game_end(self):
+        global game_active
         if score >= 20:
             sides['usa'].winner = True
+            game_active = False
         elif score <= -20:
             sides['ussr'].winner = True
+            game_active = False
+
 
     def change_score(self, s, p):
         global score
