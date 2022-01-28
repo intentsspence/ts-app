@@ -247,10 +247,3 @@ class TwilightStruggleGame(CardGame):
             raise ValueError("Side must be 'usa' or 'ussr'")
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
-print("USA space level: " + str(sides['usa'].space_level))
-print("USSR space level: " + str(sides['ussr'].space_level))
-game.increase_space_level('usa')
-print("USA space level: " + str(sides['usa'].space_level))
-print("USSR space level: " + str(sides['ussr'].space_level))
-print("Current score: " + str(score))
