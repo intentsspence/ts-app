@@ -42,7 +42,7 @@ class Country:
 class TwilightStruggleCountry(Country):
     """Class of countries specific to Twilight Struggle"""
 
-    def __init__(self, n, r, sr, st, bg, usa_i, ussr_i):
+    def __init__(self, n, r, sr, st, bg, usa_i, ussr_i, c):
         Country.__init__(self, n)
 
         if r not in ['Africa', 'Asia', 'Central America', 'Europe', 'Middle East', 'South America']:
@@ -58,7 +58,7 @@ class TwilightStruggleCountry(Country):
 
         if not st.isdigit() and (int(st) > 4 or int(st) < 1):
             raise ValueError("Error creating Twilight Struggle country. Stability must be a number between 1 and 4")
-        self.stability = st
+        self.stability = int(st)
 
         if bg not in ['TRUE', 'FALSE']:
             raise ValueError("Error creating Twilight Struggle country. Battleground must be True or False.")
@@ -71,6 +71,9 @@ class TwilightStruggleCountry(Country):
         if not ussr_i.isdigit():
             raise ValueError("Error creating Twilight Struggle country. USSR influence must be a number.")
         self.ussr_influence = ussr_i
+
+        if c not in ['usa', 'ussr', '']
+            raise ValueError("Error creating Twilight Struggle country")
 
 class TwilightStruggleGame(CardGame):
     """Class of an individual game of Twilight Struggle"""
@@ -97,4 +100,3 @@ class TwilightStruggleGame(CardGame):
             country_dict.update({country.name: country})
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
