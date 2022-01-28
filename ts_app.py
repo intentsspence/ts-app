@@ -5,7 +5,6 @@ phasing_player = 'USA'
 countries = {}
 
 
-
 def adjust_defcon(adjustment_value):
     global defcon
     defcon = defcon + adjustment_value
@@ -16,6 +15,7 @@ def adjust_defcon(adjustment_value):
 
     # Check to see if the defcon has ended the game
     # TODO - Add game ending conditions if defcon = 1
+
 
 class CardGame:
     """Base class for a collection of Card Pile objects"""
@@ -76,6 +76,7 @@ class TwilightStruggleCountry(Country):
             raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa', 'ussr', or ''")
         self.controlled = c
 
+
 class TwilightStruggleGame(CardGame):
     """Class of an individual game of Twilight Struggle"""
 
@@ -99,6 +100,43 @@ class TwilightStruggleGame(CardGame):
         for line in lines:
             country = TwilightStruggleCountry(*line.split(','))
             countries.update({country.name: country})
+
+    # Functions to modify influence
+    def check_for_control(self, c):
+        if (countries[c].usa_influence - countries[c].ussr_influence) >= countries[c].stability:
+            countries[c].controlled = 'usa'
+        elif (countries[c].ussr_influence - countries[c].usa_influence) >= countries[c].stability:
+            countries[c].controlled = 'ussr'
+        else:
+            countries[c].controlled = ''
+
+    def remove_all_influence(self, c, s):
+        if s == 'usa':
+            countries[c].usa_influence = 0
+        elif s == 'ussr':
+            countries[c].ussr_influence = 0
+
+        self.check_for_control(c)
+
+    def add_influence(self, c, s, i):
+        if s == 'usa':
+            countries[c].usa_influence += i
+        elif s == 'ussr':
+            countries[c].ussr_influence += i
+
+        self.check_for_control(c)
+
+    def remove_influence(self, c, s, i):
+        if s == 'usa':
+            countries[c].usa_influence -= i
+            if countries[c].usa_influence < 0:
+                countries[c].usa_influence = 0
+        elif s == 'ussr':
+            countries[c].ussr_influence -= i
+            if countries[c].ussr_influence < 0:
+                countries[c].ussr_influence = 0
+
+        self.check_for_control(c)
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
