@@ -3,6 +3,8 @@
 defcon = 5
 score = 0
 
+game_active = True
+
 countries = {}
 players = {}
 sides = {}
@@ -191,6 +193,15 @@ class TwilightStruggleGame(CardGame):
             countries[c].ussr_influence = 0
 
         self.check_for_control(c)
+
+    # Functions to modify the score
+    def check_game_end(self):
+        if score >= 20:
+            sides['usa'].winner = True
+        elif score <= -20:
+            sides['ussr'].winner = True
+
+
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
