@@ -1,7 +1,8 @@
 # App to play twilight struggle
 
 defcon = 5
-phasing_player = 'USA'
+score = 0
+
 countries = {}
 players = {}
 sides = {}
