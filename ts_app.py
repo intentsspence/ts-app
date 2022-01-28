@@ -2,7 +2,7 @@
 
 defcon = 5
 phasing_player = 'USA'
-country_dict = {}
+countries = {}
 
 
 
@@ -72,7 +72,7 @@ class TwilightStruggleCountry(Country):
             raise ValueError("Error creating Twilight Struggle country. USSR influence must be a number.")
         self.ussr_influence = int(ussr_i)
 
-        if c not in ['usa', 'ussr', '']
+        if c not in ['usa', 'ussr', '']:
             raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa', 'ussr', or ''")
         self.controlled = c
 
@@ -80,7 +80,7 @@ class TwilightStruggleGame(CardGame):
     """Class of an individual game of Twilight Struggle"""
 
     turns = 10
-    action_rounds = {1:6, 2:6, 3:6, 4:7, 5:7, 6:7, 7:7, 8:7, 9:7, 10:7}
+    action_rounds = {1: 6, 2: 6, 3: 6, 4: 7, 5: 7, 6: 7, 7: 7, 8: 7, 9: 7, 10: 7}
 
     def __init__(self, n, d, opt):
         CardGame.__init__(self, n, d)
@@ -98,6 +98,7 @@ class TwilightStruggleGame(CardGame):
 
         for line in lines:
             country = TwilightStruggleCountry(*line.split(','))
-            country_dict.update({country.name: country})
+            countries.update({country.name: country})
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
