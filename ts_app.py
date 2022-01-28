@@ -39,6 +39,18 @@ class Country:
         return self.name
 
 
+class Player:
+    """Base class for a player in a game"""
+    def __init__(self, n):
+        self.name = n
+
+    def __repr__(self):
+        return "<Player: %s>" % self.name
+
+    def __str__(self):
+        return self.name
+
+
 class TwilightStruggleCountry(Country):
     """Class of countries specific to Twilight Struggle"""
 
