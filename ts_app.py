@@ -219,5 +219,20 @@ class TwilightStruggleGame(CardGame):
 
         self.check_game_end()
 
+    # Functions for space race
+    def space_race_awards(self, s, l):
+
+
+    def increase_space_level(self, s):
+        if s == 'usa':
+            sides['usa'].space_level += 1
+            self.space_race_awards('usa', sides['usa'].space_level)
+        elif s == 'ussr':
+            sides['ussr'].space_level += 1
+            self.space_race_awards('ussr', sides['ussr'].space_level)
+
+
+
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
