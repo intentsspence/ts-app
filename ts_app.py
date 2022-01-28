@@ -3,6 +3,8 @@
 defcon = 5
 phasing_player = 'USA'
 countries = {}
+players = {}
+sides = {}
 
 
 def adjust_defcon(adjustment_value):
@@ -37,6 +39,38 @@ class Country:
 
     def __str__(self):
         return self.name
+
+
+class Player:
+    """Base class for a player in a game"""
+    def __init__(self, n):
+        self.name = n
+
+    def __repr__(self):
+        return "<Player: %s>" % self.name
+
+    def __str__(self):
+        return self.name
+
+
+class TwilightStrugglePlayer(Player):
+    """Class of players specific to Twilight Struggle"""
+
+    def __init__(self, n, s):
+        Player.__init__(self, n)
+
+        if s not in ['usa', 'ussr']:
+            raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa' or 'ussr'")
+        self.side = s
+
+        # Set phasing player to false
+        self.phasing = False
+
+        # Set space level to 0
+        self.space_level = 0
+
+        # Set winner to false
+        self.winner = False
 
 
 class TwilightStruggleCountry(Country):
@@ -91,6 +125,7 @@ class TwilightStruggleGame(CardGame):
         self.optional_cards = True if opt == 1 else False
 
         self.__create_countries()
+        self.__create_players()
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as handle:
@@ -100,6 +135,16 @@ class TwilightStruggleGame(CardGame):
         for line in lines:
             country = TwilightStruggleCountry(*line.split(','))
             countries.update({country.name: country})
+
+    def __create_players(self):
+        # TODO - Change the "create players" function to allow for user input
+
+        player_list = [['Player 1', 'ussr'], ['Player 2', 'usa']]
+
+        for list in player_list:
+            player = TwilightStrugglePlayer(list[0], list[1])
+            players.update({player.name: player})
+            sides.update({player.side: player})
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -148,4 +193,3 @@ class TwilightStruggleGame(CardGame):
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
