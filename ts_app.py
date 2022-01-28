@@ -66,14 +66,15 @@ class TwilightStruggleCountry(Country):
 
         if not usa_i.isdigit():
             raise ValueError("Error creating Twilight Struggle country. USA influence must be a number.")
-        self.usa_influence = usa_i
+        self.usa_influence = int(usa_i)
 
         if not ussr_i.isdigit():
             raise ValueError("Error creating Twilight Struggle country. USSR influence must be a number.")
-        self.ussr_influence = ussr_i
+        self.ussr_influence = int(ussr_i)
 
         if c not in ['usa', 'ussr', '']
-            raise ValueError("Error creating Twilight Struggle country")
+            raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa', 'ussr', or ''")
+        self.controlled = c
 
 class TwilightStruggleGame(CardGame):
     """Class of an individual game of Twilight Struggle"""
