@@ -18,6 +18,14 @@ def adjust_defcon(adjustment_value):
     if defcon > 5:
         defcon = 5
 
+    if defcon < 2:
+        if sides['usa'].phasing:
+            sides['ussr'].winner = True
+        elif sides['ussr'].phasing:
+            sides['usa'].winner = True
+
+        global game_active
+        game_active = False
     # Check to see if the defcon has ended the game
     # TODO - Add game ending conditions if defcon = 1
 
@@ -201,7 +209,13 @@ class TwilightStruggleGame(CardGame):
         elif score <= -20:
             sides['ussr'].winner = True
 
+    def change_score(self, s, p):
+        global score
+        if s == 'usa':
+            score = score + p
+        elif s == 'ussr':
+            score = score - p
 
-
+        self.check_game_end()
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
