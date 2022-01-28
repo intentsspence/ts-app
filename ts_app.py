@@ -136,13 +136,19 @@ class TwilightStruggleGame(CardGame):
         self.__create_players()
 
     def __create_countries(self):
-        with open('countries/country_list.csv', 'r') as handle:
-            header = handle.readline()
-            lines = handle.read().splitlines()
+        with open('countries/country_list.csv', 'r') as c_handle:
+            country_header = c_handle.readline()
+            c_lines = c_handle.read().splitlines()
 
-        for line in lines:
+        for c_line in c_lines:
             country = TwilightStruggleCountry(*line.split(','))
             countries.update({country.name: country})
+
+        with open('countries/borders_list.csv', 'r') as b_handle:
+            b_header = b_handle.readline()
+            b_lines = b_handle
+
+
 
     def __create_players(self):
         # TODO - Change the "create players" function to allow for user input
