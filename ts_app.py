@@ -51,6 +51,26 @@ class Player:
         return self.name
 
 
+class TwilightStrugglePlayer(Player):
+    """Class of players specific to Twilight Struggle"""
+
+    def __init__(self, n, s):
+        Player.__init__(self, n)
+
+        if s not in ['usa', 'ussr']:
+            raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa' or 'ussr'")
+        self.side = s
+
+        # Set phasing player to false
+        self.phasing = False
+
+        # Set space level to 0
+        self.space_level = 0
+
+        # Set winner to false
+        self.winner = False
+
+
 class TwilightStruggleCountry(Country):
     """Class of countries specific to Twilight Struggle"""
 
