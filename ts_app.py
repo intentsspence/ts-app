@@ -9,7 +9,6 @@ countries = {}
 players = {}
 sides = {}
 
-
 def adjust_defcon(adjustment_value):
     global defcon
     defcon = defcon + adjustment_value
@@ -219,5 +218,32 @@ class TwilightStruggleGame(CardGame):
 
         self.check_game_end()
 
+    # Functions for space race
+    def space_race_awards(self, s):
+        space_race_points = {1: [2, 1], 3: [2, 0], 5: [3, 1], 7: [4, 2], 8: [2, 0]}
+
+        if s == 'usa':
+            opponent = 'ussr'
+        elif s == 'ussr':
+            opponent = 'usa'
+        else:
+            raise ValueError("Side must be 'usa' or 'ussr'")
+        level = sides[s].space_level
+
+        if level in space_race_points:
+            if sides[opponent].space_level < level:
+                self.change_score(s, space_race_points[level][0])
+            if sides[opponent].space_level >= level:
+                self.change_score(s, space_race_points[level][1])
+
+    def increase_space_level(self, s):
+        if s == 'usa':
+            sides['usa'].space_level += 1
+            self.space_race_awards('usa')
+        elif s == 'ussr':
+            sides['ussr'].space_level += 1
+            self.space_race_awards('ussr')
+        else:
+            raise ValueError("Side must be 'usa' or 'ussr'")
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
