@@ -228,14 +228,16 @@ class TwilightStruggleGame(CardGame):
             opponent = 'ussr'
         elif s == 'ussr':
             opponent = 'usa'
+        else:
+            raise ValueError("Side must be 'usa' or 'ussr'")
 
-        l = sides[s].space_level
+        level = sides[s].space_level
 
-        if l in space_race_points:
-            if sides[opponent].space_level < l:
-                self.change_score(s, space_race_points[l][0])
-            if sides[opponent].space_level >= l:
-                self.change_score(s, space_race_points[l][1])
+        if level in space_race_points:
+            if sides[opponent].space_level < level:
+                self.change_score(s, space_race_points[level][0])
+            if sides[opponent].space_level >= level:
+                self.change_score(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
         if s == 'usa':
@@ -244,9 +246,5 @@ class TwilightStruggleGame(CardGame):
         elif s == 'ussr':
             sides['ussr'].space_level += 1
             self.space_race_awards('ussr')
-
-
-
-
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
