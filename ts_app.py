@@ -1,7 +1,10 @@
 # App to play twilight struggle
 
 defcon = 5
-phasing_player = 'USA'
+score = 0
+
+game_active = True
+
 countries = {}
 players = {}
 sides = {}
@@ -15,8 +18,14 @@ def adjust_defcon(adjustment_value):
     if defcon > 5:
         defcon = 5
 
-    # Check to see if the defcon has ended the game
-    # TODO - Add game ending conditions if defcon = 1
+    if defcon < 2:
+        if sides['usa'].phasing:
+            sides['ussr'].winner = True
+        elif sides['ussr'].phasing:
+            sides['usa'].winner = True
+
+        global game_active
+        game_active = False
 
 
 class CardGame:
@@ -190,6 +199,25 @@ class TwilightStruggleGame(CardGame):
             countries[c].ussr_influence = 0
 
         self.check_for_control(c)
+
+    # Functions to modify the score
+    def check_game_end(self):
+        global game_active
+        if score >= 20:
+            sides['usa'].winner = True
+            game_active = False
+        elif score <= -20:
+            sides['ussr'].winner = True
+            game_active = False
+
+    def change_score(self, s, p):
+        global score
+        if s == 'usa':
+            score = score + p
+        elif s == 'ussr':
+            score = score - p
+
+        self.check_game_end()
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
