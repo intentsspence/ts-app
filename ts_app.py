@@ -110,19 +110,19 @@ class TwilightStruggleGame(CardGame):
         else:
             countries[c].controlled = ''
 
-    def remove_all_influence(self, c, s):
-        if s == 'usa':
-            countries[c].usa_influence = 0
-        elif s == 'ussr':
-            countries[c].ussr_influence = 0
-
-        self.check_for_control(c)
-
     def add_influence(self, c, s, i):
         if s == 'usa':
             countries[c].usa_influence += i
         elif s == 'ussr':
             countries[c].ussr_influence += i
+
+        self.check_for_control(c)
+
+    def add_influence_to_control(self, c, s):
+        if s == 'usa':
+            countries[c].usa_influence = countries[c].ussr_influence + countries[c].stability
+        elif s == 'ussr':
+            countries[c].ussr_influence = countries[c].usa_influence + countries[c].stability
 
         self.check_for_control(c)
 
@@ -138,5 +138,14 @@ class TwilightStruggleGame(CardGame):
 
         self.check_for_control(c)
 
+    def remove_all_influence(self, c, s):
+        if s == 'usa':
+            countries[c].usa_influence = 0
+        elif s == 'ussr':
+            countries[c].ussr_influence = 0
+
+        self.check_for_control(c)
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
