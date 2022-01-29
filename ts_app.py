@@ -44,7 +44,6 @@ class Card:
 
 class CardGame:
     """Base class for a collection of Card Pile objects"""
-    # TODO Finish the CardGame class with piles
 
     def __init__(self, n, d):
         self.name = n
@@ -79,7 +78,7 @@ class CardGame:
 
 class CardPile:
     """Base class for a collection of Card objects"""
-    def __init__(self, n, card_dict):
+    def __init__(self, n, card_dict = {}):
         self.name = n
         self.cards = {}
         for card in card_dict:
@@ -244,6 +243,7 @@ class TwilightStruggleGame(CardGame):
         self.optional_cards = True if opt == 1 else False
 
         self.__create_cards()
+        self.__create_piles()
         self.__create_countries()
         self.__create_players()
 
@@ -276,6 +276,12 @@ class TwilightStruggleGame(CardGame):
             borders_list = b_line.split(',')
             borders_list[:] = [x for x in borders_list if x]
             countries[borders_list[0]].borders = borders_list[1:]
+
+    def __create_piles(self):
+        pile_list = ['early war', ' mid war', 'late war', 'deck', 'discard', 'removed', 'usa hand', 'ussr hand']
+
+        for pile in pile_list:
+            self.add_pile(CardPile(pile))
 
     def __create_players(self):
         # TODO - Change the "create players" function to allow for user input
@@ -397,3 +403,4 @@ class TwilightStruggleGame(CardGame):
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
