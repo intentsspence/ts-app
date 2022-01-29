@@ -5,6 +5,7 @@ score = 0
 
 game_active = True
 
+cards = {}
 countries = {}
 players = {}
 sides = {}
@@ -181,8 +182,21 @@ class TwilightStruggleGame(CardGame):
             raise ValueError("Error creating Twilight Struggle game. Optional cards parameter must be a 1 or a 0.")
         self.optional_cards = True if opt == 1 else False
 
+        self.__create_cards()
         self.__create_countries()
         self.__create_players()
+
+    def __create_cards(self):
+        with open('cards/card_list.csv', 'r') as handle:
+            header = handle.readline()
+            lines = handle.read().splitlines()
+
+        for line in lines:
+            card = TwilightStruggleCard(*line.split(','))
+            if not self.optional_cards and card.optional:
+                continue
+            cards.update({card.number: card})
+            # TODO - Add function to move cards to pile at beginning of game
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
