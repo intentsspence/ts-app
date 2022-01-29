@@ -104,7 +104,7 @@ class CardPile:
         return len(self.cards)
 
     def __repr__(self):
-        string = "<CardPile: %s\n" % self.name
+        string = "<CardPile: %s>" % self.name
         for card in self.cards:
             string += "\t" + repr(card) + "\n"
         return string
@@ -256,8 +256,11 @@ class TwilightStruggleGame(CardGame):
             card = TwilightStruggleCard(*line.split(','))
             if not self.optional_cards and card.optional:
                 continue
+            start_pile = self.get_pile(card.period)
+            if not start_pile:
+                raise ValueError("Error adding card " + str(card) + " to pile " + str(start_pile) + ".")
+            start_pile.add_card(card)
 
-            # TODO - Add function to move cards to pile at beginning of game
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
@@ -404,3 +407,4 @@ class TwilightStruggleGame(CardGame):
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
+print(game.piles)
