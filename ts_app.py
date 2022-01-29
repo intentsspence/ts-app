@@ -252,5 +252,28 @@ class TwilightStruggleGame(CardGame):
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
 
+    # Functions for checking access
+    def countries_with_influence(self, s):
+        country_list = []
+        for country in countries.values():
+            if s == 'usa' and country.usa_influence > 0:
+                country_list.append(country.name)
+            elif s == 'ussr' and country.ussr_influence > 0:
+                country_list.append(country.name)
+
+        return country_list
+
+    def accessible_countries(self, s):
+        influenced_countries = self.countries_with_influence(s)
+        accessible_countries = influenced_countries.copy()
+
+        for country in influenced_countries:
+            border_list = countries[country].borders
+            for border in border_list:
+                if border not in accessible_countries and border != 'USA' and border != 'USSR':
+                    accessible_countries.append(border)
+
+        return accessible_countries
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
