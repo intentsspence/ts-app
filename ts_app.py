@@ -53,6 +53,46 @@ class CardGame:
         self.piles = []
 
 
+class CardPile:
+    """Base class for a collection of Card objects"""
+    def __init__(self, n, card_dict):
+        self.name = n
+        self.cards = []
+        for card in card_list:
+            self.add_card(card)
+
+    def add_card(self, c):
+        if (isinstance(c, Card)):
+            self.cards.append(c)
+        else:
+            raise ValueError("Could not add card " + str(c) + " to card pile " + str(self) + ".")
+
+    def remove_card(self, c):
+        try:
+            self.cards.remove(c)
+        except ValueError:
+            raise ValueError("Could not remove card"+ str(c) + " from card pile " + str(self) + ".")
+
+    def get_card(self, n):
+        card = None
+        card_list = list(filter(lambda x: x.name == n, self.cards))
+        if len(card_list):
+            card = card_list.pop()
+        return card
+
+    def get_pile_size(self):
+        return len(self.cards)
+
+    def __repr__(self):
+        string = "<CardPile: %s\n" % self.name
+        for card in self.cards:
+            string += "\t" + repr(card) + "\n"
+        return string
+
+    def __str__(self):
+        return self.name
+
+
 class Country:
     """Base class for a country in a game"""
     def __init__(self, n):
