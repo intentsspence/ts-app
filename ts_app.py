@@ -245,7 +245,6 @@ class TwilightStruggleCountry(Country):
 class TwilightStruggleGame(CardGame):
     """Class of an individual game of Twilight Struggle"""
 
-
     turns = 10
     action_rounds = {1: 6, 2: 6, 3: 6, 4: 7, 5: 7, 6: 7, 7: 7, 8: 7, 9: 7, 10: 7}
 
@@ -444,7 +443,6 @@ class TwilightStruggleGame(CardGame):
         global turn
         hand_limit = {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9, 7: 9, 8: 9, 9: 9, 10: 9}
         current_hand_limit = hand_limit[turn]
-
         hands = ['ussr hand', 'usa hand']
 
         for card_number in range(1, current_hand_limit + 1):
@@ -459,19 +457,4 @@ class TwilightStruggleGame(CardGame):
                         self.move_card(dealt_card, hand)
 
 
-
-
-
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
-game.move_card(cards['Fidel'], 'discard')
-game.move_card(cards['Defectors'], 'discard')
-print('discard')
-print(game.piles['discard'].get_cards_in_pile())
-print('deck')
-print(game.piles['deck'].get_cards_in_pile())
-game.reshuffle()
-print('discard')
-print(game.piles['discard'].get_cards_in_pile())
-print('deck')
-print(game.piles['deck'].get_cards_in_pile())
