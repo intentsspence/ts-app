@@ -5,6 +5,7 @@ score = 0
 
 game_active = True
 
+cards = {}
 countries = {}
 players = {}
 sides = {}
@@ -102,6 +103,10 @@ class CardPile:
 
     def get_pile_size(self):
         return len(self.cards)
+
+    def get_cards_in_pile(self):
+        print(self.cards)
+
 
     def __repr__(self):
         string = "<CardPile: %s>" % self.name
@@ -260,6 +265,7 @@ class TwilightStruggleGame(CardGame):
             if not start_pile:
                 raise ValueError("Error adding card " + str(card) + " to pile " + str(start_pile) + ".")
             start_pile.add_card(card)
+            cards.update({card.name: card})
 
 
     def __create_countries(self):
@@ -407,4 +413,9 @@ class TwilightStruggleGame(CardGame):
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
-print(game.piles)
+print(game.piles['early war'].get_cards_in_pile)
+print(game.piles['discard'].get_cards_in_pile)
+game.piles['early war'].remove_card('Fidel')
+game.piles['discard'].add_card('Fidel')
+print(game.piles['early war'].get_cards_in_pile)
+print(game.piles['discard'].get_cards_in_pile)
