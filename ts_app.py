@@ -29,6 +29,19 @@ def adjust_defcon(adjustment_value):
         game_active = False
 
 
+class Card:
+    """Base class for a generic card in a game"""
+
+    def __init__(self, n):
+        self.name = n
+
+    def __repr__(self):
+        return "<Card: %s>" % self.name
+
+    def __str__(self):
+        return self.name
+
+
 class CardGame:
     """Base class for a collection of Card Pile objects"""
     # TODO Finish the CardGame class with piles
@@ -62,6 +75,38 @@ class Player:
     def __str__(self):
         return self.name
 
+
+class TwilightStruggleCard(Card):
+    """Class of cards specific to the game Twilight Struggle"""
+
+    def __init__(self, n, no, p, e, o, r, opt):
+        Card.__init__(self, n)
+
+        if not no.isdigit():
+            raise ValueError("Error creating Twilight Struggle Card. Number parameter must be a number")
+        self.number = int(no)
+
+        if p not in ['early war', 'mid war', 'late war']:
+            raise ValueError("Error creating Twilight Struggle Card. Period parameter must be one of early war, mid war, or late war")
+        self.period = p
+
+        if e not in ['scoring', 'usa', 'ussr', 'neutral']:
+            raise ValueError("Error creating Twilight Struggle Card. Event type must be scoring, usa, ussr, or neutral")
+        self.event_type = e
+
+        if not o.isdigit() and (int(o) > 4 or int(o) < 0):
+            raise ValueError("Error creating Twilight Struggle Card. Ops must be a number between 0 and 4")
+        self.ops = int(o)
+
+        if not r.isdigit() and int(r) != 1 and int(r) != 0:
+            raise ValueError("Error creating Twilight Struggle Card. Removed parameter must be a 1 or a 0")
+        self.removed = True if int(r) == 1 else False
+
+        if not opt.isdigit() and int(opt) != 1 and int(opt) !=0:
+            raise ValueError("Error creating Twilight Struggle Card. Optional parameter must be a 1 or 0")
+        self.optional = True if int(opt) == 1 else False
+
+        self.played = False
 
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
