@@ -79,14 +79,14 @@ class CardGame:
 
 class CardPile:
     """Base class for a collection of Card objects"""
-    def __init__(self, n, card_dict = {}):
+    def __init__(self, n, card_dict={}):
         self.name = n
         self.cards = {}
         for card in card_dict:
             self.add_card(card)
 
     def add_card(self, c):
-        if (isinstance(c, Card)):
+        if isinstance(c, Card):
             self.cards.update({c.name: c})
         else:
             raise ValueError("Could not add card " + str(c) + " to card pile " + str(self) + ".")
@@ -95,7 +95,7 @@ class CardPile:
         try:
             self.cards.pop(c.name)
         except ValueError:
-            raise ValueError("Could not remove card"+ str(c) + " from card pile " + str(self) + ".")
+            raise ValueError("Could not remove card" + str(c) + " from card pile " + str(self) + ".")
 
     def get_card(self, n):
         card = self.cards[n]
@@ -105,8 +105,8 @@ class CardPile:
         return len(self.cards)
 
     def get_cards_in_pile(self):
-        print(self.cards)
-
+        cards_in_pile = self.cards
+        return cards_in_pile
 
     def __repr__(self):
         string = "<CardPile: %s>" % self.name
@@ -168,11 +168,12 @@ class TwilightStruggleCard(Card):
             raise ValueError("Error creating Twilight Struggle Card. Removed parameter must be a 1 or a 0")
         self.removed = True if int(r) == 1 else False
 
-        if not opt.isdigit() and int(opt) != 1 and int(opt) !=0:
+        if not opt.isdigit() and int(opt) != 1 and int(opt) != 0:
             raise ValueError("Error creating Twilight Struggle Card. Optional parameter must be a 1 or 0")
         self.optional = True if int(opt) == 1 else False
 
         self.played = False
+
 
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
@@ -266,7 +267,6 @@ class TwilightStruggleGame(CardGame):
                 raise ValueError("Error adding card " + str(card) + " to pile " + str(start_pile) + ".")
             start_pile.add_card(card)
             cards.update({card.name: card})
-
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
@@ -410,12 +410,18 @@ class TwilightStruggleGame(CardGame):
 
         return accessible_countries
 
+    # Functions for moving cards around
+    def which_pile(self, c):
+        for pile in self.piles:
+            cards_in_pile = self.piles[pile].get_cards_in_pile()
+
+            if c.name in cards_in_pile:
+                return pile
+
+    def discard_card(self, c):
+        pile_name = self.which_pile(c)
+        self.piles[pile_name].remove_card(c)
+        self.piles['discard'].add_card(c)
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
-print(game.piles['early war'].get_cards_in_pile)
-print(game.piles['discard'].get_cards_in_pile)
-game.piles['early war'].remove_card('Fidel')
-game.piles['discard'].add_card('Fidel')
-print(game.piles['early war'].get_cards_in_pile)
-print(game.piles['discard'].get_cards_in_pile)
