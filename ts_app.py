@@ -3,6 +3,7 @@ import random
 
 defcon = 5
 score = 0
+turn = 1
 
 game_active = True
 
@@ -428,6 +429,32 @@ class TwilightStruggleGame(CardGame):
         current_pile = self.which_pile(c)
         self.piles[current_pile].remove_card(c)
         self.piles[pile_name].add_card(c)
+
+    def move_all_cards(self, pile_to_name, pile_from_name):
+        card_list = self.piles[pile_from_name].get_cards_in_pile().copy()
+        for c in card_list:
+            self.piles[pile_from_name].remove_card(cards[c])
+            self.piles[pile_to_name].add_card(cards[c])
+
+    def reshuffle(self):
+        self.move_all_cards('deck', 'discard')
+
+    def deal_cards(self):
+        global turn
+        hand_limit = {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9, 7: 9, 8: 9, 9: 9, 10: 9}
+        current_hand_limit = hand_limit[turn]
+        hands = ['ussr hand', 'usa hand']
+
+        for card_number in range(1, current_hand_limit + 1):
+            for hand in hands:
+                if self.piles[hand].get_pile_size() < current_hand_limit:
+                    if self.piles['deck'].get_pile_size() > 0:
+                        dealt_card = self.piles['deck'].random_card()
+                        self.move_card(dealt_card, hand)
+                    else:
+                        self.reshuffle()
+                        dealt_card = self.piles['deck'].random_card()
+                        self.move_card(dealt_card, hand)
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
