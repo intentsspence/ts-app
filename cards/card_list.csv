@@ -4,7 +4,7 @@ Europe Scoring,2,early war,scoring,0,0,0
 Middle East Scoring,3,early war,scoring,0,0,0
 Duck and Cover,4,early war,usa,3,0,0
 Five Year Plan,5,early war,usa,3,0,0
-The China Card,6,early war,neutural,4,0,0
+The China Card,6,early war,neutral,4,0,0
 Socialist Governments,7,early war,ussr,3,0,0
 Fidel,8,early war,ussr,2,1,0
 Vietnam Revolts,9,early war,ussr,2,1,0
@@ -16,38 +16,38 @@ Comecon,14,early war,ussr,3,1,0
 Nasser,15,early war,ussr,1,1,0
 Warsaw Pact Formed,16,early war,ussr,3,1,0
 De Gaulle Leads France,17,early war,ussr,3,1,0
-Captured Nazi Scientist,18,early war,neutural,1,1,0
+Captured Nazi Scientist,18,early war,neutral,1,1,0
 Truman Doctrine,19,early war,usa,1,1,0
-Olympic Games,20,early war,neutural,2,0,0
+Olympic Games,20,early war,neutral,2,0,0
 NATO,21,early war,usa,4,1,0
 Independent Reds,22,early war,usa,2,1,0
 Marshall Plan,23,early war,usa,4,1,0
-Indo-Pakistani War,24,early war,neutural,2,0,0
+Indo-Pakistani War,24,early war,neutral,2,0,0
 Containment,25,early war,usa,3,1,0
 CIA Created,26,early war,usa,1,1,0
 US/Japan Mutual Defense Pact,27,early war,usa,4,1,0
 Suez Crisis,28,early war,ussr,3,1,0
 East European Unrest,29,early war,usa,3,0,0
 Decolonization,30,early war,ussr,2,0,0
-Red Scare/Purge,31,early war,neutural,4,0,0
-UN Intervention,32,early war,neutural,1,0,0
+Red Scare/Purge,31,early war,neutral,4,0,0
+UN Intervention,32,early war,neutral,1,0,0
 De-Stalinization,33,early war,ussr,3,1,0
-Nuclear Test Ban,34,early war,neutural,4,0,0
+Nuclear Test Ban,34,early war,neutral,4,0,0
 Formosan Resolution,35,early war,usa,2,1,0
-Brush War,36,mid war,neutural,3,0,0
+Brush War,36,mid war,neutral,3,0,0
 Central America Scoring,37,mid war,scoring,0,0,0
 Southeast Asia Scoring,38,mid war,scoring,0,1,0
-Arms Race,39,mid war,neutural,3,0,0
-Cuban Missile Crisis,40,mid war,neutural,3,1,0
+Arms Race,39,mid war,neutral,3,0,0
+Cuban Missile Crisis,40,mid war,neutral,3,1,0
 Nuclear Subs,41,mid war,usa,2,1,0
 Quagmire,42,mid war,ussr,3,1,0
-SALT Negotiations,43,mid war,neutural,3,1,0
+SALT Negotiations,43,mid war,neutral,3,1,0
 Bear Trap,44,mid war,usa,3,1,0
-Summit,45,mid war,neutural,1,0,0
-How I Learned to Stop Worrying,46,mid war,neutural,2,1,0
-Junta,47,mid war,neutural,2,0,0
+Summit,45,mid war,neutral,1,0,0
+How I Learned to Stop Worrying,46,mid war,neutral,2,1,0
+Junta,47,mid war,neutral,2,0,0
 Kitchen Debates,48,mid war,usa,1,1,0
-Missile Envy,49,mid war,neutural,2,0,0
+Missile Envy,49,mid war,neutral,2,0,0
 “We Will Bury You”,50,mid war,ussr,4,1,0
 Brezhnev Doctrine,51,mid war,ussr,3,1,0
 Portuguese Empire Crumbles,52,mid war,ussr,2,1,0
@@ -55,7 +55,7 @@ South African Unrest,53,mid war,ussr,2,0,0
 Allende,54,mid war,ussr,1,1,0
 Willy Brandt,55,mid war,ussr,2,1,0
 Muslim Revolution,56,mid war,ussr,4,0,0
-ABM Treaty,57,mid war,neutural,4,0,0
+ABM Treaty,57,mid war,neutral,4,0,0
 Cultural Revolution,58,mid war,ussr,3,1,0
 Flower Power,59,mid war,ussr,4,1,0
 U2 Incident,60,mid war,ussr,3,1,0
@@ -67,7 +67,7 @@ Camp David Accords,65,mid war,usa,2,1,0
 Puppet Governments,66,mid war,usa,2,1,0
 Grain Sales to Soviets,67,mid war,usa,2,0,0
 John Paul II Elected Pope,68,mid war,usa,2,1,0
-Latin American Death Squads,69,mid war,neutural,2,0,0
+Latin American Death Squads,69,mid war,neutral,2,0,0
 OAS Founded,70,mid war,usa,1,1,0
 Nixon Plays the China Card,71,mid war,usa,2,1,0
 Sadat Expels Soviets,72,mid war,usa,1,1,0
@@ -78,7 +78,7 @@ Ussuri River Skirmish,76,mid war,usa,3,1,0
 “Ask Not What Your Country…”,77,mid war,usa,3,1,0
 Alliance for Progress,78,mid war,usa,3,1,0
 Africa Scoring,79,mid war,scoring,0,0,0
-“One Small Step…”,80,mid war,neutural,2,0,0
+“One Small Step…”,80,mid war,neutral,2,0,0
 South America Scoring,81,mid war,scoring,0,0,0
 Iranian Hostage Crisis,82,late war,ussr,3,1,0
 The Iron Lady,83,late war,usa,3,1,0
@@ -90,7 +90,7 @@ Marine Barracks Bombing,88,late war,ussr,2,1,0
 Soviets Shoot Down KAL-007,89,late war,usa,4,1,0
 Glasnost,90,late war,ussr,4,1,0
 Ortega Elected in Nicaragua,91,late war,ussr,2,1,0
-Terrorism,92,late war,neutural,2,0,0
+Terrorism,92,late war,neutral,2,0,0
 Iran-Contra Scandal,93,late war,ussr,2,1,0
 Chernobyl,94,late war,usa,3,1,0
 Latin American Debt Crisis,95,late war,ussr,2,0,0
@@ -98,9 +98,9 @@ Tear Down this Wall,96,late war,usa,3,1,0
 “An Evil Empire”,97,late war,usa,3,1,0
 Aldrich Ames Remix,98,late war,ussr,3,1,0
 Pershing II Deployed,99,late war,ussr,3,1,0
-Wargames,100,late war,neutural,4,1,0
+Wargames,100,late war,neutral,4,1,0
 Solidarity,101,late war,usa,2,1,0
-Iran-Iraq War,102,late war,neutural,2,1,0
+Iran-Iraq War,102,late war,neutral,2,1,0
 Defectors,103,early war,usa,2,0,0
 The Cambridge Five,104,early war,ussr,2,0,1
 Special Relationship,105,early war,usa,2,0,1
