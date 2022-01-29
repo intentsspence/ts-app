@@ -100,8 +100,7 @@ class CardPile:
 
     def random_card(self):
         card_list = self.cards
-        card = card_list.pop(random.choice(list(card_list.keys())))
-        self.cards.update({card.name: card})
+        card = random.choice(list(card_list.values()))
         return card
 
     def get_card(self, n):
