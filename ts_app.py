@@ -1,4 +1,5 @@
 # App to play twilight struggle
+import random
 
 defcon = 5
 score = 0
@@ -96,6 +97,12 @@ class CardPile:
             self.cards.pop(c.name)
         except ValueError:
             raise ValueError("Could not remove card" + str(c) + " from card pile " + str(self) + ".")
+
+    def random_card(self):
+        card_list = self.cards
+        card = card_list.pop(random.choice(list(card_list.keys())))
+        self.cards.update({card.name: card})
+        return card
 
     def get_card(self, n):
         card = self.cards[n]
@@ -418,10 +425,28 @@ class TwilightStruggleGame(CardGame):
             if c.name in cards_in_pile:
                 return pile
 
-    def move_card(self, card, pile_name):
-        current_pile = self.which_pile(card)
-        self.piles[current_pile].remove_card(card)
-        self.piles[pile_name].add_card(card)
+    def move_card(self, c, pile_name):
+        current_pile = self.which_pile(c)
+        self.piles[current_pile].remove_card(c)
+        self.piles[pile_name].add_card(c)
+
+    # def random_discard(self, hand_name):
+    #     pile = self.piles['usa hand']
+    #     print(type(pile))
+    #     card = pile.pop(random.choice(pile.keys()))
+    #     return card
+
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
+game.move_card(cards['Fidel'], 'usa hand')
+game.move_card(cards['Defectors'], 'usa hand')
+game.move_card(cards['Asia Scoring'], 'usa hand')
+
+print(game.piles['usa hand'].get_cards_in_pile())
+temp_card = game.piles['usa hand'].random_card()
+print(temp_card)
+game.move_card(temp_card, 'discard')
+print(game.piles['usa hand'].get_cards_in_pile())
+print(game.piles['discard'].get_cards_in_pile())
