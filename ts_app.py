@@ -63,7 +63,7 @@ class CardGame:
             raise ValueError("Could not remove pile " + str(p) + " from card game " + str(self.name) + ".")
 
     def get_pile(self, n):
-        pile = self.piles.pop(n)
+        pile = self.piles[n]
         return pile
 
     def __repr__(self):
@@ -97,7 +97,7 @@ class CardPile:
             raise ValueError("Could not remove card"+ str(c) + " from card pile " + str(self) + ".")
 
     def get_card(self, n):
-        card = self.cards.pop(n)
+        card = self.cards[n]
         return card
 
     def get_pile_size(self):
@@ -242,8 +242,8 @@ class TwilightStruggleGame(CardGame):
             raise ValueError("Error creating Twilight Struggle game. Optional cards parameter must be a 1 or a 0.")
         self.optional_cards = True if opt == 1 else False
 
-        self.__create_cards()
         self.__create_piles()
+        self.__create_cards()
         self.__create_countries()
         self.__create_players()
 
@@ -281,7 +281,7 @@ class TwilightStruggleGame(CardGame):
             countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
-        pile_list = ['early war', ' mid war', 'late war', 'deck', 'discard', 'removed', 'usa hand', 'ussr hand']
+        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'usa hand', 'ussr hand']
 
         for pile in pile_list:
             self.add_pile(CardPile(pile))
