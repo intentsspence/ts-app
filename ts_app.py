@@ -263,5 +263,17 @@ class TwilightStruggleGame(CardGame):
 
         return country_list
 
+    def accessible_countries(self, s):
+        influenced_countries = self.countries_with_influence(s)
+        accessible_countries = influenced_countries.copy()
+
+        for country in influenced_countries:
+            border_list = countries[country].borders
+            for border in border_list:
+                if border not in accessible_countries and border != 'USA' and border != 'USSR':
+                    accessible_countries.append(border)
+
+        return accessible_countries
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
