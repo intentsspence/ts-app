@@ -5,7 +5,6 @@ score = 0
 
 game_active = True
 
-cards = {}
 countries = {}
 players = {}
 sides = {}
@@ -57,27 +56,24 @@ class CardPile:
     """Base class for a collection of Card objects"""
     def __init__(self, n, card_dict):
         self.name = n
-        self.cards = []
-        for card in card_list:
+        self.cards = {}
+        for card in card_dict:
             self.add_card(card)
 
     def add_card(self, c):
         if (isinstance(c, Card)):
-            self.cards.append(c)
+            self.cards.update({c.name: c})
         else:
             raise ValueError("Could not add card " + str(c) + " to card pile " + str(self) + ".")
 
     def remove_card(self, c):
         try:
-            self.cards.remove(c)
+            self.cards.pop(c.name)
         except ValueError:
             raise ValueError("Could not remove card"+ str(c) + " from card pile " + str(self) + ".")
 
     def get_card(self, n):
-        card = None
-        card_list = list(filter(lambda x: x.name == n, self.cards))
-        if len(card_list):
-            card = card_list.pop()
+        card = self.cards.pop(n)
         return card
 
     def get_pile_size(self):
@@ -235,7 +231,7 @@ class TwilightStruggleGame(CardGame):
             card = TwilightStruggleCard(*line.split(','))
             if not self.optional_cards and card.optional:
                 continue
-            cards.update({card.number: card})
+
             # TODO - Add function to move cards to pile at beginning of game
 
     def __create_countries(self):
