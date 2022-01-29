@@ -9,6 +9,7 @@ countries = {}
 players = {}
 sides = {}
 
+
 def adjust_defcon(adjustment_value):
     global defcon
     defcon = defcon + adjustment_value
@@ -118,6 +119,8 @@ class TwilightStruggleCountry(Country):
             raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa', 'ussr', or ''")
         self.controlled = c
 
+        self.borders = []
+
 
 class TwilightStruggleGame(CardGame):
     """Class of an individual game of Twilight Struggle"""
@@ -136,13 +139,22 @@ class TwilightStruggleGame(CardGame):
         self.__create_players()
 
     def __create_countries(self):
-        with open('countries/country_list.csv', 'r') as handle:
-            header = handle.readline()
-            lines = handle.read().splitlines()
+        with open('countries/country_list.csv', 'r') as c_handle:
+            country_header = c_handle.readline()
+            c_lines = c_handle.read().splitlines()
 
-        for line in lines:
-            country = TwilightStruggleCountry(*line.split(','))
+        for c_line in c_lines:
+            country = TwilightStruggleCountry(*c_line.split(','))
             countries.update({country.name: country})
+
+        with open('countries/borders_list.csv', 'r') as b_handle:
+            b_header = b_handle.readline()
+            b_lines = b_handle.read().splitlines()
+
+        for b_line in b_lines:
+            borders_list = b_line.split(',')
+            borders_list[:] = [x for x in borders_list if x]
+            countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_players(self):
         # TODO - Change the "create players" function to allow for user input
@@ -245,5 +257,6 @@ class TwilightStruggleGame(CardGame):
             self.space_race_awards('ussr')
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
