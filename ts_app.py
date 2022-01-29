@@ -303,8 +303,8 @@ class TwilightStruggleGame(CardGame):
 
         player_list = [['Player 1', 'ussr'], ['Player 2', 'usa']]
 
-        for list in player_list:
-            player = TwilightStrugglePlayer(list[0], list[1])
+        for p_list in player_list:
+            player = TwilightStrugglePlayer(p_list[0], p_list[1])
             players.update({player.name: player})
             sides.update({player.side: player})
 
@@ -429,23 +429,5 @@ class TwilightStruggleGame(CardGame):
         self.piles[current_pile].remove_card(c)
         self.piles[pile_name].add_card(c)
 
-    # def random_discard(self, hand_name):
-    #     pile = self.piles['usa hand']
-    #     print(type(pile))
-    #     card = pile.pop(random.choice(pile.keys()))
-    #     return card
-
-
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
-game.move_card(cards['Fidel'], 'usa hand')
-game.move_card(cards['Defectors'], 'usa hand')
-game.move_card(cards['Asia Scoring'], 'usa hand')
-
-print(game.piles['usa hand'].get_cards_in_pile())
-temp_card = game.piles['usa hand'].random_card()
-print(temp_card)
-game.move_card(temp_card, 'discard')
-print(game.piles['usa hand'].get_cards_in_pile())
-print(game.piles['discard'].get_cards_in_pile())
