@@ -49,7 +49,32 @@ class CardGame:
     def __init__(self, n, d):
         self.name = n
         self.date = d
-        self.piles = []
+        self.piles = {}
+
+    def add_pile(self, p):
+        if isinstance(p, CardPile):
+            self.piles.update({p.name: p})
+        else:
+            raise ValueError("Could not add pile " + str(p) + " to card game " + str(self.name) + ".")
+
+    def remove_pile(self, p):
+        try:
+            self.piles.pop(p.name)
+        except ValueError:
+            raise ValueError("Could not remove pile " + str(p) + " from card game " + str(self.name) + ".")
+
+    def get_pile(self, n):
+        pile = self.piles.pop(n)
+        return pile
+
+    def __repr__(self):
+        string = "<CardGame: %s on %s>" % (self.name, self.date)
+        for pile in self.piles:
+            string += "\t" + repr(pile) + "\n"
+        return string
+
+    def __str__(self):
+        return "%s on %s" % (self.name, self.date)
 
 
 class CardPile:
