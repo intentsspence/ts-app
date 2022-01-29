@@ -418,10 +418,10 @@ class TwilightStruggleGame(CardGame):
             if c.name in cards_in_pile:
                 return pile
 
-    def discard_card(self, c):
-        pile_name = self.which_pile(c)
-        self.piles[pile_name].remove_card(c)
-        self.piles['discard'].add_card(c)
+    def move_card(self, card, pile_name):
+        current_pile = self.which_pile(card)
+        self.piles[current_pile].remove_card(card)
+        self.piles[pile_name].add_card(card)
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
