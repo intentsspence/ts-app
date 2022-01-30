@@ -330,6 +330,7 @@ class TwilightStruggleGame(CardGame):
                 countries[initial_influence_list[1]].ussr_influence = int(initial_influence_list[2])
             else:
                 raise ValueError("Error adding initial influence")
+            self.check_for_control(initial_influence_list[1])
 
     # Functions to modify influence
     def check_for_control(self, c):
