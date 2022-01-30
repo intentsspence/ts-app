@@ -491,5 +491,11 @@ class TwilightStruggleGame(CardGame):
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
 
+    def check_required_military_ops(self):
+        # TODO - write check_required_military_ops which scores the miliary ops
+
+    def reset_military_ops(self):
+        # TODO - write reset_military_ops which sets both players military ops to 0
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
