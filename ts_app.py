@@ -491,4 +491,5 @@ class TwilightStruggleGame(CardGame):
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
 
+
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
