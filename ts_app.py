@@ -259,6 +259,7 @@ class TwilightStruggleGame(CardGame):
         self.__create_cards()
         self.__create_countries()
         self.__create_players()
+        self.__set_up_game()
 
     def __create_cards(self):
         with open('cards/card_list.csv', 'r') as handle:
