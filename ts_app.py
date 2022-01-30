@@ -309,6 +309,27 @@ class TwilightStruggleGame(CardGame):
             players.update({player.name: player})
             sides.update({player.side: player})
 
+    def __set_up_game(self):
+        # 3.1 Add the early war cards to the deck and deal out cards
+        self.move_all_cards('deck', 'early war')
+        self.deal_cards()
+
+        # 3.2 - 3.3 Add initial influence
+        with open('countries/initial_influence.csv', 'r') as i_handle:
+            i_header = i_handle.readline()
+            i_lines = i_handle.read().splitlines()
+
+        for i_line in i_lines:
+            initial_influence_list = i_line.split(',')
+            initial_influence_list[:] = [x for x in initial_influence_list if x]
+
+            if initial_influence_list[0] == 'usa':
+                countries[initial_influence_list[1]].usa_influence = int(initial_influence_list[2])
+            elif initial_influence_list[0] == 'ussr':
+                countries[initial_influence_list[1]].ussr_influence = int(initial_influence_list[2])
+            else:
+                raise ValueError("Error adding initial influence")
+
     # Functions to modify influence
     def check_for_control(self, c):
         if (countries[c].usa_influence - countries[c].ussr_influence) >= countries[c].stability:
