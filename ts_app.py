@@ -198,6 +198,9 @@ class TwilightStrugglePlayer(Player):
         # Set space level to 0
         self.space_level = 0
 
+        # Set mil ops to 0
+        self.military_ops = 0
+
         # Set winner to false
         self.winner = False
 
@@ -479,5 +482,13 @@ class TwilightStruggleGame(CardGame):
                         dealt_card = self.piles['deck'].random_card()
                         self.move_card(dealt_card, hand)
 
+    # Functions to change military ops
+    def add_military_ops(self, side, amount):
+        if side == 'usa':
+            sides['usa'].military_ops += amount
+        elif side == 'ussr':
+            sides['ussr'].military_ops += amount
+        else:
+            raise ValueError("Side must be 'usa' or 'ussr'")
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
