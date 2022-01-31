@@ -198,6 +198,9 @@ class TwilightStrugglePlayer(Player):
         # Set space level to 0
         self.space_level = 0
 
+        # Set mil ops to 0
+        self.military_ops = 0
+
         # Set winner to false
         self.winner = False
 
@@ -387,7 +390,13 @@ class TwilightStruggleGame(CardGame):
             sides['ussr'].winner = True
             game_active = False
 
-    def change_score(self, s, p):
+    def change_score(self, points):
+        global score
+        score = score + points
+
+        self.check_game_end()
+
+    def change_score_by_side(self, s, p):
         global score
         if s == 'usa':
             score = score + p
@@ -403,9 +412,9 @@ class TwilightStruggleGame(CardGame):
 
         if level in space_race_points:
             if sides[opponent[s]].space_level < level:
-                self.change_score(s, space_race_points[level][0])
+                self.change_score_by_side(s, space_race_points[level][0])
             if sides[opponent[s]].space_level >= level:
-                self.change_score(s, space_race_points[level][1])
+                self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
         if s == 'usa':
@@ -478,6 +487,38 @@ class TwilightStruggleGame(CardGame):
                         self.reshuffle()
                         dealt_card = self.piles['deck'].random_card()
                         self.move_card(dealt_card, hand)
+
+    # Functions to change military ops
+    def add_military_ops(self, side, amount):
+        if side == 'usa':
+            sides['usa'].military_ops += amount
+            if sides['usa'].military_ops > 5:
+                sides['usa'].military_ops = 5
+        elif side == 'ussr':
+            sides['ussr'].military_ops += amount
+            if sides['ussr'].military_ops > 5:
+                sides['ussr'].military_ops = 5
+        else:
+            raise ValueError("Side must be 'usa' or 'ussr'")
+
+    def check_required_military_ops(self):
+        global defcon
+        global score
+        usa_points = 0
+        ussr_points = 0
+
+        if sides['usa'].military_ops < defcon:
+            ussr_points = defcon - sides['usa'].military_ops
+
+        if sides['ussr'].military_ops < defcon:
+            usa_points = defcon - sides['ussr'].military_ops
+
+        points = usa_points - ussr_points
+        self.change_score(points)
+
+    def reset_military_ops(self):
+        sides['usa'].military_ops = 0
+        sides['ussr'].military_ops = 0
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
