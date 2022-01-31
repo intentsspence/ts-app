@@ -317,7 +317,7 @@ class TwilightStruggleGame(CardGame):
             self.check_for_control(initial_influence_list[1])
 
     # Function to adjust defcon
-    def adjust_defcon(self, adjustment_value):
+    def change_defcon(self, adjustment_value):
         global defcon
         defcon = defcon + adjustment_value
 
@@ -523,6 +523,6 @@ class TwilightStruggleGame(CardGame):
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
 print(defcon)
-game.adjust_defcon(-3)
+game.change_defcon(-3)
 print(defcon)
 game.ch
