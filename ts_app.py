@@ -390,7 +390,7 @@ class TwilightStruggleGame(CardGame):
             sides['ussr'].winner = True
             game_active = False
 
-    def change_score(self, s, p):
+    def change_score_by_side(self, s, p):
         global score
         if s == 'usa':
             score = score + p
@@ -406,9 +406,9 @@ class TwilightStruggleGame(CardGame):
 
         if level in space_race_points:
             if sides[opponent[s]].space_level < level:
-                self.change_score(s, space_race_points[level][0])
+                self.change_score_by_side(s, space_race_points[level][0])
             if sides[opponent[s]].space_level >= level:
-                self.change_score(s, space_race_points[level][1])
+                self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
         if s == 'usa':
@@ -508,6 +508,7 @@ class TwilightStruggleGame(CardGame):
             usa_points = defcon - sides['ussr'].military_ops
 
         score = score + usa_points - ussr_points
+        self.check_game_end()
 
     def reset_military_ops(self):
         sides['usa'].military_ops = 0
