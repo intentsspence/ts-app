@@ -1,7 +1,7 @@
 # App to play twilight struggle
 import random
 
-turn = 1
+
 
 game_active = True
 
@@ -240,6 +240,7 @@ class TwilightStruggleGame(CardGame):
 
         self.defcon = 5
         self.score = 0
+        self.turn = 1
 
 
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
@@ -473,9 +474,8 @@ class TwilightStruggleGame(CardGame):
         self.move_all_cards('deck', 'discard')
 
     def deal_cards(self):
-        global turn
         hand_limit = {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9, 7: 9, 8: 9, 9: 9, 10: 9}
-        current_hand_limit = hand_limit[turn]
+        current_hand_limit = hand_limit[self.turn]
         hands = ['ussr hand', 'usa hand']
 
         for card_number in range(1, current_hand_limit + 1):
@@ -536,4 +536,6 @@ print(game_active)
 game.increase_space_level('usa')
 print(game.score)
 print(game_active)
+game.deal_cards()
+print(game.piles['ussr hand'].get_cards_in_pile())
 
