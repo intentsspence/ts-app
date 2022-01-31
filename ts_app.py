@@ -3,7 +3,7 @@ import random
 
 
 
-players = {}
+
 sides = {}
 
 
@@ -241,6 +241,7 @@ class TwilightStruggleGame(CardGame):
 
         self.cards = {}
         self.countries = {}
+        self.players = {}
 
 
 
@@ -298,7 +299,7 @@ class TwilightStruggleGame(CardGame):
 
         for p_list in player_list:
             player = TwilightStrugglePlayer(p_list[0], p_list[1])
-            players.update({player.name: player})
+            self.players.update({player.name: player})
             sides.update({player.side: player})
 
     def __set_up_game(self):
