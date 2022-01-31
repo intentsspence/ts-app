@@ -221,7 +221,6 @@ class TwilightStruggleGame(CardGame):
     turns = 10
     action_rounds = {1: 6, 2: 6, 3: 6, 4: 7, 5: 7, 6: 7, 7: 7, 8: 7, 9: 7, 10: 7}
 
-
     def __init__(self, n, d, opt):
         CardGame.__init__(self, n, d)
 
@@ -515,67 +514,3 @@ class TwilightStruggleGame(CardGame):
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
-# print(game.score)
-# print(game.game_active)
-# game.change_score(5)
-# print(game.score)
-# print(game.game_active)
-# game.change_score_by_side('ussr', 7)
-# print(game.score)
-# print(game.game_active)
-# game.increase_space_level('ussr')
-# print(game.score)
-# print(game.game_active)
-# game.increase_space_level('usa')
-# print(game.score)
-# print(game.game_active)
-# game.deal_cards()
-# print(game.piles['ussr hand'].get_cards_in_pile())
-#
-# game.change_defcon(-3)
-# print(game.defcon)
-# print(game.game_active)
-# game.change_defcon(-2)
-# print(game.defcon)
-# print(game.game_active)
-
-print(game.piles['discard'].get_cards_in_pile())
-print(game.piles['deck'].get_cards_in_pile())
-game.move_all_cards('discard', 'deck')
-print(game.piles['discard'].get_cards_in_pile())
-print(game.piles['deck'].get_cards_in_pile())
-
-game.add_influence('Cuba', 'usa', 2)
-print('1 Cuba')
-print('usa')
-print(game.countries['Cuba'].usa_influence)
-print('ussr')
-print(game.countries['Cuba'].ussr_influence)
-print('Controlled by: ' + game.countries['Cuba'].controlled + '\n')
-
-game.add_influence_to_control('Cuba', 'ussr')
-print('2 Cuba')
-print('usa')
-print(game.countries['Cuba'].usa_influence)
-print('ussr')
-print(game.countries['Cuba'].ussr_influence)
-print('Controlled by: ' + game.countries['Cuba'].controlled + '\n')
-
-game.remove_influence('Cuba', 'ussr', 2)
-print('3 Cuba')
-print('usa')
-print(game.countries['Cuba'].usa_influence)
-print('ussr')
-print(game.countries['Cuba'].ussr_influence)
-print('Controlled by: ' + game.countries['Cuba'].controlled + '\n')
-
-game.remove_all_influence('Cuba', 'usa')
-print('4 Cuba')
-print('usa')
-print(game.countries['Cuba'].usa_influence)
-print('ussr')
-print(game.countries['Cuba'].ussr_influence)
-print('Controlled by: ' + game.countries['Cuba'].controlled + '\n')
-
-print(game.accessible_countries('usa'))
