@@ -9,7 +9,7 @@ cards = {}
 countries = {}
 players = {}
 sides = {}
-opponent = {'usa': 'ussr', 'ussr': 'usa'}
+
 
 class Card:
     """Base class for a generic card in a game"""
@@ -241,6 +241,9 @@ class TwilightStruggleGame(CardGame):
         self.defcon = 5
         self.score = 0
 
+
+        self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
+
         self.__create_piles()
         self.__create_cards()
         self.__create_countries()
@@ -409,9 +412,9 @@ class TwilightStruggleGame(CardGame):
         level = sides[s].space_level
 
         if level in space_race_points:
-            if sides[opponent[s]].space_level < level:
+            if sides[self.opponent[s]].space_level < level:
                 self.change_score_by_side(s, space_race_points[level][0])
-            if sides[opponent[s]].space_level >= level:
+            if sides[self.opponent[s]].space_level >= level:
                 self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
@@ -527,7 +530,10 @@ print(game_active)
 game.change_score_by_side('ussr', 7)
 print(game.score)
 print(game_active)
-game.change_score(-20)
+game.increase_space_level('ussr')
+print(game.score)
+print(game_active)
+game.increase_space_level('usa')
 print(game.score)
 print(game_active)
 
