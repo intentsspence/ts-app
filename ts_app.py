@@ -3,7 +3,7 @@ import random
 
 
 
-game_active = True
+
 
 cards = {}
 countries = {}
@@ -242,6 +242,8 @@ class TwilightStruggleGame(CardGame):
         self.score = 0
         self.turn = 1
 
+        self.game_active = True
+
 
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
 
@@ -336,8 +338,7 @@ class TwilightStruggleGame(CardGame):
             elif sides['ussr'].phasing:
                 sides['usa'].winner = True
 
-            global game_active
-            game_active = False
+            self.game_active = False
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -386,13 +387,12 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to modify the score
     def check_game_end(self):
-        global game_active
         if self.score >= 20:
             sides['usa'].winner = True
-            game_active = False
+            self.game_active = False
         elif self.score <= -20:
             sides['ussr'].winner = True
-            game_active = False
+            self.game_active = False
 
     def change_score(self, points):
         self.score = self.score + points
@@ -523,19 +523,27 @@ class TwilightStruggleGame(CardGame):
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
 print(game.score)
-print(game_active)
+print(game.game_active)
 game.change_score(5)
 print(game.score)
-print(game_active)
+print(game.game_active)
 game.change_score_by_side('ussr', 7)
 print(game.score)
-print(game_active)
+print(game.game_active)
 game.increase_space_level('ussr')
 print(game.score)
-print(game_active)
+print(game.game_active)
 game.increase_space_level('usa')
 print(game.score)
-print(game_active)
+print(game.game_active)
 game.deal_cards()
 print(game.piles['ussr hand'].get_cards_in_pile())
+
+game.change_defcon(-3)
+print(game.defcon)
+print(game.game_active)
+game.change_defcon(-2)
+game.change_score(100)
+print(game.score)
+print(game.game_active)
 
