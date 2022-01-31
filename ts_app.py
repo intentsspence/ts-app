@@ -390,6 +390,12 @@ class TwilightStruggleGame(CardGame):
             sides['ussr'].winner = True
             game_active = False
 
+    def change_score(self, points):
+        global score
+        score = score + points
+
+        self.check_game_end()
+
     def change_score_by_side(self, s, p):
         global score
         if s == 'usa':
