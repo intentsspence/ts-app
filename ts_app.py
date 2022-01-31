@@ -2,10 +2,6 @@
 import random
 
 
-
-
-
-cards = {}
 countries = {}
 players = {}
 sides = {}
@@ -241,8 +237,10 @@ class TwilightStruggleGame(CardGame):
         self.defcon = 5
         self.score = 0
         self.turn = 1
-
         self.game_active = True
+
+        self.cards = {}
+
 
 
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
@@ -266,7 +264,7 @@ class TwilightStruggleGame(CardGame):
             if not start_pile:
                 raise ValueError("Error adding card " + str(card) + " to pile " + str(start_pile) + ".")
             start_pile.add_card(card)
-            cards.update({card.name: card})
+            self.cards.update({card.name: card})
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
@@ -468,8 +466,8 @@ class TwilightStruggleGame(CardGame):
     def move_all_cards(self, pile_to_name, pile_from_name):
         card_list = self.piles[pile_from_name].get_cards_in_pile().copy()
         for c in card_list:
-            self.piles[pile_from_name].remove_card(cards[c])
-            self.piles[pile_to_name].add_card(cards[c])
+            self.piles[pile_from_name].remove_card(self.cards[c])
+            self.piles[pile_to_name].add_card(self.cards[c])
 
     def reshuffle(self):
         self.move_all_cards('deck', 'discard')
@@ -523,28 +521,33 @@ class TwilightStruggleGame(CardGame):
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
-print(game.score)
-print(game.game_active)
-game.change_score(5)
-print(game.score)
-print(game.game_active)
-game.change_score_by_side('ussr', 7)
-print(game.score)
-print(game.game_active)
-game.increase_space_level('ussr')
-print(game.score)
-print(game.game_active)
-game.increase_space_level('usa')
-print(game.score)
-print(game.game_active)
-game.deal_cards()
-print(game.piles['ussr hand'].get_cards_in_pile())
+# print(game.score)
+# print(game.game_active)
+# game.change_score(5)
+# print(game.score)
+# print(game.game_active)
+# game.change_score_by_side('ussr', 7)
+# print(game.score)
+# print(game.game_active)
+# game.increase_space_level('ussr')
+# print(game.score)
+# print(game.game_active)
+# game.increase_space_level('usa')
+# print(game.score)
+# print(game.game_active)
+# game.deal_cards()
+# print(game.piles['ussr hand'].get_cards_in_pile())
+#
+# game.change_defcon(-3)
+# print(game.defcon)
+# print(game.game_active)
+# game.change_defcon(-2)
+# print(game.defcon)
+# print(game.game_active)
 
-game.change_defcon(-3)
-print(game.defcon)
-print(game.game_active)
-game.change_defcon(-2)
-game.change_score(100)
-print(game.score)
-print(game.game_active)
+print(game.piles['discard'].get_cards_in_pile())
+print(game.piles['deck'].get_cards_in_pile())
+game.move_all_cards('discard', 'deck')
+print(game.piles['discard'].get_cards_in_pile())
+print(game.piles['deck'].get_cards_in_pile())
 
