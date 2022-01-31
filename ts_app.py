@@ -231,7 +231,6 @@ class TwilightStruggleGame(CardGame):
     turns = 10
     action_rounds = {1: 6, 2: 6, 3: 6, 4: 7, 5: 7, 6: 7, 7: 7, 8: 7, 9: 7, 10: 7}
 
-    defcon = 5
 
     def __init__(self, n, d, opt):
         CardGame.__init__(self, n, d)
@@ -239,6 +238,8 @@ class TwilightStruggleGame(CardGame):
         if not opt.isdigit() and int(opt) != 1 and int(opt) != 0:
             raise ValueError("Error creating Twilight Struggle game. Optional cards parameter must be a 1 or a 0.")
         self.optional_cards = True if opt == 1 else False
+
+        self.defcon = 5
 
         self.__create_piles()
         self.__create_cards()
