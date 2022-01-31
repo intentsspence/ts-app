@@ -338,6 +338,7 @@ class TwilightStruggleGame(CardGame):
             elif sides['ussr'].phasing:
                 sides['usa'].winner = True
 
+            self.defcon = 1
             self.game_active = False
 
     # Functions to modify influence
