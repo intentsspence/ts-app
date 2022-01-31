@@ -486,16 +486,32 @@ class TwilightStruggleGame(CardGame):
     def add_military_ops(self, side, amount):
         if side == 'usa':
             sides['usa'].military_ops += amount
+            if sides['usa'].military_ops > 5:
+                sides['usa'].military_ops = 5
         elif side == 'ussr':
             sides['ussr'].military_ops += amount
+            if sides['ussr'].military_ops > 5:
+                sides['ussr'].military_ops = 5
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
 
     def check_required_military_ops(self):
-        # TODO - write check_required_military_ops which scores the miliary ops
+        global defcon
+        global score
+        usa_points = 0
+        ussr_points = 0
+
+        if sides['usa'].military_ops < defcon:
+            ussr_points = defcon - sides['usa'].military_ops
+
+        if sides['ussr'].military_ops < defcon:
+            usa_points = defcon - sides['ussr'].military_ops
+
+        score = score + usa_points - ussr_points
 
     def reset_military_ops(self):
-        # TODO - write reset_military_ops which sets both players military ops to 0
+        sides['usa'].military_ops = 0
+        sides['ussr'].military_ops = 0
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
