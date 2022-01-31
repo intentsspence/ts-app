@@ -1,7 +1,6 @@
 # App to play twilight struggle
 import random
 
-defcon = 5
 score = 0
 turn = 1
 
@@ -232,6 +231,8 @@ class TwilightStruggleGame(CardGame):
     turns = 10
     action_rounds = {1: 6, 2: 6, 3: 6, 4: 7, 5: 7, 6: 7, 7: 7, 8: 7, 9: 7, 10: 7}
 
+    defcon = 5
+
     def __init__(self, n, d, opt):
         CardGame.__init__(self, n, d)
 
@@ -318,14 +319,13 @@ class TwilightStruggleGame(CardGame):
 
     # Function to adjust defcon
     def change_defcon(self, adjustment_value):
-        global defcon
-        defcon = defcon + adjustment_value
+        self.defcon = self.defcon + adjustment_value
 
         # Adjust defcon to 5 if above 5
-        if defcon > 5:
-            defcon = 5
+        if self.defcon > 5:
+            self.defcon = 5
 
-        if defcon < 2:
+        if self.defcon < 2:
             if sides['usa'].phasing:
                 sides['ussr'].winner = True
             elif sides['ussr'].phasing:
@@ -501,16 +501,15 @@ class TwilightStruggleGame(CardGame):
             raise ValueError("Side must be 'usa' or 'ussr'")
 
     def check_required_military_ops(self):
-        global defcon
         global score
         usa_points = 0
         ussr_points = 0
 
-        if sides['usa'].military_ops < defcon:
-            ussr_points = defcon - sides['usa'].military_ops
+        if sides['usa'].military_ops < self.defcon:
+            ussr_points = self.defcon - sides['usa'].military_ops
 
-        if sides['ussr'].military_ops < defcon:
-            usa_points = defcon - sides['ussr'].military_ops
+        if sides['ussr'].military_ops < self.defcon:
+            usa_points = self.defcon - sides['ussr'].military_ops
 
         points = usa_points - ussr_points
         self.change_score(points)
@@ -522,7 +521,8 @@ class TwilightStruggleGame(CardGame):
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
-print(defcon)
+print(game.defcon)
 game.change_defcon(-3)
-print(defcon)
-game.ch
+print(game.defcon)
+game.check_required_military_ops()
+
