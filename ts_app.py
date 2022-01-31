@@ -13,25 +13,6 @@ players = {}
 sides = {}
 opponent = {'usa': 'ussr', 'ussr': 'usa'}
 
-
-def adjust_defcon(adjustment_value):
-    global defcon
-    defcon = defcon + adjustment_value
-
-    # Adjust defcon to 5 if above 5
-    if defcon > 5:
-        defcon = 5
-
-    if defcon < 2:
-        if sides['usa'].phasing:
-            sides['ussr'].winner = True
-        elif sides['ussr'].phasing:
-            sides['usa'].winner = True
-
-        global game_active
-        game_active = False
-
-
 class Card:
     """Base class for a generic card in a game"""
 
@@ -335,6 +316,24 @@ class TwilightStruggleGame(CardGame):
                 raise ValueError("Error adding initial influence")
             self.check_for_control(initial_influence_list[1])
 
+    # Function to adjust defcon
+    def adjust_defcon(self, adjustment_value):
+        global defcon
+        defcon = defcon + adjustment_value
+
+        # Adjust defcon to 5 if above 5
+        if defcon > 5:
+            defcon = 5
+
+        if defcon < 2:
+            if sides['usa'].phasing:
+                sides['ussr'].winner = True
+            elif sides['ussr'].phasing:
+                sides['usa'].winner = True
+
+            global game_active
+            game_active = False
+
     # Functions to modify influence
     def check_for_control(self, c):
         if (countries[c].usa_influence - countries[c].ussr_influence) >= countries[c].stability:
@@ -522,3 +521,8 @@ class TwilightStruggleGame(CardGame):
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
+print(defcon)
+game.adjust_defcon(-3)
+print(defcon)
+game.ch
