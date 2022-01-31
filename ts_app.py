@@ -1,36 +1,6 @@
 # App to play twilight struggle
 import random
 
-defcon = 5
-score = 0
-turn = 1
-
-game_active = True
-
-cards = {}
-countries = {}
-players = {}
-sides = {}
-opponent = {'usa': 'ussr', 'ussr': 'usa'}
-
-
-def adjust_defcon(adjustment_value):
-    global defcon
-    defcon = defcon + adjustment_value
-
-    # Adjust defcon to 5 if above 5
-    if defcon > 5:
-        defcon = 5
-
-    if defcon < 2:
-        if sides['usa'].phasing:
-            sides['ussr'].winner = True
-        elif sides['ussr'].phasing:
-            sides['usa'].winner = True
-
-        global game_active
-        game_active = False
-
 
 class Card:
     """Base class for a generic card in a game"""
@@ -258,6 +228,17 @@ class TwilightStruggleGame(CardGame):
             raise ValueError("Error creating Twilight Struggle game. Optional cards parameter must be a 1 or a 0.")
         self.optional_cards = True if opt == 1 else False
 
+        self.defcon = 5
+        self.score = 0
+        self.turn = 1
+        self.game_active = True
+
+        self.cards = {}
+        self.countries = {}
+        self.players = {}
+        self.sides = {}
+        self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
+
         self.__create_piles()
         self.__create_cards()
         self.__create_countries()
@@ -277,7 +258,7 @@ class TwilightStruggleGame(CardGame):
             if not start_pile:
                 raise ValueError("Error adding card " + str(card) + " to pile " + str(start_pile) + ".")
             start_pile.add_card(card)
-            cards.update({card.name: card})
+            self.cards.update({card.name: card})
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
@@ -286,7 +267,7 @@ class TwilightStruggleGame(CardGame):
 
         for c_line in c_lines:
             country = TwilightStruggleCountry(*c_line.split(','))
-            countries.update({country.name: country})
+            self.countries.update({country.name: country})
 
         with open('countries/borders_list.csv', 'r') as b_handle:
             b_header = b_handle.readline()
@@ -295,7 +276,7 @@ class TwilightStruggleGame(CardGame):
         for b_line in b_lines:
             borders_list = b_line.split(',')
             borders_list[:] = [x for x in borders_list if x]
-            countries[borders_list[0]].borders = borders_list[1:]
+            self.countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
         pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'usa hand', 'ussr hand']
@@ -310,8 +291,8 @@ class TwilightStruggleGame(CardGame):
 
         for p_list in player_list:
             player = TwilightStrugglePlayer(p_list[0], p_list[1])
-            players.update({player.name: player})
-            sides.update({player.side: player})
+            self.players.update({player.name: player})
+            self.sides.update({player.side: player})
 
     def __set_up_game(self):
         # 3.1 Add the early war cards to the deck and deal out cards
@@ -328,100 +309,114 @@ class TwilightStruggleGame(CardGame):
             initial_influence_list[:] = [x for x in initial_influence_list if x]
 
             if initial_influence_list[0] == 'usa':
-                countries[initial_influence_list[1]].usa_influence = int(initial_influence_list[2])
+                self.countries[initial_influence_list[1]].usa_influence = int(initial_influence_list[2])
             elif initial_influence_list[0] == 'ussr':
-                countries[initial_influence_list[1]].ussr_influence = int(initial_influence_list[2])
+                self.countries[initial_influence_list[1]].ussr_influence = int(initial_influence_list[2])
             else:
                 raise ValueError("Error adding initial influence")
             self.check_for_control(initial_influence_list[1])
 
+    # Function to adjust defcon
+    def change_defcon(self, adjustment_value):
+        self.defcon = self.defcon + adjustment_value
+
+        # Adjust defcon to 5 if above 5
+        if self.defcon > 5:
+            self.defcon = 5
+
+        if self.defcon < 2:
+            if self.sides['usa'].phasing:
+                self.sides['ussr'].winner = True
+            elif self.sides['ussr'].phasing:
+                self.sides['usa'].winner = True
+
+            self.defcon = 1
+            self.game_active = False
+
     # Functions to modify influence
     def check_for_control(self, c):
-        if (countries[c].usa_influence - countries[c].ussr_influence) >= countries[c].stability:
-            countries[c].controlled = 'usa'
-        elif (countries[c].ussr_influence - countries[c].usa_influence) >= countries[c].stability:
-            countries[c].controlled = 'ussr'
+        if (self.countries[c].usa_influence - self.countries[c].ussr_influence) >= self.countries[c].stability:
+            self.countries[c].controlled = 'usa'
+        elif (self.countries[c].ussr_influence - self.countries[c].usa_influence) >= self.countries[c].stability:
+            self.countries[c].controlled = 'ussr'
         else:
-            countries[c].controlled = ''
+            self.countries[c].controlled = ''
 
     def add_influence(self, c, s, i):
         if s == 'usa':
-            countries[c].usa_influence += i
+            self.countries[c].usa_influence += i
         elif s == 'ussr':
-            countries[c].ussr_influence += i
+            self.countries[c].ussr_influence += i
 
         self.check_for_control(c)
 
     def add_influence_to_control(self, c, s):
         if s == 'usa':
-            countries[c].usa_influence = countries[c].ussr_influence + countries[c].stability
+            self.countries[c].usa_influence = self.countries[c].ussr_influence + self.countries[c].stability
         elif s == 'ussr':
-            countries[c].ussr_influence = countries[c].usa_influence + countries[c].stability
+            self.countries[c].ussr_influence = self.countries[c].usa_influence + self.countries[c].stability
 
         self.check_for_control(c)
 
     def remove_influence(self, c, s, i):
         if s == 'usa':
-            countries[c].usa_influence -= i
-            if countries[c].usa_influence < 0:
-                countries[c].usa_influence = 0
+            self.countries[c].usa_influence -= i
+            if self.countries[c].usa_influence < 0:
+                self.countries[c].usa_influence = 0
         elif s == 'ussr':
-            countries[c].ussr_influence -= i
-            if countries[c].ussr_influence < 0:
-                countries[c].ussr_influence = 0
+            self.countries[c].ussr_influence -= i
+            if self.countries[c].ussr_influence < 0:
+                self.countries[c].ussr_influence = 0
 
         self.check_for_control(c)
 
     def remove_all_influence(self, c, s):
         if s == 'usa':
-            countries[c].usa_influence = 0
+            self.countries[c].usa_influence = 0
         elif s == 'ussr':
-            countries[c].ussr_influence = 0
+            self.countries[c].ussr_influence = 0
 
         self.check_for_control(c)
 
     # Functions to modify the score
     def check_game_end(self):
-        global game_active
-        if score >= 20:
-            sides['usa'].winner = True
-            game_active = False
-        elif score <= -20:
-            sides['ussr'].winner = True
-            game_active = False
+        if self.score >= 20:
+            self.sides['usa'].winner = True
+            self.game_active = False
+        elif self.score <= -20:
+            self.sides['ussr'].winner = True
+            self.game_active = False
 
     def change_score(self, points):
-        global score
-        score = score + points
+        self.score = self.score + points
 
         self.check_game_end()
 
     def change_score_by_side(self, s, p):
-        global score
         if s == 'usa':
-            score = score + p
+            self.score = self.score + p
         elif s == 'ussr':
-            score = score - p
+            self.score = self.score - p
 
         self.check_game_end()
 
     # Functions for space race
     def space_race_awards(self, s):
         space_race_points = {1: [2, 1], 3: [2, 0], 5: [3, 1], 7: [4, 2], 8: [2, 0]}
-        level = sides[s].space_level
+        level = self.sides[s].space_level
 
         if level in space_race_points:
-            if sides[opponent[s]].space_level < level:
+            if self.sides[self.opponent[s]].space_level < level:
                 self.change_score_by_side(s, space_race_points[level][0])
-            if sides[opponent[s]].space_level >= level:
+            if self.sides[self.opponent[s]].space_level >= level:
                 self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
         if s == 'usa':
-            sides['usa'].space_level += 1
+            self.sides['usa'].space_level += 1
             self.space_race_awards('usa')
         elif s == 'ussr':
-            sides['ussr'].space_level += 1
+            self.sides['ussr'].space_level += 1
             self.space_race_awards('ussr')
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
@@ -429,7 +424,7 @@ class TwilightStruggleGame(CardGame):
     # Functions for checking access
     def countries_with_influence(self, s):
         country_list = []
-        for country in countries.values():
+        for country in self.countries.values():
             if s == 'usa' and country.usa_influence > 0:
                 country_list.append(country.name)
             elif s == 'ussr' and country.ussr_influence > 0:
@@ -442,7 +437,7 @@ class TwilightStruggleGame(CardGame):
         accessible_countries = influenced_countries.copy()
 
         for country in influenced_countries:
-            border_list = countries[country].borders
+            border_list = self.countries[country].borders
             for border in border_list:
                 if border not in accessible_countries and border != 'USA' and border != 'USSR':
                     accessible_countries.append(border)
@@ -465,16 +460,15 @@ class TwilightStruggleGame(CardGame):
     def move_all_cards(self, pile_to_name, pile_from_name):
         card_list = self.piles[pile_from_name].get_cards_in_pile().copy()
         for c in card_list:
-            self.piles[pile_from_name].remove_card(cards[c])
-            self.piles[pile_to_name].add_card(cards[c])
+            self.piles[pile_from_name].remove_card(self.cards[c])
+            self.piles[pile_to_name].add_card(self.cards[c])
 
     def reshuffle(self):
         self.move_all_cards('deck', 'discard')
 
     def deal_cards(self):
-        global turn
         hand_limit = {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9, 7: 9, 8: 9, 9: 9, 10: 9}
-        current_hand_limit = hand_limit[turn]
+        current_hand_limit = hand_limit[self.turn]
         hands = ['ussr hand', 'usa hand']
 
         for card_number in range(1, current_hand_limit + 1):
@@ -491,34 +485,32 @@ class TwilightStruggleGame(CardGame):
     # Functions to change military ops
     def add_military_ops(self, side, amount):
         if side == 'usa':
-            sides['usa'].military_ops += amount
-            if sides['usa'].military_ops > 5:
-                sides['usa'].military_ops = 5
+            self.sides['usa'].military_ops += amount
+            if self.sides['usa'].military_ops > 5:
+                self.sides['usa'].military_ops = 5
         elif side == 'ussr':
-            sides['ussr'].military_ops += amount
-            if sides['ussr'].military_ops > 5:
-                sides['ussr'].military_ops = 5
+            self.sides['ussr'].military_ops += amount
+            if self.sides['ussr'].military_ops > 5:
+                self.sides['ussr'].military_ops = 5
         else:
             raise ValueError("Side must be 'usa' or 'ussr'")
 
     def check_required_military_ops(self):
-        global defcon
-        global score
         usa_points = 0
         ussr_points = 0
 
-        if sides['usa'].military_ops < defcon:
-            ussr_points = defcon - sides['usa'].military_ops
+        if self.sides['usa'].military_ops < self.defcon:
+            ussr_points = self.defcon - self.sides['usa'].military_ops
 
-        if sides['ussr'].military_ops < defcon:
-            usa_points = defcon - sides['ussr'].military_ops
+        if self.sides['ussr'].military_ops < self.defcon:
+            usa_points = self.defcon - self.sides['ussr'].military_ops
 
         points = usa_points - ussr_points
         self.change_score(points)
 
     def reset_military_ops(self):
-        sides['usa'].military_ops = 0
-        sides['ussr'].military_ops = 0
+        self.sides['usa'].military_ops = 0
+        self.sides['ussr'].military_ops = 0
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
