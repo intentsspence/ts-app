@@ -2,7 +2,7 @@
 import random
 
 
-countries = {}
+
 players = {}
 sides = {}
 
@@ -240,6 +240,7 @@ class TwilightStruggleGame(CardGame):
         self.game_active = True
 
         self.cards = {}
+        self.countries = {}
 
 
 
@@ -273,7 +274,7 @@ class TwilightStruggleGame(CardGame):
 
         for c_line in c_lines:
             country = TwilightStruggleCountry(*c_line.split(','))
-            countries.update({country.name: country})
+            self.countries.update({country.name: country})
 
         with open('countries/borders_list.csv', 'r') as b_handle:
             b_header = b_handle.readline()
@@ -282,7 +283,7 @@ class TwilightStruggleGame(CardGame):
         for b_line in b_lines:
             borders_list = b_line.split(',')
             borders_list[:] = [x for x in borders_list if x]
-            countries[borders_list[0]].borders = borders_list[1:]
+            self.countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
         pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'usa hand', 'ussr hand']
@@ -315,9 +316,9 @@ class TwilightStruggleGame(CardGame):
             initial_influence_list[:] = [x for x in initial_influence_list if x]
 
             if initial_influence_list[0] == 'usa':
-                countries[initial_influence_list[1]].usa_influence = int(initial_influence_list[2])
+                self.countries[initial_influence_list[1]].usa_influence = int(initial_influence_list[2])
             elif initial_influence_list[0] == 'ussr':
-                countries[initial_influence_list[1]].ussr_influence = int(initial_influence_list[2])
+                self.countries[initial_influence_list[1]].ussr_influence = int(initial_influence_list[2])
             else:
                 raise ValueError("Error adding initial influence")
             self.check_for_control(initial_influence_list[1])
@@ -341,46 +342,46 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to modify influence
     def check_for_control(self, c):
-        if (countries[c].usa_influence - countries[c].ussr_influence) >= countries[c].stability:
-            countries[c].controlled = 'usa'
-        elif (countries[c].ussr_influence - countries[c].usa_influence) >= countries[c].stability:
-            countries[c].controlled = 'ussr'
+        if (self.countries[c].usa_influence - self.countries[c].ussr_influence) >= self.countries[c].stability:
+            self.countries[c].controlled = 'usa'
+        elif (self.countries[c].ussr_influence - self.countries[c].usa_influence) >= self.countries[c].stability:
+            self.countries[c].controlled = 'ussr'
         else:
-            countries[c].controlled = ''
+            self.countries[c].controlled = ''
 
     def add_influence(self, c, s, i):
         if s == 'usa':
-            countries[c].usa_influence += i
+            self.countries[c].usa_influence += i
         elif s == 'ussr':
-            countries[c].ussr_influence += i
+            self.countries[c].ussr_influence += i
 
         self.check_for_control(c)
 
     def add_influence_to_control(self, c, s):
         if s == 'usa':
-            countries[c].usa_influence = countries[c].ussr_influence + countries[c].stability
+            self.countries[c].usa_influence = self.countries[c].ussr_influence + self.countries[c].stability
         elif s == 'ussr':
-            countries[c].ussr_influence = countries[c].usa_influence + countries[c].stability
+            self.countries[c].ussr_influence = self.countries[c].usa_influence + self.countries[c].stability
 
         self.check_for_control(c)
 
     def remove_influence(self, c, s, i):
         if s == 'usa':
-            countries[c].usa_influence -= i
-            if countries[c].usa_influence < 0:
-                countries[c].usa_influence = 0
+            self.countries[c].usa_influence -= i
+            if self.countries[c].usa_influence < 0:
+                self.countries[c].usa_influence = 0
         elif s == 'ussr':
-            countries[c].ussr_influence -= i
-            if countries[c].ussr_influence < 0:
-                countries[c].ussr_influence = 0
+            self.countries[c].ussr_influence -= i
+            if self.countries[c].ussr_influence < 0:
+                self.countries[c].ussr_influence = 0
 
         self.check_for_control(c)
 
     def remove_all_influence(self, c, s):
         if s == 'usa':
-            countries[c].usa_influence = 0
+            self.countries[c].usa_influence = 0
         elif s == 'ussr':
-            countries[c].ussr_influence = 0
+            self.countries[c].ussr_influence = 0
 
         self.check_for_control(c)
 
@@ -430,7 +431,7 @@ class TwilightStruggleGame(CardGame):
     # Functions for checking access
     def countries_with_influence(self, s):
         country_list = []
-        for country in countries.values():
+        for country in self.countries.values():
             if s == 'usa' and country.usa_influence > 0:
                 country_list.append(country.name)
             elif s == 'ussr' and country.ussr_influence > 0:
@@ -443,7 +444,7 @@ class TwilightStruggleGame(CardGame):
         accessible_countries = influenced_countries.copy()
 
         for country in influenced_countries:
-            border_list = countries[country].borders
+            border_list = self.countries[country].borders
             for border in border_list:
                 if border not in accessible_countries and border != 'USA' and border != 'USSR':
                     accessible_countries.append(border)
