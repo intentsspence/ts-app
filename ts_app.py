@@ -513,8 +513,8 @@ class TwilightStruggleGame(CardGame):
         if sides['ussr'].military_ops < defcon:
             usa_points = defcon - sides['ussr'].military_ops
 
-        score = score + usa_points - ussr_points
-        self.check_game_end()
+        points = usa_points - ussr_points
+        self.change_score(points)
 
     def reset_military_ops(self):
         sides['usa'].military_ops = 0
