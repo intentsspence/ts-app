@@ -1,7 +1,6 @@
 # App to play twilight struggle
 import random
 
-score = 0
 turn = 1
 
 game_active = True
@@ -240,6 +239,7 @@ class TwilightStruggleGame(CardGame):
         self.optional_cards = True if opt == 1 else False
 
         self.defcon = 5
+        self.score = 0
 
         self.__create_piles()
         self.__create_cards()
@@ -383,25 +383,23 @@ class TwilightStruggleGame(CardGame):
     # Functions to modify the score
     def check_game_end(self):
         global game_active
-        if score >= 20:
+        if self.score >= 20:
             sides['usa'].winner = True
             game_active = False
-        elif score <= -20:
+        elif self.score <= -20:
             sides['ussr'].winner = True
             game_active = False
 
     def change_score(self, points):
-        global score
-        score = score + points
+        self.score = self.score + points
 
         self.check_game_end()
 
     def change_score_by_side(self, s, p):
-        global score
         if s == 'usa':
-            score = score + p
+            self.score = self.score + p
         elif s == 'ussr':
-            score = score - p
+            self.score = self.score - p
 
         self.check_game_end()
 
@@ -502,7 +500,6 @@ class TwilightStruggleGame(CardGame):
             raise ValueError("Side must be 'usa' or 'ussr'")
 
     def check_required_military_ops(self):
-        global score
         usa_points = 0
         ussr_points = 0
 
@@ -522,8 +519,15 @@ class TwilightStruggleGame(CardGame):
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
-print(game.defcon)
-game.change_defcon(-3)
-print(game.defcon)
-game.check_required_military_ops()
+print(game.score)
+print(game_active)
+game.change_score(5)
+print(game.score)
+print(game_active)
+game.change_score_by_side('ussr', 7)
+print(game.score)
+print(game_active)
+game.change_score(-20)
+print(game.score)
+print(game_active)
 
