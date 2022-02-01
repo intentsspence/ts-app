@@ -385,6 +385,15 @@ class TwilightStruggleGame(CardGame):
 
         self.check_for_control(c)
 
+    def get_influence(self, country, side):
+        """Returns an int with the country's current influence"""
+        influence = 0
+        if side == 'usa':
+            influence =  self.countries[country].usa_influence
+        elif side == 'ussr':
+            influence = self.countries[country].ussr_influence
+        return influence
+
     # Functions to modify the score
     def check_game_end(self):
         if self.score >= 20:
@@ -737,6 +746,10 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Iran', 'usa', 4)
 print(g.countries['Iran'].usa_influence)
 print(g.countries['Iran'].ussr_influence)
+print(g.get_influence('Iran', 'usa'))
+print(g.get_influence('Iran', 'ussr'))
 g.trigger_event(g.cards['Iranian Hostage Crisis'])
 print(g.countries['Iran'].usa_influence)
 print(g.countries['Iran'].ussr_influence)
+print(g.get_influence('Iran', 'usa'))
+print(g.get_influence('Iran', 'ussr'))
