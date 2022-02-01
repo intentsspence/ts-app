@@ -548,6 +548,16 @@ class TwilightStruggleGame(CardGame):
         self.change_score_by_side(self.phasing, points)
         self.change_defcon(2)
 
+    def event_039(self):
+        """Arms Race"""
+        phasing_mil_ops = self.sides[self.phasing].military_ops
+        opponent_mil_ops = self.sides[(self.opponent[self.phasing])].military_ops
+        if (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops < self.defcon):
+            self.change_score_by_side(self.phasing, 1)
+        elif (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops >= self.defcon):
+            self.change_score_by_side(self.phasing, 3)
+
+
     # Dictionary of all the events
     events = {4:    event_004,
               8:    event_008,
@@ -558,3 +568,4 @@ class TwilightStruggleGame(CardGame):
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
