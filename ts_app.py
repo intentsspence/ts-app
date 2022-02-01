@@ -565,7 +565,11 @@ class TwilightStruggleGame(CardGame):
             usa_points = self.defcon - self.sides['ussr'].military_ops
 
         points = usa_points - ussr_points
-        self.change_score(points)
+        if usa_points > ussr_points:
+            self.change_score_by_side('usa', points)
+        elif ussr_points > usa_points:
+            self.change_score_by_side('ussr', points)
+
 
     def reset_military_ops(self):
         self.sides['usa'].military_ops = 0
@@ -729,8 +733,3 @@ class TwilightStruggleGame(CardGame):
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", '1')
-
-
-game.add_influence_to_control('Cuba', 'usa')
-game.add_influence_to_control('Brazil', 'usa')
-game.trigger_event(game.cards['Alliance for Progress'])
