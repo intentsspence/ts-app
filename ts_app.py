@@ -680,8 +680,6 @@ class TwilightStruggleGame(CardGame):
 
         self.change_score_by_side('ussr', points)
 
-        # TODO - 061 OPEC is cancelled by 086 North Sea Oil
-
     def event_064(self):
         """Panama Canal Returned"""
         self.add_influence('Panama', 'usa', 1)
@@ -692,8 +690,6 @@ class TwilightStruggleGame(CardGame):
         """John Paul II Elected Pope"""
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
-
-        # TODO - 068 John Paul II enables Solidarity if that card does not check for this one
 
     def event_072(self):
         """Sadat Expels Soviets"""
@@ -712,6 +708,11 @@ class TwilightStruggleGame(CardGame):
             self.sides[self.phasing].space_level += 1
             self.increase_space_level(self.phasing)
 
+    def event_082(self):
+        """Iranian Hostage Crisis"""
+        self.remove_all_influence('Iran', 'usa')
+        self.add_influence('Iran', 'ussr', 2)
+
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
@@ -728,4 +729,14 @@ class TwilightStruggleGame(CardGame):
               'John Paul II Elected Pope':  event_068,
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
-              '"One Small Step..."':        event_080}
+              '"One Small Step..."':        event_080,
+              'Iranian Hostage Crisis':     event_082}
+
+g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+
+g.add_influence('Iran', 'usa', 4)
+print(g.countries['Iran'].usa_influence)
+print(g.countries['Iran'].ussr_influence)
+g.trigger_event(g.cards['Iranian Hostage Crisis'])
+print(g.countries['Iran'].usa_influence)
+print(g.countries['Iran'].ussr_influence)
