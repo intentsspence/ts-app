@@ -769,6 +769,9 @@ class TwilightStruggleGame(CardGame):
                 discard = self.piles['USA hand'].random_card()
                 self.move_card(discard, 'discard')
 
+    def event_101(self):
+        """Solidarity"""
+        self.add_influence('Poland', 'usa', 3)
 
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
@@ -790,9 +793,10 @@ class TwilightStruggleGame(CardGame):
               'Iranian Hostage Crisis':     event_082,
               'The Iron Lady':              event_083,
               'Reagan Bombs Libya':         event_084,
-              'Terrorism':                  event_092}
+              'Terrorism':                  event_092,
+              'Solidarity':                 event_101}
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-
-g.trigger_event(g.cards['Terrorism'])
+g.trigger_event(g.cards['John Paul II Elected Pope'])
+g.trigger_event(g.cards['Solidarity'])
