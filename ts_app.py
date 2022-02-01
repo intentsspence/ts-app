@@ -188,10 +188,7 @@ class TwilightStruggleCountry(Country):
 
         if sr not in ['Both Europe', 'Eastern Europe', 'Western Europe', 'Southeast Asia', '']:
             raise ValueError("Error creating Twilight Struggle country. Subregion must be one of: 'Both Europe', 'Eastern Europe', 'Western Europe', or 'Southeast Asia'")
-        if sr == '':
-            pass
-        else:
-            self.subregion = sr
+        self.subregion = sr
 
         if not st.isdigit() and (int(st) > 4 or int(st) < 1):
             raise ValueError("Error creating Twilight Struggle country. Stability must be a number between 1 and 4")
@@ -227,7 +224,7 @@ class TwilightStruggleGame(CardGame):
 
         if not opt.isdigit() and int(opt) != 1 and int(opt) != 0:
             raise ValueError("Error creating Twilight Struggle game. Optional cards parameter must be a 1 or a 0.")
-        self.optional_cards = True if opt == 1 else False
+        self.optional_cards = True if int(opt) == 1 else False
 
         self.defcon = 5
         self.score = 0
@@ -240,9 +237,9 @@ class TwilightStruggleGame(CardGame):
         self.players = {}
         self.sides = {}
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
-        self.pre_reqs = {'Nato': ['Marshall Plan', 'Warsaw Pact'],
+        self.pre_reqs = {'NATO': ['Marshall Plan', 'Warsaw Pact Formed'],
                          'Solidarity': ['John Paul II Elected Pope']}
-        self.cancelled = {'Arab Israeli War': 'Camp David Accords',
+        self.prevents = {'Arab Israeli War': 'Camp David Accords',
                           'Socialist Governments': 'The Iron Lady',
                           'OPEC': 'North Sea Oil',
                           'Willy Brandt': 'Tear Down This Wall',
@@ -436,25 +433,54 @@ class TwilightStruggleGame(CardGame):
         country_list = []
         for country in self.countries.values():
             if s == 'usa' and country.usa_influence > 0:
-                country_list.append(country.name)
+                country_list.append(country)
             elif s == 'ussr' and country.ussr_influence > 0:
-                country_list.append(country.name)
+                country_list.append(country)
 
         return country_list
+
+    def countries_in_region(self, region):
+        countries_in_region = []
+        for country in self.countries.values():
+            if country.region == region:
+                countries_in_region.append(country)
+
+        return countries_in_region
+
+    def countries_in_subregion(self, subregion):
+        countries_in_subregion = []
+        for country in self.countries.values():
+            if country.subregion == subregion:
+                countries_in_subregion.append(country)
+
+        return countries_in_subregion
+
+    def controlled_in_region(self, region, side):
+        country_list = self.countries_in_region(region)
+        print(country_list)
+        controlled_list = []
+
+        for country in country_list:
+            if side == 'usa' and country.controlled == 'usa':
+                controlled_list.append(country)
+            elif side == 'ussr' and country.controlled == 'usa':
+                controlled_list.append(country)
+
+        return controlled_list
 
     def accessible_countries(self, s):
         influenced_countries = self.countries_with_influence(s)
         accessible_countries = influenced_countries.copy()
 
         for country in influenced_countries:
-            border_list = self.countries[country].borders
+            border_list = country.borders
             for border in border_list:
                 if border not in accessible_countries and border != 'USA' and border != 'USSR':
-                    accessible_countries.append(border)
+                    accessible_countries.append(self.countries[border])
 
         return accessible_countries
 
-    def battlegrounds_controlled(self, side):
+    def total_battlegrounds_controlled(self, side):
         country_list = []
 
         for country in self.countries.values():
@@ -534,10 +560,32 @@ class TwilightStruggleGame(CardGame):
     # Functions to manipulate events
     def check_event_eligibility(self, card):
         eligible = False
+        if card.name in self.pre_reqs.keys():
+            for pre_req in self.pre_reqs[card.name]:
+                if self.cards[pre_req].played:
+                    eligible = True
+        elif card.name in self.prevents.keys():
+            if not self.cards[self.prevents[card.name]].played:
+                eligible = True
+        elif card.name == 'Kitchen Debates':
+            usa_battlegrounds = self.total_battlegrounds_controlled('usa')
+            ussr_battlegrounds = self.total_battlegrounds_controlled('ussr')
+            eligible = True if usa_battlegrounds > ussr_battlegrounds else False
+        elif card.name == 'Star Wars':
+            usa_space = self.sides['usa'].space_level
+            ussr_space = self.sides['ussr'].space_level
+            eligible = True if usa_space > ussr_space else False
+        elif card.name == 'Our Man in Tehran':
+            usa_controlled_middle_east = self.controlled_in_region('Middle East', 'usa')
+            if len(usa_controlled_middle_east) > 0:
+                eligible = True
+        else:
+            eligible = True
 
+        return eligible
 
-    def trigger_event(self, card):
-
+    # def trigger_event(self, card):
+    # TODO - write trigger_event function
 
     # Specific events
     def event_004(self):
@@ -584,8 +632,8 @@ class TwilightStruggleGame(CardGame):
 
     def event_048(self):
         """Kitchen Debates"""
-        usa_battlegrounds = self.battlegrounds_controlled('usa')
-        ussr_battlegrounds = self.battlegrounds_controlled('ussr')
+        usa_battlegrounds = self.total_battlegrounds_controlled('usa')
+        ussr_battlegrounds = self.total_battlegrounds_controlled('ussr')
 
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
@@ -647,4 +695,4 @@ class TwilightStruggleGame(CardGame):
               72:   event_072}
 
 
-game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+game = TwilightStruggleGame("default_name", "2022-01-27", '1')
