@@ -751,7 +751,7 @@ class TwilightStruggleGame(CardGame):
         """The Iron Lady"""
         self.add_influence('Argentina', 'ussr', 1)
         self.remove_all_influence('UK', 'ussr')
-
+        self.change_score_by_side('usa', 1)
 
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
@@ -770,7 +770,8 @@ class TwilightStruggleGame(CardGame):
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
               '"One Small Step..."':        event_080,
-              'Iranian Hostage Crisis':     event_082}
+              'Iranian Hostage Crisis':     event_082,
+              'The Iron Lady':              event_083}
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
