@@ -583,6 +583,34 @@ class TwilightStruggleGame(CardGame):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
 
+    def event_061(self):
+        """OPEC"""
+        opec_list = ['Egypt', 'Iran', 'Libya', 'Saudi Arabia', 'Iraq', 'Gulf States', 'Venezuela']
+        points = 0
+
+        for country in opec_list:
+            if self.countries[country].controlled == 'ussr':
+                points += 1
+
+        self.change_score_by_side('ussr', points)
+
+        # TODO - 061 OPEC is cancelled by 086 North Sea Oil
+
+    def event_064(self):
+        """Panama Canal Returned"""
+        self.add_influence('Panama', 'usa', 1)
+        self.add_influence('Costa Rica', 'usa', 1)
+        self.add_influence('Venezuela', 'usa', 1)
+
+    def event_068(self):
+        """John Paul II Elected Pope"""
+        self.remove_influence('Poland', 'ussr', 2)
+        self.add_influence('Poland', 'usa', 1)
+
+        # TODO - 068 John Paul II enables Solidarity if that card does not check for this one
+
+
+
     # Dictionary of the events
     events = {4:    event_004,
               8:    event_008,
@@ -593,11 +621,17 @@ class TwilightStruggleGame(CardGame):
               39:   event_039,
               48:   event_048,
               52:   event_052,
-              54:   event_054}
+              54:   event_054,
+              61:   event_061,
+              64:   event_064,
+              68:   event_068}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
 
-print(game.countries['Chile'].ussr_influence)
-game.event_054()
-print(game.countries['Chile'].ussr_influence)
+game.countries['Poland'].ussr_influence = 4
+print(game.countries['Poland'].usa_influence)
+print(game.countries['Poland'].ussr_influence)
+game.event_068()
+print(game.countries['Poland'].usa_influence)
+print(game.countries['Poland'].ussr_influence)
