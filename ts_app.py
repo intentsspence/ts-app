@@ -408,7 +408,7 @@ class TwilightStruggleGame(CardGame):
             usa_controlled = '*'
         elif self.countries[country_name].controlled == 'ussr':
             ussr_controlled = '*'
-        log_string = "{c}: [ {usa_c}{usa_i} | {ussr_c}{ussr_i} ]".format(c=country_name,
+        log_string = "{c}: [ {usa_i}{usa_c} | {ussr_i}{ussr_c} ]".format(c=country_name,
                                                                          usa_i=usa_inf,
                                                                          usa_c=usa_controlled,
                                                                          ussr_i=ussr_inf,
@@ -630,12 +630,13 @@ class TwilightStruggleGame(CardGame):
         eligible = self.check_event_eligibility(card)
 
         if eligible:
-            self.events[card.name](self)
-            card.played = True
             log_string = "{p} triggered event {no} - {na}".format(p=self.phasing.upper(),
                                                                   no=card.number,
                                                                   na=card.name)
             print(log_string)
+            self.events[card.name](self)
+            card.played = True
+
             if card.removed:
                 self.move_card(card, 'removed')
             else:
@@ -782,5 +783,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
-# g.trigger_event(g.cards['Reagan Bombs Libya'])
+g.trigger_event(g.cards['Reagan Bombs Libya'])
 
