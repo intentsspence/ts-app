@@ -584,7 +584,18 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
-    # def trigger_event(self, card):
+    def trigger_event(self, card):
+        eligible = self.check_event_eligibility(card)
+
+        if eligible:
+            self.events[card.name](self)
+            card.played = True
+            if card.removed:
+                self.move_card(card, 'removed')
+            else:
+                self.move_card(card, 'discard')
+        else:
+            self.move_card(card, 'discard')
     # TODO - write trigger_event function
 
     # Specific events
@@ -679,20 +690,20 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Egypt', 'usa', 1)
 
     # Dictionary of the events
-    events = {4:    event_004,
-              8:    event_008,
-              12:   event_012,
-              15:   event_015,
-              18:   event_018,
-              34:   event_034,
-              39:   event_039,
-              48:   event_048,
-              52:   event_052,
-              54:   event_054,
-              61:   event_061,
-              64:   event_064,
-              68:   event_068,
-              72:   event_072}
+    events = {'Duck and Cover':             event_004,
+              'Socialist Governments':      event_008,
+              'Romanian Abdication':        event_012,
+              'Nasser':                     event_015,
+              'Captured Nazi Scientist':    event_018,
+              'Nuclear Test Ban':           event_034,
+              'Arms Race':                  event_039,
+              'Kitchen Debates':            event_048,
+              'Portuguese Empire Crumbles': event_052,
+              'Allende':                    event_054,
+              'OPEC':                       event_061,
+              'Panama Canal Returned':      event_064,
+              'John Paul II Elected Pope':  event_068,
+              'Sadat Expels Soviets':       event_072}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", '1')
