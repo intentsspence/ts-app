@@ -389,10 +389,30 @@ class TwilightStruggleGame(CardGame):
         """Returns an int with the country's current influence"""
         influence = 0
         if side == 'usa':
-            influence =  self.countries[country].usa_influence
+            influence = country.usa_influence
         elif side == 'ussr':
-            influence = self.countries[country].ussr_influence
+            influence = country.ussr_influence
         return influence
+
+    def current_inf(self, country_name):
+        """Quick method to see the current influence. Takes a string"""
+        usa_inf = self.get_influence(self.countries[country_name], 'usa')
+        ussr_inf = self.get_influence(self.countries[country_name], 'ussr')
+        usa_controlled = ' '
+        ussr_controlled = ' '
+        if self.countries[country_name].controlled == 'usa':
+            usa_controlled = '*'
+        elif self.countries[country_name].controlled == 'ussr':
+            ussr_controlled = '*'
+        log_string = "{c}: [ {usa_c}{usa_i} | {ussr_c}{ussr_i} ]".format(c=country_name,
+                                                                         usa_i=usa_inf,
+                                                                         usa_c=usa_controlled,
+                                                                         ussr_i=ussr_inf,
+                                                                         ussr_c=ussr_controlled)
+        print(log_string)
+        return log_string
+
+
 
     # Functions to modify the score
     def check_game_end(self):
@@ -616,7 +636,6 @@ class TwilightStruggleGame(CardGame):
                 self.move_card(card, 'discard')
         else:
             self.move_card(card, 'discard')
-    # TODO - write trigger_event function
 
     # Specific events
     def event_004(self):
@@ -744,12 +763,7 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
 g.add_influence('Iran', 'usa', 4)
-print(g.countries['Iran'].usa_influence)
-print(g.countries['Iran'].ussr_influence)
-print(g.get_influence('Iran', 'usa'))
-print(g.get_influence('Iran', 'ussr'))
+g.current_inf('Iran')
 g.trigger_event(g.cards['Iranian Hostage Crisis'])
-print(g.countries['Iran'].usa_influence)
-print(g.countries['Iran'].ussr_influence)
-print(g.get_influence('Iran', 'usa'))
-print(g.get_influence('Iran', 'ussr'))
+g.current_inf('Iran')
+
