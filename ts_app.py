@@ -1,5 +1,6 @@
 # App to play twilight struggle
 import random
+import math
 
 
 class Card:
@@ -529,9 +530,18 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('Romania', 'usa')
         self.add_influence_to_control('Romania', 'ussr')
 
+    def event_015(self):
+        """Nasser"""
+        usa_inf = self.countries['Egypt'].usa_influence
+        inf_to_remove = math.ceil(usa_inf / 2)
+        self.add_influence('Egypt', 'ussr', 2)
+        self.remove_influence('Egypt', 'usa', inf_to_remove)
+
+
     # Dictionary of all the events
     events = {4:    event_004,
               8:    event_008,
               12:   event_012}
+
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
