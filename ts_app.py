@@ -399,12 +399,13 @@ class TwilightStruggleGame(CardGame):
 
         self.check_game_end()
 
-    def change_score_by_side(self, s, p):
-        if s == 'usa':
-            self.score = self.score + p
-        elif s == 'ussr':
-            self.score = self.score - p
-
+    def change_score_by_side(self, side, points):
+        if side == 'usa':
+            self.score = self.score + points
+        elif side == 'ussr':
+            self.score = self.score - points
+        log_string = "{s} scored {p} points. Score is now {score}.".format(s = side.upper(), p = points, score = self.score)
+        print(log_string)
         self.check_game_end()
 
     # Functions for space race
@@ -616,7 +617,7 @@ class TwilightStruggleGame(CardGame):
         """Duck and Cover"""
         self.change_defcon(-1)
         points = 5 - self.defcon
-        self.change_score(points)
+        self.change_score_by_side('usa', points)
 
     def event_008(self):
         """Fidel"""
@@ -704,9 +705,9 @@ class TwilightStruggleGame(CardGame):
 
     def event_078(self):
         """Alliance for Progress"""
-        ca_battlegrounds = self.battlegrounds_controlled_in_region('Central America', 'usa')
-        sa_battlegrounds = self.battlegrounds_controlled_in_region('South America', 'usa')
-        self.change_score_by_side((ca_battlegrounds + sa_battlegrounds), 'usa')
+        ca_battlegrounds = len(self.battlegrounds_controlled_in_region('Central America', 'usa'))
+        sa_battlegrounds = len(self.battlegrounds_controlled_in_region('South America', 'usa'))
+        self.change_score_by_side('usa', (ca_battlegrounds + sa_battlegrounds))
 
 
     # Dictionary of the events
@@ -729,3 +730,7 @@ class TwilightStruggleGame(CardGame):
 
 game = TwilightStruggleGame("default_name", "2022-01-27", '1')
 
+
+game.add_influence_to_control('Cuba', 'usa')
+game.add_influence_to_control('Brazil', 'usa')
+game.trigger_event(game.cards['Alliance for Progress'])
