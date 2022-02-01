@@ -237,14 +237,14 @@ class TwilightStruggleGame(CardGame):
         self.players = {}
         self.sides = {}
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
-        self.pre_reqs = {'NATO': ['Marshall Plan', 'Warsaw Pact Formed'],
-                         'Solidarity': ['John Paul II Elected Pope']}
-        self.prevents = {'Arab Israeli War': 'Camp David Accords',
-                          'Socialist Governments': 'The Iron Lady',
-                          'OPEC': 'North Sea Oil',
-                          'Willy Brandt': 'Tear Down This Wall',
-                          'Flower Power': 'An Evil Empire',
-                          'Muslim Revolution': 'AWACS Sale to Saudis'}
+        self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
+                         'Solidarity':  ['John Paul II Elected Pope']}
+        self.prevents = {'Arab Israeli War':        'Camp David Accords',
+                         'Socialist Governments':   'The Iron Lady',
+                         'OPEC':                    'North Sea Oil',
+                         'Willy Brandt':            'Tear Down This Wall',
+                         'Flower Power':            'An Evil Empire',
+                         'Muslim Revolution':       'AWACS Sale to Saudis'}
 
         self.__create_piles()
         self.__create_cards()
@@ -798,5 +798,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['John Paul II Elected Pope'])
-g.trigger_event(g.cards['Solidarity'])
+# g.trigger_event(g.cards['John Paul II Elected Pope'])
