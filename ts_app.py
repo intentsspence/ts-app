@@ -702,6 +702,9 @@ class TwilightStruggleGame(CardGame):
 
     def event_078(self):
         """Alliance for Progress"""
+        ca_battlegrounds = self.battlegrounds_controlled_in_region('Central America', 'usa')
+        sa_battlegrounds = self.battlegrounds_controlled_in_region('South America', 'usa')
+        self.change_score_by_side((ca_battlegrounds + sa_battlegrounds), 'usa')
 
 
     # Dictionary of the events
@@ -718,7 +721,9 @@ class TwilightStruggleGame(CardGame):
               'OPEC':                       event_061,
               'Panama Canal Returned':      event_064,
               'John Paul II Elected Pope':  event_068,
-              'Sadat Expels Soviets':       event_072}
+              'Sadat Expels Soviets':       event_072,
+              'Alliance for Progress':      event_078}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", '1')
+
