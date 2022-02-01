@@ -402,8 +402,8 @@ class TwilightStruggleGame(CardGame):
         """Quick method to see the current influence. Takes a string"""
         usa_inf = self.get_influence(self.countries[country_name], 'usa')
         ussr_inf = self.get_influence(self.countries[country_name], 'ussr')
-        usa_controlled = ' '
-        ussr_controlled = ' '
+        usa_controlled = ''
+        ussr_controlled = ''
         if self.countries[country_name].controlled == 'usa':
             usa_controlled = '*'
         elif self.countries[country_name].controlled == 'ussr':
