@@ -351,7 +351,7 @@ class TwilightStruggleGame(CardGame):
             self.countries[c].controlled = 'ussr'
         else:
             self.countries[c].controlled = ''
-        self.current_inf(c)
+        self.print_influence(c)
 
     def add_influence(self, c, s, i):
         if s == 'usa':
@@ -398,7 +398,7 @@ class TwilightStruggleGame(CardGame):
             influence = country.ussr_influence
         return influence
 
-    def current_inf(self, country_name):
+    def print_influence(self, country_name):
         """Quick method to see the current influence. Takes a string"""
         usa_inf = self.get_influence(self.countries[country_name], 'usa')
         ussr_inf = self.get_influence(self.countries[country_name], 'ussr')
@@ -746,6 +746,12 @@ class TwilightStruggleGame(CardGame):
         """Iranian Hostage Crisis"""
         self.remove_all_influence('Iran', 'usa')
         self.add_influence('Iran', 'ussr', 2)
+
+    def event_083(self):
+        """The Iron Lady"""
+        self.add_influence('Argentina', 'ussr', 1)
+        self.remove_all_influence('UK', 'ussr')
+
 
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
