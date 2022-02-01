@@ -233,6 +233,7 @@ class TwilightStruggleGame(CardGame):
         self.score = 0
         self.turn = 1
         self.game_active = True
+        self.phasing = ''
 
         self.cards = {}
         self.countries = {}
@@ -537,11 +538,16 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Egypt', 'ussr', 2)
         self.remove_influence('Egypt', 'usa', inf_to_remove)
 
+    def event_018(self):
+        """Captured Nazi Scientist"""
+        self.increase_space_level(self.phasing)
 
     # Dictionary of all the events
     events = {4:    event_004,
               8:    event_008,
-              12:   event_012}
+              12:   event_012,
+              15:   event_015}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
