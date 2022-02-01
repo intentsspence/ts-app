@@ -574,6 +574,11 @@ class TwilightStruggleGame(CardGame):
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
 
+    def event_052(self):
+        """Portuguese Empire Crumbles"""
+        self.add_influence('Angola', 'ussr', 2)
+        self.add_influence('SE African States', 'ussr', 2)
+
     # Dictionary of the events
     events = {4:    event_004,
               8:    event_008,
@@ -582,7 +587,8 @@ class TwilightStruggleGame(CardGame):
               18:   event_018,
               34:   event_034,
               39:   event_039,
-              48:   event_048}
+              48:   event_048,
+              52:   event_052}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
