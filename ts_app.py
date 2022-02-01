@@ -609,7 +609,10 @@ class TwilightStruggleGame(CardGame):
 
         # TODO - 068 John Paul II enables Solidarity if that card does not check for this one
 
-
+    def event_072(self):
+        """Sadat Expels Soviets"""
+        self.remove_all_influence('Egypt', 'ussr')
+        self.add_influence('Egypt', 'usa', 1)
 
     # Dictionary of the events
     events = {4:    event_004,
@@ -624,14 +627,8 @@ class TwilightStruggleGame(CardGame):
               54:   event_054,
               61:   event_061,
               64:   event_064,
-              68:   event_068}
+              68:   event_068,
+              72:   event_072}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
-game.countries['Poland'].ussr_influence = 4
-print(game.countries['Poland'].usa_influence)
-print(game.countries['Poland'].ussr_influence)
-game.event_068()
-print(game.countries['Poland'].usa_influence)
-print(game.countries['Poland'].ussr_influence)
