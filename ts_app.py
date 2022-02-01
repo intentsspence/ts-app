@@ -579,6 +579,10 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Angola', 'ussr', 2)
         self.add_influence('SE African States', 'ussr', 2)
 
+    def event_054(self):
+        """Allende"""
+        self.add_influence('Chile', 'ussr', 2)
+
     # Dictionary of the events
     events = {4:    event_004,
               8:    event_008,
@@ -588,7 +592,12 @@ class TwilightStruggleGame(CardGame):
               34:   event_034,
               39:   event_039,
               48:   event_048,
-              52:   event_052}
+              52:   event_052,
+              54:   event_054}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
+
+print(game.countries['Chile'].ussr_influence)
+game.event_054()
+print(game.countries['Chile'].ussr_influence)
