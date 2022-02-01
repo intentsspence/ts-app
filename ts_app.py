@@ -420,14 +420,8 @@ class TwilightStruggleGame(CardGame):
                 self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
-        if s == 'usa':
-            self.sides['usa'].space_level += 1
-            self.space_race_awards('usa')
-        elif s == 'ussr':
-            self.sides['ussr'].space_level += 1
-            self.space_race_awards('ussr')
-        else:
-            raise ValueError("Side must be 'usa' or 'ussr'")
+        self.sides[s].space_level += 1
+        self.space_race_awards(s)
 
     # Functions for checking access
     def countries_with_influence(self, s):
@@ -569,7 +563,6 @@ class TwilightStruggleGame(CardGame):
             self.change_score_by_side('usa', points)
         elif ussr_points > usa_points:
             self.change_score_by_side('ussr', points)
-
 
     def reset_military_ops(self):
         self.sides['usa'].military_ops = 0
@@ -736,8 +729,3 @@ class TwilightStruggleGame(CardGame):
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
               '"One Small Step..."':        event_080}
-
-
-game = TwilightStruggleGame("default_name", "2022-01-27", '1')
-
-
