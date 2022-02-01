@@ -323,6 +323,9 @@ class TwilightStruggleGame(CardGame):
                 raise ValueError("Error adding initial influence")
             self.check_for_control(initial_influence_list[1])
 
+        log_string = "Setup complete\n-----------------------------------"
+        print(log_string)
+
     # Function to adjust defcon
     def change_defcon(self, adjustment_value):
         self.defcon = self.defcon + adjustment_value
@@ -348,6 +351,7 @@ class TwilightStruggleGame(CardGame):
             self.countries[c].controlled = 'ussr'
         else:
             self.countries[c].controlled = ''
+        self.current_inf(c)
 
     def add_influence(self, c, s, i):
         if s == 'usa':
@@ -412,8 +416,6 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
         return log_string
 
-
-
     # Functions to modify the score
     def check_game_end(self):
         if self.score >= 20:
@@ -433,7 +435,7 @@ class TwilightStruggleGame(CardGame):
             self.score = self.score + points
         elif side == 'ussr':
             self.score = self.score - points
-        log_string = "{s} scored {p} points. Score is now {score}.".format(s = side.upper(), p = points, score = self.score)
+        log_string = "{s} scored {p} points. Score is now {score}.".format(s=side.upper(), p=points, score=self.score)
         print(log_string)
         self.check_game_end()
 
@@ -536,7 +538,7 @@ class TwilightStruggleGame(CardGame):
         current_pile = self.which_pile(c)
         self.piles[current_pile].remove_card(c)
         self.piles[pile_name].add_card(c)
-        log_string = "{c} moved to {p}.".format(c = c.name, p = pile_name)
+        log_string = "{c} moved to {p}.".format(c=c.name, p=pile_name)
         print(log_string)
 
     def move_all_cards(self, pile_to_name, pile_from_name):
@@ -630,6 +632,10 @@ class TwilightStruggleGame(CardGame):
         if eligible:
             self.events[card.name](self)
             card.played = True
+            log_string = "{p} triggered event {no} - {na}".format(p=self.phasing.upper(),
+                                                                  no=card.number,
+                                                                  na=card.name)
+            print(log_string)
             if card.removed:
                 self.move_card(card, 'removed')
             else:
@@ -760,10 +766,5 @@ class TwilightStruggleGame(CardGame):
               '"One Small Step..."':        event_080,
               'Iranian Hostage Crisis':     event_082}
 
+
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-
-g.add_influence('Iran', 'usa', 4)
-g.current_inf('Iran')
-g.trigger_event(g.cards['Iranian Hostage Crisis'])
-g.current_inf('Iran')
-
