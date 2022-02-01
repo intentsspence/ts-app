@@ -542,12 +542,19 @@ class TwilightStruggleGame(CardGame):
         """Captured Nazi Scientist"""
         self.increase_space_level(self.phasing)
 
+    def event_034(self):
+        """Nuclear Test Ban"""
+        points = self.defcon - 2
+        self.change_score_by_side(self.phasing, points)
+        self.change_defcon(2)
+
     # Dictionary of all the events
     events = {4:    event_004,
               8:    event_008,
               12:   event_012,
-              15:   event_015}
+              15:   event_015,
+              18:   event_018,
+              34:   event_034}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
