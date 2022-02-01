@@ -286,7 +286,7 @@ class TwilightStruggleGame(CardGame):
             self.countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
-        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'usa hand', 'ussr hand']
+        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand']
 
         for pile in pile_list:
             self.add_pile(CardPile(pile))
@@ -512,6 +512,8 @@ class TwilightStruggleGame(CardGame):
         current_pile = self.which_pile(c)
         self.piles[current_pile].remove_card(c)
         self.piles[pile_name].add_card(c)
+        log_string = "{c} moved to {p}.".format(c = c.name, p = pile_name)
+        print(log_string)
 
     def move_all_cards(self, pile_to_name, pile_from_name):
         card_list = self.piles[pile_from_name].get_cards_in_pile().copy()
@@ -525,7 +527,7 @@ class TwilightStruggleGame(CardGame):
     def deal_cards(self):
         hand_limit = {1: 8, 2: 8, 3: 8, 4: 9, 5: 9, 6: 9, 7: 9, 8: 9, 9: 9, 10: 9}
         current_hand_limit = hand_limit[self.turn]
-        hands = ['ussr hand', 'usa hand']
+        hands = ['USSR hand', 'USA hand']
 
         for card_number in range(1, current_hand_limit + 1):
             for hand in hands:
