@@ -713,6 +713,11 @@ class TwilightStruggleGame(CardGame):
         sa_battlegrounds = len(self.battlegrounds_controlled_in_region('South America', 'usa'))
         self.change_score_by_side('usa', (ca_battlegrounds + sa_battlegrounds))
 
+    def event_080(self):
+        """One Small Step..."""
+        if self.sides[self.phasing].space_level < self.sides[self.opponent[self.phasing]].space_level:
+            self.sides[self.phasing].space_level += 1
+            self.increase_space_level(self.phasing)
 
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
@@ -729,7 +734,10 @@ class TwilightStruggleGame(CardGame):
               'Panama Canal Returned':      event_064,
               'John Paul II Elected Pope':  event_068,
               'Sadat Expels Soviets':       event_072,
-              'Alliance for Progress':      event_078}
+              'Alliance for Progress':      event_078,
+              '"One Small Step..."':        event_080}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", '1')
+
+
