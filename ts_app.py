@@ -512,5 +512,26 @@ class TwilightStruggleGame(CardGame):
         self.sides['usa'].military_ops = 0
         self.sides['ussr'].military_ops = 0
 
+    # Events
+    def event_004(self):
+        """Duck and Cover"""
+        self.change_defcon(-1)
+        points = 5 - self.defcon
+        self.change_score(points)
+
+    def event_008(self):
+        """Fidel"""
+        self.remove_all_influence('Cuba', 'usa')
+        self.add_influence_to_control('Cuba', 'ussr')
+
+    def event_012(self):
+        """Romanian Abdication"""
+        self.remove_all_influence('Romania', 'usa')
+        self.add_influence_to_control('Romania', 'ussr')
+
+    # Dictionary of all the events
+    events = {4:    event_004,
+              8:    event_008,
+              12:   event_012}
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
