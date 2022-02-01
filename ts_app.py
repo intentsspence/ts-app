@@ -240,6 +240,14 @@ class TwilightStruggleGame(CardGame):
         self.players = {}
         self.sides = {}
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
+        self.pre_reqs = {'Nato': ['Marshall Plan', 'Warsaw Pact'],
+                         'Solidarity': ['John Paul II Elected Pope']}
+        self.cancelled = {'Arab Israeli War': 'Camp David Accords',
+                          'Socialist Governments': 'The Iron Lady',
+                          'OPEC': 'North Sea Oil',
+                          'Willy Brandt': 'Tear Down This Wall',
+                          'Flower Power': 'An Evil Empire',
+                          'Muslim Revolution': 'AWACS Sale to Saudis'}
 
         self.__create_piles()
         self.__create_cards()
@@ -523,7 +531,15 @@ class TwilightStruggleGame(CardGame):
         self.sides['usa'].military_ops = 0
         self.sides['ussr'].military_ops = 0
 
-    # Events
+    # Functions to manipulate events
+    def check_event_eligibility(self, card):
+        eligible = False
+
+
+    def trigger_event(self, card):
+
+
+    # Specific events
     def event_004(self):
         """Duck and Cover"""
         self.change_defcon(-1)
