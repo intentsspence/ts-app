@@ -457,13 +457,24 @@ class TwilightStruggleGame(CardGame):
 
     def controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
-        print(country_list)
         controlled_list = []
 
         for country in country_list:
             if side == 'usa' and country.controlled == 'usa':
                 controlled_list.append(country)
-            elif side == 'ussr' and country.controlled == 'usa':
+            elif side == 'ussr' and country.controlled == 'ussr':
+                controlled_list.append(country)
+
+        return controlled_list
+
+    def battlegrounds_controlled_in_region(self, region, side):
+        country_list = self.countries_in_region(region)
+        controlled_list = []
+
+        for country in country_list:
+            if side == 'usa' and country.controlled == 'usa' and country.battleground:
+                controlled_list.append(country)
+            elif side == 'ussr' and country.controlled == 'ussr' and country.battleground:
                 controlled_list.append(country)
 
         return controlled_list
@@ -688,6 +699,10 @@ class TwilightStruggleGame(CardGame):
         """Sadat Expels Soviets"""
         self.remove_all_influence('Egypt', 'ussr')
         self.add_influence('Egypt', 'usa', 1)
+
+    def event_078(self):
+        """Alliance for Progress"""
+
 
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
