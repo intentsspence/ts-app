@@ -759,6 +759,17 @@ class TwilightStruggleGame(CardGame):
         points = self.countries['Libya'].ussr_influence // 2
         self.change_score_by_side('usa', points)
 
+    def event_092(self):
+        """Terrorism"""
+        if self.piles['USA hand'].get_pile_size() > 0:
+            discard = self.piles['USA hand'].random_card()
+            self.move_card(discard, 'discard')
+        if self.cards['Iranian Hostage Crisis'].played:
+            if self.piles['USA hand'].get_pile_size() > 0:
+                discard = self.piles['USA hand'].random_card()
+                self.move_card(discard, 'discard')
+
+
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
@@ -778,10 +789,10 @@ class TwilightStruggleGame(CardGame):
               '"One Small Step..."':        event_080,
               'Iranian Hostage Crisis':     event_082,
               'The Iron Lady':              event_083,
-              'Reagan Bombs Libya':         event_084}
+              'Reagan Bombs Libya':         event_084,
+              'Terrorism':                  event_092}
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
-g.trigger_event(g.cards['Reagan Bombs Libya'])
-
+g.trigger_event(g.cards['Terrorism'])
