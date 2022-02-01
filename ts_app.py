@@ -753,6 +753,11 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('UK', 'ussr')
         self.change_score_by_side('usa', 1)
 
+    def event_084(self):
+        """Reagan Bombs Libya"""
+        points = self.countries['Libya'].ussr_influence // 2
+        self.change_score_by_side('usa', points)
+
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
@@ -771,7 +776,11 @@ class TwilightStruggleGame(CardGame):
               'Alliance for Progress':      event_078,
               '"One Small Step..."':        event_080,
               'Iranian Hostage Crisis':     event_082,
-              'The Iron Lady':              event_083}
+              'The Iron Lady':              event_083,
+              'Reagan Bombs Libya':         event_084}
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+
+# g.trigger_event(g.cards['Reagan Bombs Libya'])
+
