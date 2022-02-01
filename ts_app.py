@@ -199,7 +199,7 @@ class TwilightStruggleCountry(Country):
 
         if bg not in ['TRUE', 'FALSE']:
             raise ValueError("Error creating Twilight Struggle country. Battleground must be True or False.")
-        self.battleground = True if bg == 'True' else False
+        self.battleground = True if bg == 'TRUE' else False
 
         if not usa_i.isdigit():
             raise ValueError("Error creating Twilight Struggle country. USA influence must be a number.")
@@ -446,6 +446,15 @@ class TwilightStruggleGame(CardGame):
 
         return accessible_countries
 
+    def battlegrounds_controlled(self, side):
+        country_list = []
+
+        for country in self.countries.values():
+            if country.controlled == side and country.battleground:
+                country_list.append(country.name)
+
+        return len(country_list)
+
     # Functions for moving cards around
     def which_pile(self, c):
         for pile in self.piles:
@@ -557,15 +566,23 @@ class TwilightStruggleGame(CardGame):
         elif (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops >= self.defcon):
             self.change_score_by_side(self.phasing, 3)
 
+    def event_048(self):
+        """Kitchen Debates"""
+        usa_battlegrounds = self.battlegrounds_controlled('usa')
+        ussr_battlegrounds = self.battlegrounds_controlled('ussr')
 
-    # Dictionary of all the events
+        if usa_battlegrounds > ussr_battlegrounds:
+            self.change_score_by_side('usa', 2)
+
+    # Dictionary of the events
     events = {4:    event_004,
               8:    event_008,
               12:   event_012,
               15:   event_015,
               18:   event_018,
-              34:   event_034}
+              34:   event_034,
+              39:   event_039,
+              48:   event_048}
 
 
 game = TwilightStruggleGame("default_name", "2022-01-27", "0")
-
