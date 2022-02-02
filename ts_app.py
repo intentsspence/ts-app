@@ -821,6 +821,15 @@ class TwilightStruggleGame(CardGame):
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
 
+    def event_071(self):
+        """Nixon Plays the China Card"""
+        if self.cards['China'] in self.piles['USSR China'].get_cards_in_pile().values():
+            self.move_china_card('USA China', False)
+        elif self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
+            self.change_score_by_side('usa', 2)
+        else:
+            raise ValueError("China card must be in USA hand or USSR hand")
+
     def event_072(self):
         """Sadat Expels Soviets"""
         self.remove_all_influence('Egypt', 'ussr')
@@ -885,6 +894,7 @@ class TwilightStruggleGame(CardGame):
               'OPEC':                       event_061,
               'Panama Canal Returned':      event_064,
               'John Paul II Elected Pope':  event_068,
+              'Nixon Plays the China Card': event_071,
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
               '"One Small Step..."':        event_080,
@@ -897,7 +907,10 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
+print(g.piles['USA China'].get_cards_in_pile())
 print(g.piles['USSR China'].get_cards_in_pile())
-# g.move_china_card('USA China', True)
-# g.trigger_event(g.cards['Cultural Revolution'])
+g.move_china_card('USA China', True)
+g.trigger_event(g.cards['Nixon Plays the China Card'])
+print(g.piles['USA China'].get_cards_in_pile())
+print(g.piles['USSR China'].get_cards_in_pile())
 
