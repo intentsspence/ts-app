@@ -744,8 +744,8 @@ class TwilightStruggleGame(CardGame):
         ussr_countries = 0
         usa_bgs = 0
         ussr_bgs = 0
-        usa_type = ''
-        ussr_type = ''
+        usa_type = 'no influence'
+        ussr_type = 'no influence'
 
         battlegrounds_in_region = len(self.battleground_countries_in_region(region))
         usa_countries = len(self.controlled_in_region(region, 'usa'))
@@ -769,7 +769,6 @@ class TwilightStruggleGame(CardGame):
 
         return [usa_type, ussr_type]
 
-
     def score_card(self, region, presence, domination, control):
         usa_total = 0
         ussr_total = 0
@@ -781,7 +780,7 @@ class TwilightStruggleGame(CardGame):
         ussr_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
         countries_in_region = self.countries_in_region(region)
 
-        score_dict = {'': 0, 'presence': presence, 'domination': domination,'control': control}
+        score_dict = {'no influence': 0, 'presence': presence, 'domination': domination,'control': control}
 
         for country in countries_in_region:
             border_list = country.borders
@@ -818,6 +817,14 @@ class TwilightStruggleGame(CardGame):
             self.change_score_by_side('ussr', ussr_total - usa_total)
 
     # Specific events
+    def event_001(self):
+        """Asia Scoring"""
+        self.score_card('Asia', 3, 7, 9)
+
+    def event_003(self):
+        """Middle East Scoring"""
+        self.score_card('Middle East', 3, 5, 7)
+
     def event_004(self):
         """Duck and Cover"""
         self.change_defcon(-1)
@@ -858,6 +865,10 @@ class TwilightStruggleGame(CardGame):
         points = self.defcon - 2
         self.change_score_by_side(self.phasing, points)
         self.change_defcon(2)
+
+    def event_037(self):
+        """Central America Scoring"""
+        self.score_card('Central America', 1, 3, 5)
 
     def event_039(self):
         """Arms Race"""
@@ -936,11 +947,19 @@ class TwilightStruggleGame(CardGame):
         sa_battlegrounds = len(self.battlegrounds_controlled_in_region('South America', 'usa'))
         self.change_score_by_side('usa', (ca_battlegrounds + sa_battlegrounds))
 
+    def event_079(self):
+        """Africa Scoring"""
+        self.score_card('Africa', 1, 4, 6)
+
     def event_080(self):
         """One Small Step..."""
         if self.sides[self.phasing].space_level < self.sides[self.opponent[self.phasing]].space_level:
             self.sides[self.phasing].space_level += 1
             self.increase_space_level(self.phasing)
+
+    def event_081(self):
+        """South America Scoring"""
+        self.score_card('South America', 2, 5, 6)
 
     def event_082(self):
         """Iranian Hostage Crisis"""
@@ -973,7 +992,9 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Poland', 'usa', 3)
 
     # Dictionary of the events
-    events = {'Duck and Cover':             event_004,
+    events = {'Asia Scoring':               event_001,
+              'Middle East Scoring':        event_003,
+              'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
               'Korean War':                 event_011,
               'Romanian Abdication':        event_012,
@@ -981,6 +1002,7 @@ class TwilightStruggleGame(CardGame):
               'Nasser':                     event_015,
               'Captured Nazi Scientist':    event_018,
               'Nuclear Test Ban':           event_034,
+              'Central America Scoring':    event_037,
               'Arms Race':                  event_039,
               'Kitchen Debates':            event_048,
               'Portuguese Empire Crumbles': event_052,
@@ -992,7 +1014,9 @@ class TwilightStruggleGame(CardGame):
               'Nixon Plays the China Card': event_071,
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
+              'Africa Scoring':             event_079,
               '"One Small Step..."':        event_080,
+              'South America Scoring':      event_081,
               'Iranian Hostage Crisis':     event_082,
               'The Iron Lady':              event_083,
               'Reagan Bombs Libya':         event_084,
@@ -1004,14 +1028,15 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
 # print(g.piles['USA China'].get_cards_in_pile())
 # print(g.piles['USSR China'].get_cards_in_pile())
-
-# g.trigger_event(g.cards['Nixon Plays the China Card'])
-g.add_influence_to_control('Poland', 'ussr')
-g.add_influence_to_control('W. Germany', 'ussr')
-g.add_influence_to_control('France', 'ussr')
-g.add_influence_to_control('Turkey', 'ussr')
-g.add_influence_to_control('Italy', 'usa')
-g.add_influence_to_control('Finland', 'usa')
-print(g.score_type('Europe'))
-g.score_card('Europe', 1, 5, 10)
-
+#
+# # g.trigger_event(g.cards['Nixon Plays the China Card'])
+# g.add_influence_to_control('Poland', 'ussr')
+# g.add_influence_to_control('W. Germany', 'ussr')
+# g.add_influence_to_control('France', 'ussr')
+# g.add_influence_to_control('Turkey', 'ussr')
+# g.add_influence_to_control('Italy', 'usa')
+# g.add_influence_to_control('Cuba', 'ussr')
+# print(g.score_type('Europe'))
+# g.score_card('Europe', 1, 5, 10)
+#
+# g.trigger_event(g.cards['South America Scoring'])
