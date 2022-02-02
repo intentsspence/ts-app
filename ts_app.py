@@ -669,11 +669,11 @@ class TwilightStruggleGame(CardGame):
         self.add_military_ops(side, mil_ops)
         log_string_1 = "{s} rolls {r}. {o} controls {a} adjacent countries. " \
                        "Modified die roll is {m}. Victory {su} - 6.".format(s=side.upper(),
-                                                            r=roll,
-                                                            o=self.opponent[side].upper(),
-                                                            a=number_adjacent,
-                                                            m=modified_die_roll,
-                                                            su=success)
+                                                                            r=roll,
+                                                                            o=self.opponent[side].upper(),
+                                                                            a=number_adjacent,
+                                                                            m=modified_die_roll,
+                                                                            su=success)
         print(log_string_1)
         if modified_die_roll >= success:
             log_string_2 = "Success!"
@@ -853,4 +853,3 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence_to_control('Jordan', 'usa')
 g.add_influence_to_control('Israel', 'usa')
 g.trigger_event(g.cards['Arab-Israeli War'])
-
