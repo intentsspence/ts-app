@@ -335,7 +335,7 @@ class TwilightStruggleGame(CardGame):
         self.deal_cards()
 
         # 3.1 Give the USSR player the China card
-        self.move_china_card('USSR China', True)
+        self.piles['USSR China'].add_card(self.cards['China'])
 
         # 3.2 - 3.3 Add initial influence
         with open('countries/initial_influence.csv', 'r') as i_handle:
@@ -589,6 +589,8 @@ class TwilightStruggleGame(CardGame):
             self.piles[pile_to_name].add_card(self.cards[c])
 
     def move_china_card(self, pile_to_name, face_up=False):
+        current_pile = self.which_pile(self.cards['China'])
+        self.piles[current_pile].remove_card(self.cards['China'])
         self.piles[pile_to_name].add_card(self.cards['China'])
         self.cards['China'].face_up = face_up
         if face_up:
@@ -907,10 +909,10 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
-print(g.piles['USA China'].get_cards_in_pile())
-print(g.piles['USSR China'].get_cards_in_pile())
+# print(g.piles['USA China'].get_cards_in_pile())
+# print(g.piles['USSR China'].get_cards_in_pile())
 g.move_china_card('USA China', True)
 g.trigger_event(g.cards['Nixon Plays the China Card'])
-print(g.piles['USA China'].get_cards_in_pile())
-print(g.piles['USSR China'].get_cards_in_pile())
+# print(g.piles['USA China'].get_cards_in_pile())
+# print(g.piles['USSR China'].get_cards_in_pile())
 
