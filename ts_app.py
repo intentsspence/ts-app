@@ -529,6 +529,14 @@ class TwilightStruggleGame(CardGame):
 
         return countries_in_subregion
 
+    def battleground_countries_in_region(self, region):
+        bg_countries_in_region = []
+        for country in self.countries.values():
+            if country.region == region and country.battleground:
+                bg_countries_in_region.append(country)
+
+        return bg_countries_in_region
+
     def controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
         controlled_list = []
@@ -731,6 +739,45 @@ class TwilightStruggleGame(CardGame):
             log_string_2 = "Failure."
             print(log_string_2)
 
+    def score_type(self, region):
+        usa_countries = 0
+        ussr_countries = 0
+        usa_bgs = 0
+        ussr_bgs = 0
+        usa_type = ''
+        ussr_type = ''
+
+        battlegrounds_in_region = len(self.battleground_countries_in_region(region))
+        usa_countries = len(self.controlled_in_region(region, 'usa'))
+        ussr_countries = len(self.controlled_in_region(region, 'ussr'))
+        usa_bgs = len(self.battlegrounds_controlled_in_region(region, 'usa'))
+        ussr_bgs = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
+
+        if usa_countries > 0:
+            usa_type = 'presence'
+        if (usa_countries > ussr_countries) and (usa_bgs > ussr_bgs) and (usa_countries > usa_bgs):
+            usa_type = 'domination'
+        if (usa_countries > ussr_countries) and usa_bgs == battlegrounds_in_region:
+            usa_type = 'control'
+
+        if ussr_countries > 0:
+            ussr_type = 'presence'
+        if (ussr_countries > usa_countries) and (ussr_bgs > usa_bgs) and (ussr_countries > ussr_bgs):
+            ussr_type = 'domination'
+        if (ussr_countries > usa_countries) and ussr_bgs == battlegrounds_in_region:
+            ussr_type = 'control'
+
+        return [usa_type, ussr_type]
+
+
+    def score_card(self, region, presence, domination, control, adjacent_to_usa, adjacent_to_ussr):
+        usa_points = 0
+        ussr_points = 0
+        usa_score_type = self.score_type(region)[0]
+        ussr_score_type = self.score_type(region)[1]
+        # TODO - write score card function
+
+
     # Specific events
     def event_004(self):
         """Duck and Cover"""
@@ -918,8 +965,11 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
 # print(g.piles['USA China'].get_cards_in_pile())
 # print(g.piles['USSR China'].get_cards_in_pile())
-g.move_china_card('USA China', True)
-g.trigger_event(g.cards['Nixon Plays the China Card'])
-# print(g.piles['USA China'].get_cards_in_pile())
-# print(g.piles['USSR China'].get_cards_in_pile())
+
+# g.trigger_event(g.cards['Nixon Plays the China Card'])
+g.add_influence_to_control('Poland', 'ussr')
+g.add_influence_to_control('W. Germany', 'ussr')
+g.add_influence_to_control('France', 'ussr')
+g.add_influence_to_control('Italy', 'ussr')
+print(g.score_type('Africa'))
 
