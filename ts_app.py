@@ -598,12 +598,13 @@ class TwilightStruggleGame(CardGame):
         current_pile = self.which_pile(self.cards['China'])
         self.piles[current_pile].remove_card(self.cards['China'])
         self.piles[pile_to_name].add_card(self.cards['China'])
-        self.cards['China'].face_up = face_up
+        log_string_1 = "China card given to {s}.".format(s=self.pile_owners[pile_to_name].upper())
+        print(log_string_1)
         if face_up:
-            log_string = "China card given to {s}. Card is face up.".format(s=self.pile_owners[pile_to_name].upper())
+            self.cards['China'].flip_face_up()
         else:
-            log_string = "China card given to {s}. Card is face down.".format(s=self.pile_owners[pile_to_name].upper())
-        print(log_string)
+            log_string_2 = 'China card is face down.'
+            print(log_string_2)
 
     def reshuffle(self):
         self.move_all_cards('deck', 'discard')
