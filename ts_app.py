@@ -790,6 +790,15 @@ class TwilightStruggleGame(CardGame):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
 
+    def event_058(self):
+        """Cultural Revolution"""
+        if self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
+            self.move_china_card('USSR China', True)
+        elif self.cards['China'] in self.piles['USSR China'].get_cards_in_pile().values():
+            self.change_score_by_side('ussr', 1)
+        else:
+            raise ValueError("China card must be in USA hand or USSR hand")
+
     def event_061(self):
         """OPEC"""
         opec_list = ['Egypt', 'Iran', 'Libya', 'Saudi Arabia', 'Iraq', 'Gulf States', 'Venezuela']
@@ -872,6 +881,7 @@ class TwilightStruggleGame(CardGame):
               'Kitchen Debates':            event_048,
               'Portuguese Empire Crumbles': event_052,
               'Allende':                    event_054,
+              'Cultural Revolution':        event_058,
               'OPEC':                       event_061,
               'Panama Canal Returned':      event_064,
               'John Paul II Elected Pope':  event_068,
@@ -886,7 +896,8 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.add_influence_to_control('Jordan', 'usa')
-# g.add_influence_to_control('Israel', 'usa')
-# g.trigger_event(g.cards['Arab-Israeli War'])
-g.move_china_card('USA China', True)
+
+print(g.piles['USSR China'].get_cards_in_pile())
+# g.move_china_card('USA China', True)
+# g.trigger_event(g.cards['Cultural Revolution'])
+
