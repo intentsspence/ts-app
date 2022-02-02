@@ -157,6 +157,28 @@ class TwilightStruggleCard(Card):
         self.played = False
 
 
+class TwilightStruggleChinaCard(Card):
+    """Class for the china card"""
+
+    def __init__(self, n, no, o):
+        Card.__init__(self, n)
+
+        if not no.isdigit():
+            raise ValueError("Error creating Twilight Struggle China Card. Number parameter must be a number")
+        self.number = int(no)
+
+        if not o.isdigit() and (int(o) > 4 or int(o) < 0):
+            raise ValueError("Error creating Twilight Struggle China Card. Ops must be a number between 0 and 4")
+        self.ops = int(o)
+
+        self.face_up = True
+        self.owner = ''
+
+    def flip_face_up(self):
+        self.face_up = True
+        log_string = "China card is face up and available to play."
+        print(log_string)
+
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
 
@@ -241,6 +263,10 @@ class TwilightStruggleGame(CardGame):
         self.players = {}
         self.sides = {}
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
+        self.pile_owners = {'USA hand': 'usa',
+                            'USA China': 'usa',
+                            'USSR hand': 'ussr',
+                            'USSR China': 'ussr'}
         self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
                          'Solidarity':  ['John Paul II Elected Pope']}
         self.prevents = {'Arab Israeli War':        'Camp David Accords',
@@ -271,6 +297,9 @@ class TwilightStruggleGame(CardGame):
             start_pile.add_card(card)
             self.cards.update({card.name: card})
 
+        china_card = TwilightStruggleChinaCard('China', '6', '4')
+        self.cards.update({china_card.name: china_card})
+
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
             country_header = c_handle.readline()
@@ -290,7 +319,7 @@ class TwilightStruggleGame(CardGame):
             self.countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
-        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand']
+        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand', 'USA China', 'USSR China']
 
         for pile in pile_list:
             self.add_pile(CardPile(pile))
@@ -309,6 +338,10 @@ class TwilightStruggleGame(CardGame):
         # 3.1 Add the early war cards to the deck and deal out cards
         self.move_all_cards('deck', 'early war')
         self.deal_cards()
+
+        # 3.1 Give the USSR player the China card
+        self.piles['USSR China'].add_card(self.cards['China'])
+        self.cards['China'].flip_face_up()
 
         # 3.2 - 3.3 Add initial influence
         with open('countries/initial_influence.csv', 'r') as i_handle:
@@ -561,6 +594,18 @@ class TwilightStruggleGame(CardGame):
             self.piles[pile_from_name].remove_card(self.cards[c])
             self.piles[pile_to_name].add_card(self.cards[c])
 
+    def move_china_card(self, pile_to_name, face_up=False):
+        current_pile = self.which_pile(self.cards['China'])
+        self.piles[current_pile].remove_card(self.cards['China'])
+        self.piles[pile_to_name].add_card(self.cards['China'])
+        log_string_1 = "China card given to {s}.".format(s=self.pile_owners[pile_to_name].upper())
+        print(log_string_1)
+        if face_up:
+            self.cards['China'].flip_face_up()
+        else:
+            log_string_2 = 'China card is face down.'
+            print(log_string_2)
+
     def reshuffle(self):
         self.move_all_cards('deck', 'discard')
 
@@ -754,6 +799,15 @@ class TwilightStruggleGame(CardGame):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
 
+    def event_058(self):
+        """Cultural Revolution"""
+        if self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
+            self.move_china_card('USSR China', True)
+        elif self.cards['China'] in self.piles['USSR China'].get_cards_in_pile().values():
+            self.change_score_by_side('ussr', 1)
+        else:
+            raise ValueError("China card must be in USA hand or USSR hand")
+
     def event_061(self):
         """OPEC"""
         opec_list = ['Egypt', 'Iran', 'Libya', 'Saudi Arabia', 'Iraq', 'Gulf States', 'Venezuela']
@@ -775,6 +829,15 @@ class TwilightStruggleGame(CardGame):
         """John Paul II Elected Pope"""
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
+
+    def event_071(self):
+        """Nixon Plays the China Card"""
+        if self.cards['China'] in self.piles['USSR China'].get_cards_in_pile().values():
+            self.move_china_card('USA China', False)
+        elif self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
+            self.change_score_by_side('usa', 2)
+        else:
+            raise ValueError("China card must be in USA hand or USSR hand")
 
     def event_072(self):
         """Sadat Expels Soviets"""
@@ -836,9 +899,11 @@ class TwilightStruggleGame(CardGame):
               'Kitchen Debates':            event_048,
               'Portuguese Empire Crumbles': event_052,
               'Allende':                    event_054,
+              'Cultural Revolution':        event_058,
               'OPEC':                       event_061,
               'Panama Canal Returned':      event_064,
               'John Paul II Elected Pope':  event_068,
+              'Nixon Plays the China Card': event_071,
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
               '"One Small Step..."':        event_080,
@@ -850,6 +915,11 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.add_influence_to_control('Jordan', 'usa')
-g.add_influence_to_control('Israel', 'usa')
-g.trigger_event(g.cards['Arab-Israeli War'])
+
+# print(g.piles['USA China'].get_cards_in_pile())
+# print(g.piles['USSR China'].get_cards_in_pile())
+g.move_china_card('USA China', True)
+g.trigger_event(g.cards['Nixon Plays the China Card'])
+# print(g.piles['USA China'].get_cards_in_pile())
+# print(g.piles['USSR China'].get_cards_in_pile())
+
