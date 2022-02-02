@@ -311,7 +311,7 @@ class TwilightStruggleGame(CardGame):
             self.countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
-        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand']
+        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand', 'USA China', 'USSR China']
 
         for pile in pile_list:
             self.add_pile(CardPile(pile))
@@ -330,6 +330,8 @@ class TwilightStruggleGame(CardGame):
         # 3.1 Add the early war cards to the deck and deal out cards
         self.move_all_cards('deck', 'early war')
         self.deal_cards()
+
+        # 3.1 Give the USSR player the China card
 
         # 3.2 - 3.3 Add initial influence
         with open('countries/initial_influence.csv', 'r') as i_handle:
