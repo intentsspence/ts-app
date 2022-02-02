@@ -658,6 +658,34 @@ class TwilightStruggleGame(CardGame):
         else:
             self.move_card(card, 'discard')
 
+    def war_card(self, country, side, success, mil_ops, points, itself):
+        number_adjacent = len(self.get_adjacent_controlled(country, self.opponent[side]))
+        if itself:
+            if country.controlled == self.opponent[side]:
+                number_adjacent += 1
+
+        roll = self.die_roll()
+        modified_die_roll = roll - number_adjacent
+        self.add_military_ops(side, mil_ops)
+        log_string_1 = "{s} rolls {r}. {o} controls {a} adjacent countries. " \
+                       "Modified die roll is {m}. Victory {su} - 6.".format(s=side.upper(),
+                                                            r=roll,
+                                                            o=self.opponent[side].upper(),
+                                                            a=number_adjacent,
+                                                            m=modified_die_roll,
+                                                            su=success)
+        print(log_string_1)
+        if modified_die_roll >= success:
+            log_string_2 = "Success!"
+            print(log_string_2)
+            self.change_score_by_side(side, points)
+            influence = self.get_influence(country, self.opponent[side])
+            self.remove_all_influence(country.name, self.opponent[side])
+            self.add_influence(country.name, side, influence)
+        else:
+            log_string_2 = "Failure."
+            print(log_string_2)
+
     # Specific events
     def event_004(self):
         """Duck and Cover"""
@@ -672,12 +700,16 @@ class TwilightStruggleGame(CardGame):
 
     def event_011(self):
         """Korean War"""
-        self.war_card(self.countries['S. Korea'], 'ussr', 4, 2, 2)
+        self.war_card(self.countries['S. Korea'], 'ussr', 4, 2, 2, False)
 
     def event_012(self):
         """Romanian Abdication"""
         self.remove_all_influence('Romania', 'usa')
         self.add_influence_to_control('Romania', 'ussr')
+
+    def event_013(self):
+        """Arab-Israeli War"""
+        self.war_card(self.countries['Israel'], 'ussr', 4, 2, 2, True)
 
     def event_015(self):
         """Nasser"""
@@ -791,35 +823,12 @@ class TwilightStruggleGame(CardGame):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
 
-    def war_card(self, country, side, success, mil_ops, points):
-        number_adjacent = len(self.get_adjacent_controlled(country, self.opponent[side]))
-        roll = self.die_roll()
-        modified_die_roll = roll - number_adjacent
-        self.add_military_ops(side, mil_ops)
-        log_string_1 = "{s} rolls {r}. {o} controls {a} adjacent countries. " \
-                       "Modified die roll is {m}. Victory {su} - 6.".format(s=side.upper(),
-                                                            r=roll,
-                                                            o=self.opponent[side].upper(),
-                                                            a=number_adjacent,
-                                                            m=modified_die_roll,
-                                                            su=success)
-        print(log_string_1)
-        if modified_die_roll >= success:
-            log_string_2 = "Success!"
-            print(log_string_2)
-            self.change_score_by_side(side, points)
-            influence = self.get_influence(country, self.opponent[side])
-            self.remove_all_influence(country.name, self.opponent[side])
-            self.add_influence(country.name, side, influence)
-        else:
-            log_string_2 = "Failure."
-            print(log_string_2)
-
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
               'Korean War':                 event_011,
               'Romanian Abdication':        event_012,
+              'Arab-Israeli War':           event_013,
               'Nasser':                     event_015,
               'Captured Nazi Scientist':    event_018,
               'Nuclear Test Ban':           event_034,
@@ -841,7 +850,7 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.add_influence_to_control('Japan', 'usa')
-# g.add_influence_to_control('Taiwan', 'usa')
-# g.trigger_event(g.cards['Korean War'])
+g.add_influence_to_control('Jordan', 'usa')
+g.add_influence_to_control('Israel', 'usa')
+g.trigger_event(g.cards['Arab-Israeli War'])
 
