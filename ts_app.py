@@ -157,6 +157,23 @@ class TwilightStruggleCard(Card):
         self.played = False
 
 
+class TwilightStruggleChinaCard(Card):
+    """Class for the china card"""
+
+    def __init__(self, n, no, o):
+        Card.__init__(self, n)
+
+        if not no.isdigit():
+            raise ValueError("Error creating Twilight Struggle China Card. Number parameter must be a number")
+        self.number = int(no)
+
+        if not o.isdigit() and (int(o) > 4 or int(o) < 0):
+            raise ValueError("Error creating Twilight Struggle China Card. Ops must be a number between 0 and 4")
+        self.ops = int(o)
+
+        self.face_up = True
+        self.owner = ''
+
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
 
@@ -252,6 +269,7 @@ class TwilightStruggleGame(CardGame):
 
         self.__create_piles()
         self.__create_cards()
+        self.__create_china_card()
         self.__create_countries()
         self.__create_players()
         self.__set_up_game()
@@ -270,6 +288,9 @@ class TwilightStruggleGame(CardGame):
                 raise ValueError("Error adding card " + str(card) + " to pile " + str(start_pile) + ".")
             start_pile.add_card(card)
             self.cards.update({card.name: card})
+
+    def __create_china_card(self):
+        china_card = TwilightStruggleChinaCard('China', '6', '4')
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
