@@ -258,6 +258,10 @@ class TwilightStruggleGame(CardGame):
         self.players = {}
         self.sides = {}
         self.opponent = {'usa': 'ussr', 'ussr': 'usa'}
+        self.pile_owners = {'USA hand': 'usa',
+                            'USA China': 'usa',
+                            'USSR hand': 'ussr',
+                            'USSR China': 'ussr'}
         self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
                          'Solidarity':  ['John Paul II Elected Pope']}
         self.prevents = {'Arab Israeli War':        'Camp David Accords',
@@ -269,7 +273,6 @@ class TwilightStruggleGame(CardGame):
 
         self.__create_piles()
         self.__create_cards()
-        self.__create_china_card()
         self.__create_countries()
         self.__create_players()
         self.__set_up_game()
@@ -289,8 +292,8 @@ class TwilightStruggleGame(CardGame):
             start_pile.add_card(card)
             self.cards.update({card.name: card})
 
-    def __create_china_card(self):
         china_card = TwilightStruggleChinaCard('China', '6', '4')
+        self.cards.update({china_card.name: china_card})
 
     def __create_countries(self):
         with open('countries/country_list.csv', 'r') as c_handle:
@@ -332,6 +335,7 @@ class TwilightStruggleGame(CardGame):
         self.deal_cards()
 
         # 3.1 Give the USSR player the China card
+        self.move_china_card('USSR China', True)
 
         # 3.2 - 3.3 Add initial influence
         with open('countries/initial_influence.csv', 'r') as i_handle:
@@ -583,6 +587,15 @@ class TwilightStruggleGame(CardGame):
         for c in card_list:
             self.piles[pile_from_name].remove_card(self.cards[c])
             self.piles[pile_to_name].add_card(self.cards[c])
+
+    def move_china_card(self, pile_to_name, face_up=False):
+        self.piles[pile_to_name].add_card(self.cards['China'])
+        self.cards['China'].face_up = face_up
+        if face_up:
+            log_string = "China card given to {s}. Card is face up.".format(s=self.pile_owners[pile_to_name].upper())
+        else:
+            log_string = "China card given to {s}. Card is face down.".format(s=self.pile_owners[pile_to_name].upper())
+        print(log_string)
 
     def reshuffle(self):
         self.move_all_cards('deck', 'discard')
@@ -873,6 +886,7 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.add_influence_to_control('Jordan', 'usa')
-g.add_influence_to_control('Israel', 'usa')
-g.trigger_event(g.cards['Arab-Israeli War'])
+# g.add_influence_to_control('Jordan', 'usa')
+# g.add_influence_to_control('Israel', 'usa')
+# g.trigger_event(g.cards['Arab-Israeli War'])
+g.move_china_card('USA China', True)
