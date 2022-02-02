@@ -770,13 +770,38 @@ class TwilightStruggleGame(CardGame):
         return [usa_type, ussr_type]
 
 
-    def score_card(self, region, presence, domination, control, adjacent_to_usa, adjacent_to_ussr):
-        usa_points = 0
-        ussr_points = 0
+    def score_card(self, region, presence, domination, control):
+        usa_total = 0
+        ussr_total = 0
         usa_score_type = self.score_type(region)[0]
         ussr_score_type = self.score_type(region)[1]
-        # TODO - write score card function
+        usa_adjacent_bonus = 0
+        ussr_adjacent_bonus = 0
+        usa_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'usa'))
+        ussr_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
+        countries_in_region = self.countries_in_region(region)
 
+        score_dict = {'': 0, 'presence': presence, 'domination': domination,'control': control}
+
+        for country in countries_in_region:
+            border_list = country.borders
+            for border in border_list:
+                if border == 'USSR':
+                    if country.controlled == 'usa':
+                        usa_adjacent_bonus += 1
+                elif border == 'USA':
+                    if country.controlled == 'ussr':
+                        ussr_adjacent_bonus += 1
+
+        usa_total = score_dict[usa_score_type] + usa_adjacent_bonus + usa_bg_bonus
+        ussr_total = score_dict[ussr_score_type] + ussr_adjacent_bonus + ussr_bg_bonus
+
+        log_string_usa =
+
+        if usa_total > ussr_total:
+            self.change_score_by_side('usa', usa_total - ussr_total)
+        if ussr_total > usa_total:
+            self.change_score_by_side('ussr', ussr_total - usa_total)
 
     # Specific events
     def event_004(self):
