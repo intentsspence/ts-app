@@ -174,6 +174,11 @@ class TwilightStruggleChinaCard(Card):
         self.face_up = True
         self.owner = ''
 
+    def flip_face_up(self):
+        self.face_up = True
+        log_string = "China card is face up and available to play."
+        print(log_string)
+
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
 
@@ -336,6 +341,7 @@ class TwilightStruggleGame(CardGame):
 
         # 3.1 Give the USSR player the China card
         self.piles['USSR China'].add_card(self.cards['China'])
+        self.cards['China'].flip_face_up()
 
         # 3.2 - 3.3 Add initial influence
         with open('countries/initial_influence.csv', 'r') as i_handle:
