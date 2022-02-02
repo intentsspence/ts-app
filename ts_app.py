@@ -40,6 +40,10 @@ class CardGame:
         pile = self.piles[n]
         return pile
 
+    def die_roll(self):
+        return random.randint(1, 6)
+
+
     def __repr__(self):
         string = "<CardGame: %s on %s>" % (self.name, self.date)
         for pile in self.piles:
@@ -353,13 +357,24 @@ class TwilightStruggleGame(CardGame):
             self.countries[c].controlled = ''
         self.print_influence(c)
 
-    def add_influence(self, c, s, i):
-        if s == 'usa':
-            self.countries[c].usa_influence += i
-        elif s == 'ussr':
-            self.countries[c].ussr_influence += i
+    def get_adjacent_controlled(self, country, side):
+        """Gives list of countries that border the inputted country that are controlled by the inputted side"""
+        adjacent_controlled = []
+        border_list = country.borders
 
-        self.check_for_control(c)
+        for border in border_list:
+            if self.countries[border].controlled == side or border == side.upper():
+                adjacent_controlled.append(self.countries[border])
+
+        return adjacent_controlled
+
+    def add_influence(self, country_name, side, i):
+        if side == 'usa':
+            self.countries[country_name].usa_influence += i
+        elif side == 'ussr':
+            self.countries[country_name].ussr_influence += i
+
+        self.check_for_control(country_name)
 
     def add_influence_to_control(self, c, s):
         if s == 'usa':
@@ -381,13 +396,13 @@ class TwilightStruggleGame(CardGame):
 
         self.check_for_control(c)
 
-    def remove_all_influence(self, c, s):
+    def remove_all_influence(self, country_name, s):
         if s == 'usa':
-            self.countries[c].usa_influence = 0
+            self.countries[country_name].usa_influence = 0
         elif s == 'ussr':
-            self.countries[c].ussr_influence = 0
+            self.countries[country_name].ussr_influence = 0
 
-        self.check_for_control(c)
+        self.check_for_control(country_name)
 
     def get_influence(self, country, side):
         """Returns an int with the country's current influence"""
@@ -514,7 +529,6 @@ class TwilightStruggleGame(CardGame):
             for border in border_list:
                 if border not in accessible_countries and border != 'USA' and border != 'USSR':
                     accessible_countries.append(self.countries[border])
-
         return accessible_countries
 
     def total_battlegrounds_controlled(self, side):
@@ -656,6 +670,10 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('Cuba', 'usa')
         self.add_influence_to_control('Cuba', 'ussr')
 
+    def event_011(self):
+        """Korean War"""
+        self.war_card(self.countries['S. Korea'], 'ussr', 4, 2, 2)
+
     def event_012(self):
         """Romanian Abdication"""
         self.remove_all_influence('Romania', 'usa')
@@ -773,9 +791,34 @@ class TwilightStruggleGame(CardGame):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
 
+    def war_card(self, country, side, success, mil_ops, points):
+        number_adjacent = len(self.get_adjacent_controlled(country, self.opponent[side]))
+        roll = self.die_roll()
+        modified_die_roll = roll - number_adjacent
+        self.add_military_ops(side, mil_ops)
+        log_string_1 = "{s} rolls {r}. {o} controls {a} adjacent countries. " \
+                       "Modified die roll is {m}. Victory {su} - 6.".format(s=side.upper(),
+                                                            r=roll,
+                                                            o=self.opponent[side].upper(),
+                                                            a=number_adjacent,
+                                                            m=modified_die_roll,
+                                                            su=success)
+        print(log_string_1)
+        if modified_die_roll >= success:
+            log_string_2 = "Success!"
+            print(log_string_2)
+            self.change_score_by_side(side, points)
+            influence = self.get_influence(country, self.opponent[side])
+            self.remove_all_influence(country.name, self.opponent[side])
+            self.add_influence(country.name, side, influence)
+        else:
+            log_string_2 = "Failure."
+            print(log_string_2)
+
     # Dictionary of the events
     events = {'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
+              'Korean War':                 event_011,
               'Romanian Abdication':        event_012,
               'Nasser':                     event_015,
               'Captured Nazi Scientist':    event_018,
@@ -798,4 +841,7 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.trigger_event(g.cards['John Paul II Elected Pope'])
+# g.add_influence_to_control('Japan', 'usa')
+# g.add_influence_to_control('Taiwan', 'usa')
+# g.trigger_event(g.cards['Korean War'])
+
