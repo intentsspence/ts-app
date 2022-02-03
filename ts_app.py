@@ -469,9 +469,13 @@ class TwilightStruggleGame(CardGame):
         if self.score >= 20:
             self.sides['usa'].winner = True
             self.game_active = False
+            log_string = "Game over. Winner: USA"
+            print(log_string)
         elif self.score <= -20:
             self.sides['ussr'].winner = True
             self.game_active = False
+            log_string = "Game over. Winner: USSR"
+            print(log_string)
 
     def change_score(self, points):
         self.score = self.score + points
@@ -697,9 +701,8 @@ class TwilightStruggleGame(CardGame):
         eligible = self.check_event_eligibility(card)
 
         if eligible:
-            log_string = "{p} triggered event {no} - {na}".format(p=self.phasing.upper(),
-                                                                  no=card.number,
-                                                                  na=card.name)
+            log_string = "Event {no} - {na} triggered.".format(no=card.number,
+                                                            na=card.name)
             print(log_string)
             self.events[card.name](self)
             card.played = True
@@ -820,6 +823,10 @@ class TwilightStruggleGame(CardGame):
     def event_001(self):
         """Asia Scoring"""
         self.score_card('Asia', 3, 7, 9)
+
+    def event_002(self):
+        """Europe Scoring"""
+        self.score_card('Europe', 3, 7, 100)
 
     def event_003(self):
         """Middle East Scoring"""
@@ -993,6 +1000,7 @@ class TwilightStruggleGame(CardGame):
 
     # Dictionary of the events
     events = {'Asia Scoring':               event_001,
+              'Europe Scoring':             event_002,
               'Middle East Scoring':        event_003,
               'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
@@ -1028,15 +1036,13 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
 # print(g.piles['USA China'].get_cards_in_pile())
 # print(g.piles['USSR China'].get_cards_in_pile())
-#
-# # g.trigger_event(g.cards['Nixon Plays the China Card'])
-# g.add_influence_to_control('Poland', 'ussr')
-# g.add_influence_to_control('W. Germany', 'ussr')
-# g.add_influence_to_control('France', 'ussr')
-# g.add_influence_to_control('Turkey', 'ussr')
-# g.add_influence_to_control('Italy', 'usa')
-# g.add_influence_to_control('Cuba', 'ussr')
-# print(g.score_type('Europe'))
-# g.score_card('Europe', 1, 5, 10)
-#
-# g.trigger_event(g.cards['South America Scoring'])
+
+# g.trigger_event(g.cards['Nixon Plays the China Card'])
+g.add_influence_to_control('Poland', 'ussr')
+g.add_influence_to_control('W. Germany', 'usa')
+g.add_influence_to_control('France', 'usa')
+g.add_influence_to_control('Turkey', 'usa')
+g.add_influence_to_control('Italy', 'usa')
+g.add_influence_to_control('Cuba', 'ussr')
+
+g.trigger_event(g.cards['Europe Scoring'])
