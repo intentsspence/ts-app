@@ -159,6 +159,7 @@ class TwilightStruggleCard(Card):
 
 class TwilightStruggleChinaCard(Card):
     """Class for the china card"""
+    # TODO - change name of china card to 'The China Card' here and in rest of program. Maybe
 
     def __init__(self, n, no, o):
         Card.__init__(self, n)
@@ -173,6 +174,8 @@ class TwilightStruggleChinaCard(Card):
 
         self.face_up = True
         self.owner = ''
+        self.event_type = 'neutral'
+        self.removed = False
 
     def flip_face_up(self):
         self.face_up = True
@@ -267,6 +270,10 @@ class TwilightStruggleGame(CardGame):
                             'USA China': 'usa',
                             'USSR hand': 'ussr',
                             'USSR China': 'ussr'}
+        self.hands = {'usa': 'USA hand',
+                      'ussr': 'USSR hand'}
+        self.china_owner = {'usa': 'USA China',
+                            'ussr': 'USSR China'}
         self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
                          'Solidarity':  ['John Paul II Elected Pope']}
         self.prevents = {'Arab Israeli War':        'Camp David Accords',
@@ -636,6 +643,37 @@ class TwilightStruggleGame(CardGame):
                         self.reshuffle()
                         dealt_card = self.piles['deck'].random_card()
                         self.move_card(dealt_card, hand)
+
+    def format_available_cards(self, cards_to_format):
+        hand_list = []
+        for card in cards_to_format:
+            star = ''
+            if card.removed:
+                star = '*'
+            entry = "| {0} {1:7} {2:1} {3}".format(card.ops, card.event_type, star, card.name)
+            print(entry)
+            hand_list.append(entry)
+
+        return hand_list
+
+    def sort_cards(self, cards_to_sort, sort):
+        if sort == 'ops':
+            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.ops, x.event_type), reverse=True)
+        elif sort == 'side':
+            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.event_type, x.ops), reverse=True)
+        else:
+            raise ValueError("Sort type must be 'ops' or 'side'")
+
+        return sorted_cards
+
+    def get_available_cards(self, side, sort):
+        available_cards = list(self.piles[self.hands[side]].get_cards_in_pile().values())
+        if self.cards['China'] in self.piles[self.china_owner[side]].get_cards_in_pile().values():
+            available_cards.append(self.cards['China'])
+
+        sorted_available_cards = self.sort_cards(available_cards, sort)
+
+        return sorted_available_cards
 
     # Functions to change military ops
     def add_military_ops(self, side, amount):
@@ -1072,5 +1110,13 @@ class TwilightStruggleGame(CardGame):
               'Terrorism':                  event_092,
               'Solidarity':                 event_101}
 
+    # Functions to manage action rounds
+    def action_round(self, side):
+        # TODO - add check active action round effects
+        hand = self.format_hand()
+        print(hand)
+
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+clist = g.get_available_cards('ussr', 'ops')
+g.format_available_cards(clist)
