@@ -469,9 +469,13 @@ class TwilightStruggleGame(CardGame):
         if self.score >= 20:
             self.sides['usa'].winner = True
             self.game_active = False
+            log_string = "Game over. Winner: USA"
+            print(log_string)
         elif self.score <= -20:
             self.sides['ussr'].winner = True
             self.game_active = False
+            log_string = "Game over. Winner: USSR"
+            print(log_string)
 
     def change_score(self, points):
         self.score = self.score + points
@@ -528,6 +532,14 @@ class TwilightStruggleGame(CardGame):
                 countries_in_subregion.append(country)
 
         return countries_in_subregion
+
+    def battleground_countries_in_region(self, region):
+        bg_countries_in_region = []
+        for country in self.countries.values():
+            if country.region == region and country.battleground:
+                bg_countries_in_region.append(country)
+
+        return bg_countries_in_region
 
     def controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
@@ -689,9 +701,8 @@ class TwilightStruggleGame(CardGame):
         eligible = self.check_event_eligibility(card)
 
         if eligible:
-            log_string = "{p} triggered event {no} - {na}".format(p=self.phasing.upper(),
-                                                                  no=card.number,
-                                                                  na=card.name)
+            log_string = "Event {no} - {na}.".format(no=card.number,
+                                                            na=card.name)
             print(log_string)
             self.events[card.name](self)
             card.played = True
@@ -731,7 +742,96 @@ class TwilightStruggleGame(CardGame):
             log_string_2 = "Failure."
             print(log_string_2)
 
+    def score_type(self, region):
+        usa_countries = 0
+        ussr_countries = 0
+        usa_bgs = 0
+        ussr_bgs = 0
+        usa_type = 'no influence'
+        ussr_type = 'no influence'
+
+        battlegrounds_in_region = len(self.battleground_countries_in_region(region))
+        usa_countries = len(self.controlled_in_region(region, 'usa'))
+        ussr_countries = len(self.controlled_in_region(region, 'ussr'))
+        usa_bgs = len(self.battlegrounds_controlled_in_region(region, 'usa'))
+        ussr_bgs = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
+
+        if usa_countries > 0:
+            usa_type = 'presence'
+        if (usa_countries > ussr_countries) and (usa_bgs > ussr_bgs) and (usa_countries > usa_bgs):
+            usa_type = 'domination'
+        if (usa_countries > ussr_countries) and usa_bgs == battlegrounds_in_region:
+            usa_type = 'control'
+
+        if ussr_countries > 0:
+            ussr_type = 'presence'
+        if (ussr_countries > usa_countries) and (ussr_bgs > usa_bgs) and (ussr_countries > ussr_bgs):
+            ussr_type = 'domination'
+        if (ussr_countries > usa_countries) and ussr_bgs == battlegrounds_in_region:
+            ussr_type = 'control'
+
+        return [usa_type, ussr_type]
+
+    def score_card(self, region, presence, domination, control):
+        usa_total = 0
+        ussr_total = 0
+        usa_score_type = self.score_type(region)[0]
+        ussr_score_type = self.score_type(region)[1]
+        usa_adjacent_bonus = 0
+        ussr_adjacent_bonus = 0
+        usa_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'usa'))
+        ussr_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
+        countries_in_region = self.countries_in_region(region)
+
+        score_dict = {'no influence': 0, 'presence': presence, 'domination': domination,'control': control}
+
+        for country in countries_in_region:
+            border_list = country.borders
+            for border in border_list:
+                if border == 'USSR':
+                    if country.controlled == 'usa':
+                        usa_adjacent_bonus += 1
+                elif border == 'USA':
+                    if country.controlled == 'ussr':
+                        ussr_adjacent_bonus += 1
+
+        usa_total = score_dict[usa_score_type] + usa_adjacent_bonus + usa_bg_bonus
+        ussr_total = score_dict[ussr_score_type] + ussr_adjacent_bonus + ussr_bg_bonus
+
+        log_string_usa = "USA has {t}.\nScore for {tl}: {s}\n" \
+                         "Adjacent countries: {a}\nBattlegrounds: {b}\nTotal: {st}\n".format(t=usa_score_type.upper(),
+                                                                                             tl=usa_score_type,
+                                                                                             s=score_dict[usa_score_type],
+                                                                                             a=usa_adjacent_bonus,
+                                                                                             b=usa_bg_bonus,
+                                                                                             st=usa_total)
+        log_string_ussr = "USSR has {t}.\nScore for {tl}: {s}\n" \
+                          "Adjacent countries: {a}\nBattlegrounds: {b}\nTotal: {st}\n".format(t=ussr_score_type.upper(),
+                                                                                              tl=ussr_score_type,
+                                                                                              s=score_dict[ussr_score_type],
+                                                                                              a=ussr_adjacent_bonus,
+                                                                                              b=ussr_bg_bonus,
+                                                                                              st=ussr_total)
+        print(log_string_usa)
+        print(log_string_ussr)
+        if usa_total > ussr_total:
+            self.change_score_by_side('usa', usa_total - ussr_total)
+        if ussr_total > usa_total:
+            self.change_score_by_side('ussr', ussr_total - usa_total)
+
     # Specific events
+    def event_001(self):
+        """Asia Scoring"""
+        self.score_card('Asia', 3, 7, 9)
+
+    def event_002(self):
+        """Europe Scoring"""
+        self.score_card('Europe', 3, 7, 100)
+
+    def event_003(self):
+        """Middle East Scoring"""
+        self.score_card('Middle East', 3, 5, 7)
+
     def event_004(self):
         """Duck and Cover"""
         self.change_defcon(-1)
@@ -772,6 +872,50 @@ class TwilightStruggleGame(CardGame):
         points = self.defcon - 2
         self.change_score_by_side(self.phasing, points)
         self.change_defcon(2)
+
+    def event_037(self):
+        """Central America Scoring"""
+        self.score_card('Central America', 1, 3, 5)
+
+    def event_038(self):
+        """Southeast Asia Scoring"""
+        usa_score = 0
+        usa_thailand = 0
+        usa_total = 0
+        ussr_score = 0
+        ussr_thailand = 0
+        ussr_total = 0
+        country_list = self.countries_in_subregion('Southeast Asia')
+
+        for country in country_list:
+            if country.controlled == 'usa':
+                usa_score += 1
+            elif country.controlled == 'ussr':
+                ussr_score += 1
+
+        if self.countries['Thailand'].controlled == 'usa':
+            usa_thailand += 1
+            log_string_usa_2 = {"Bonus for Thailand: 1"}
+
+        if self.countries['Thailand'].controlled == 'ussr':
+            ussr_thailand += 1
+            log_string_usa_2 = {"Bonus for Thailand: 1"}
+
+        usa_total = usa_score + usa_thailand
+        ussr_total = ussr_score + ussr_thailand
+
+        log_string_usa = "USA controlled countries: {c}\nBonus for Thailand: {b}\nTotal: {t}\n".format(c=usa_score,
+                                                                                                       b=usa_thailand,
+                                                                                                       t=usa_total)
+        log_string_ussr = "USSR controlled countries: {c}\nBonus for Thailand: {b}\nTotal: {t}\n".format(c=ussr_score,
+                                                                                                         b=ussr_thailand,
+                                                                                                         t=ussr_total)
+        print(log_string_usa)
+        print(log_string_ussr)
+        if usa_total > ussr_total:
+            self.change_score_by_side('usa', usa_total - ussr_total)
+        if ussr_total > usa_total:
+            self.change_score_by_side('ussr', ussr_total - usa_total)
 
     def event_039(self):
         """Arms Race"""
@@ -850,11 +994,19 @@ class TwilightStruggleGame(CardGame):
         sa_battlegrounds = len(self.battlegrounds_controlled_in_region('South America', 'usa'))
         self.change_score_by_side('usa', (ca_battlegrounds + sa_battlegrounds))
 
+    def event_079(self):
+        """Africa Scoring"""
+        self.score_card('Africa', 1, 4, 6)
+
     def event_080(self):
         """One Small Step..."""
         if self.sides[self.phasing].space_level < self.sides[self.opponent[self.phasing]].space_level:
             self.sides[self.phasing].space_level += 1
             self.increase_space_level(self.phasing)
+
+    def event_081(self):
+        """South America Scoring"""
+        self.score_card('South America', 2, 5, 6)
 
     def event_082(self):
         """Iranian Hostage Crisis"""
@@ -887,7 +1039,10 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Poland', 'usa', 3)
 
     # Dictionary of the events
-    events = {'Duck and Cover':             event_004,
+    events = {'Asia Scoring':               event_001,
+              'Europe Scoring':             event_002,
+              'Middle East Scoring':        event_003,
+              'Duck and Cover':             event_004,
               'Socialist Governments':      event_008,
               'Korean War':                 event_011,
               'Romanian Abdication':        event_012,
@@ -895,6 +1050,8 @@ class TwilightStruggleGame(CardGame):
               'Nasser':                     event_015,
               'Captured Nazi Scientist':    event_018,
               'Nuclear Test Ban':           event_034,
+              'Central America Scoring':    event_037,
+              'Southeast Asia Scoring':     event_038,
               'Arms Race':                  event_039,
               'Kitchen Debates':            event_048,
               'Portuguese Empire Crumbles': event_052,
@@ -906,7 +1063,9 @@ class TwilightStruggleGame(CardGame):
               'Nixon Plays the China Card': event_071,
               'Sadat Expels Soviets':       event_072,
               'Alliance for Progress':      event_078,
+              'Africa Scoring':             event_079,
               '"One Small Step..."':        event_080,
+              'South America Scoring':      event_081,
               'Iranian Hostage Crisis':     event_082,
               'The Iron Lady':              event_083,
               'Reagan Bombs Libya':         event_084,
@@ -915,11 +1074,3 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-
-# print(g.piles['USA China'].get_cards_in_pile())
-# print(g.piles['USSR China'].get_cards_in_pile())
-g.move_china_card('USA China', True)
-g.trigger_event(g.cards['Nixon Plays the China Card'])
-# print(g.piles['USA China'].get_cards_in_pile())
-# print(g.piles['USSR China'].get_cards_in_pile())
-
