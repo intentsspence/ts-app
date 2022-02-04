@@ -506,6 +506,19 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
         self.check_game_end()
 
+    def get_score_in_regions(self):
+        scores = {}
+        scores.update({'Asia': [3, 7, 9, self.score_card('Asia', 3, 7, 9)]})
+        scores.update({'Europe': [3, 7, 'Win', self.score_card('Europe', 3, 7, 100)]})
+        scores.update({'Middle East': [3, 5, 7, self.score_card('Middle East', 3, 5, 7)]})
+        scores.update({'Africa': [1, 4, 6, self.score_card('Africa', 1, 4, 6)]})
+        scores.update({'Central America': [1, 3, 5, self.score_card('Central America', 1, 3, 5)]})
+        scores.update({'South America': [2, 5, 6, self.score_card('South America', 2, 5, 6)]})
+
+        print("Current scores:")
+        for score in scores:
+            print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0], scores[score][1], scores[score][2]))
+
     # Functions for space race
     def space_race_awards(self, s):
         space_race_points = {1: [2, 1], 3: [2, 0], 5: [3, 1], 7: [4, 2], 8: [2, 0]}
@@ -1207,8 +1220,8 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.move_card(g.cards['China'], 'USA hand')
 # g.move_card(g.cards['Bear Trap'], 'USA hand')
 # g.action_round('usa')
-g.add_influence_to_control('Zaire', 'ussr')
-g.add_influence_to_control('Vietnam', 'usa')
+# g.add_influence_to_control('Zaire', 'ussr')
+# g.add_influence_to_control('Vietnam', 'usa')
 
-g.trigger_event(g.cards['Africa Scoring'])
-
+# g.trigger_event(g.cards['Africa Scoring'])
+g.get_score_in_regions()
