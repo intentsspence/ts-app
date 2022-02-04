@@ -817,8 +817,6 @@ class TwilightStruggleGame(CardGame):
         return [usa_type, ussr_type]
 
     def score_card(self, region, presence, domination, control):
-        usa_total = 0
-        ussr_total = 0
         usa_score_type = self.score_type(region)[0]
         ussr_score_type = self.score_type(region)[1]
         usa_adjacent_bonus = 0
