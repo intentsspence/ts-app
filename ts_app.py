@@ -835,7 +835,7 @@ class TwilightStruggleGame(CardGame):
 
         return [usa_type, ussr_type]
 
-    def score_card(self, region, presence, domination, control):
+    def score_card(self, region, presence, domination, control, log=False):
         usa_score_type = self.score_type(region)[0]
         ussr_score_type = self.score_type(region)[1]
         usa_adjacent_bonus = 0
@@ -879,8 +879,9 @@ class TwilightStruggleGame(CardGame):
                                                                                               a=ussr_adjacent_bonus,
                                                                                               b=ussr_bg_bonus,
                                                                                               st=ussr_total)
-        print(log_string_usa)
-        print(log_string_ussr)
+        if log:
+            print(log_string_usa)
+            print(log_string_ussr)
         return usa_total - ussr_total
 
         # if usa_total > ussr_total:
@@ -891,17 +892,17 @@ class TwilightStruggleGame(CardGame):
     # Specific events
     def event_001(self):
         """Asia Scoring"""
-        points = self.score_card('Asia', 3, 7, 9)
+        points = self.score_card('Asia', 3, 7, 9, True)
         self.change_score(points)
 
     def event_002(self):
         """Europe Scoring"""
-        points = self.score_card('Europe', 3, 7, 100)
+        points = self.score_card('Europe', 3, 7, 100, True)
         self.change_score(points)
 
     def event_003(self):
         """Middle East Scoring"""
-        points = self.score_card('Middle East', 3, 5, 7)
+        points = self.score_card('Middle East', 3, 5, 7, True)
         self.change_score(points)
 
     def event_004(self):
@@ -947,7 +948,7 @@ class TwilightStruggleGame(CardGame):
 
     def event_037(self):
         """Central America Scoring"""
-        points = self.score_card('Central America', 1, 3, 5)
+        points = self.score_card('Central America', 1, 3, 5, True)
         self.change_score(points)
 
     def event_038(self):
@@ -1062,7 +1063,7 @@ class TwilightStruggleGame(CardGame):
 
     def event_079(self):
         """Africa Scoring"""
-        points = self.score_card('Africa', 1, 4, 6)
+        points = self.score_card('Africa', 1, 4, 6, True)
         self.change_score(points)
 
     def event_080(self):
@@ -1073,7 +1074,7 @@ class TwilightStruggleGame(CardGame):
 
     def event_081(self):
         """South America Scoring"""
-        points = self.score_card('South America', 2, 5, 6)
+        points = self.score_card('South America', 2, 5, 6, True)
         self.change_score(points)
 
     def event_082(self):
@@ -1223,5 +1224,5 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.add_influence_to_control('Zaire', 'ussr')
 # g.add_influence_to_control('Vietnam', 'usa')
 
-# g.trigger_event(g.cards['Africa Scoring'])
+g.trigger_event(g.cards['Asia Scoring'])
 g.get_score_in_regions()
