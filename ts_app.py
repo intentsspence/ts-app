@@ -488,6 +488,12 @@ class TwilightStruggleGame(CardGame):
 
     def change_score(self, points):
         self.score = self.score + points
+        if points > 0:
+            log_string = "USA scored {p} points. Score is now {score}.".format(p=points, score=self.score)
+            print(log_string)
+        elif points < 0:
+            log_string = "USSR scored {p} points. Score is now {score}.".format(p=abs(points), score=self.score)
+            print(log_string)
 
         self.check_game_end()
 
@@ -499,6 +505,25 @@ class TwilightStruggleGame(CardGame):
         log_string = "{s} scored {p} points. Score is now {score}.".format(s=side.upper(), p=points, score=self.score)
         print(log_string)
         self.check_game_end()
+
+    def get_score_in_regions(self):
+        scores = {}
+        scores.update({'Asia': [3, 7, 9, self.score_card('Asia', 3, 7, 9)]})
+        scores.update({'Europe': [3, 7, 'Win', self.score_card('Europe', 3, 7, 100)]})
+        scores.update({'Middle East': [3, 5, 7, self.score_card('Middle East', 3, 5, 7)]})
+        scores.update({'Africa': [1, 4, 6, self.score_card('Africa', 1, 4, 6)]})
+        scores.update({'Central America': [1, 3, 5, self.score_card('Central America', 1, 3, 5)]})
+        scores.update({'South America': [2, 5, 6, self.score_card('South America', 2, 5, 6)]})
+
+        if not self.which_pile(self.cards['Southeast Asia Scoring']) == 'removed':
+            scores.update({'Southeast Asia': self.southeast_asia_scoring()})
+
+        print("Current scores:")
+        for score in scores:
+            if score == 'Southeast Asia':
+                print("{s:>3} | {n:15}".format(s=scores[score], n=score))
+            else:
+                print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0], scores[score][1], scores[score][2]))
 
     # Functions for space race
     def space_race_awards(self, s):
@@ -606,7 +631,7 @@ class TwilightStruggleGame(CardGame):
         current_pile = self.which_pile(c)
         self.piles[current_pile].remove_card(c)
         self.piles[pile_name].add_card(c)
-        log_string = "{c} moved to {p}.".format(c=c.name, p=pile_name)
+        log_string = "{c} moved to {p}.\n".format(c=c.name, p=pile_name)
         print(log_string)
 
     def move_all_cards(self, pile_to_name, pile_from_name):
@@ -816,7 +841,7 @@ class TwilightStruggleGame(CardGame):
 
         return [usa_type, ussr_type]
 
-    def score_card(self, region, presence, domination, control):
+    def score_card(self, region, presence, domination, control, log=False):
         usa_score_type = self.score_type(region)[0]
         ussr_score_type = self.score_type(region)[1]
         usa_adjacent_bonus = 0
@@ -860,25 +885,60 @@ class TwilightStruggleGame(CardGame):
                                                                                               a=ussr_adjacent_bonus,
                                                                                               b=ussr_bg_bonus,
                                                                                               st=ussr_total)
-        print(log_string_usa)
-        print(log_string_ussr)
-        if usa_total > ussr_total:
-            self.change_score_by_side('usa', usa_total - ussr_total)
-        if ussr_total > usa_total:
-            self.change_score_by_side('ussr', ussr_total - usa_total)
+        if log:
+            print(log_string_usa)
+            print(log_string_ussr)
+        return usa_total - ussr_total
+
+    def southeast_asia_scoring(self, log=False):
+        usa_score = 0
+        usa_thailand = 0
+        ussr_score = 0
+        ussr_thailand = 0
+        country_list = self.countries_in_subregion('Southeast Asia')
+
+        for country in country_list:
+            if country.controlled == 'usa':
+                usa_score += 1
+            elif country.controlled == 'ussr':
+                ussr_score += 1
+
+        if self.countries['Thailand'].controlled == 'usa':
+            usa_thailand += 1
+
+        if self.countries['Thailand'].controlled == 'ussr':
+            ussr_thailand += 1
+
+        usa_total = usa_score + usa_thailand
+        ussr_total = ussr_score + ussr_thailand
+
+        log_string_usa = "USA controlled countries: {c}\nBonus for Thailand: {b}\nTotal: {t}\n".format(c=usa_score,
+                                                                                                       b=usa_thailand,
+                                                                                                       t=usa_total)
+        log_string_ussr = "USSR controlled countries: {c}\nBonus for Thailand: {b}\nTotal: {t}\n".format(c=ussr_score,
+                                                                                                         b=ussr_thailand,
+                                                                                                         t=ussr_total)
+        if log:
+            print(log_string_usa)
+            print(log_string_ussr)
+
+        return usa_total - ussr_total
 
     # Specific events
     def event_001(self):
         """Asia Scoring"""
-        self.score_card('Asia', 3, 7, 9)
+        points = self.score_card('Asia', 3, 7, 9, True)
+        self.change_score(points)
 
     def event_002(self):
         """Europe Scoring"""
-        self.score_card('Europe', 3, 7, 100)
+        points = self.score_card('Europe', 3, 7, 100, True)
+        self.change_score(points)
 
     def event_003(self):
         """Middle East Scoring"""
-        self.score_card('Middle East', 3, 5, 7)
+        points = self.score_card('Middle East', 3, 5, 7, True)
+        self.change_score(points)
 
     def event_004(self):
         """Duck and Cover"""
@@ -923,47 +983,13 @@ class TwilightStruggleGame(CardGame):
 
     def event_037(self):
         """Central America Scoring"""
-        self.score_card('Central America', 1, 3, 5)
+        points = self.score_card('Central America', 1, 3, 5, True)
+        self.change_score(points)
 
     def event_038(self):
         """Southeast Asia Scoring"""
-        usa_score = 0
-        usa_thailand = 0
-        usa_total = 0
-        ussr_score = 0
-        ussr_thailand = 0
-        ussr_total = 0
-        country_list = self.countries_in_subregion('Southeast Asia')
-
-        for country in country_list:
-            if country.controlled == 'usa':
-                usa_score += 1
-            elif country.controlled == 'ussr':
-                ussr_score += 1
-
-        if self.countries['Thailand'].controlled == 'usa':
-            usa_thailand += 1
-            log_string_usa_2 = {"Bonus for Thailand: 1"}
-
-        if self.countries['Thailand'].controlled == 'ussr':
-            ussr_thailand += 1
-            log_string_usa_2 = {"Bonus for Thailand: 1"}
-
-        usa_total = usa_score + usa_thailand
-        ussr_total = ussr_score + ussr_thailand
-
-        log_string_usa = "USA controlled countries: {c}\nBonus for Thailand: {b}\nTotal: {t}\n".format(c=usa_score,
-                                                                                                       b=usa_thailand,
-                                                                                                       t=usa_total)
-        log_string_ussr = "USSR controlled countries: {c}\nBonus for Thailand: {b}\nTotal: {t}\n".format(c=ussr_score,
-                                                                                                         b=ussr_thailand,
-                                                                                                         t=ussr_total)
-        print(log_string_usa)
-        print(log_string_ussr)
-        if usa_total > ussr_total:
-            self.change_score_by_side('usa', usa_total - ussr_total)
-        if ussr_total > usa_total:
-            self.change_score_by_side('ussr', ussr_total - usa_total)
+        points = self.southeast_asia_scoring(True)
+        self.change_score(points)
 
     def event_039(self):
         """Arms Race"""
@@ -1044,7 +1070,8 @@ class TwilightStruggleGame(CardGame):
 
     def event_079(self):
         """Africa Scoring"""
-        self.score_card('Africa', 1, 4, 6)
+        points = self.score_card('Africa', 1, 4, 6, True)
+        self.change_score(points)
 
     def event_080(self):
         """One Small Step..."""
@@ -1054,7 +1081,8 @@ class TwilightStruggleGame(CardGame):
 
     def event_081(self):
         """South America Scoring"""
-        self.score_card('South America', 2, 5, 6)
+        points = self.score_card('South America', 2, 5, 6, True)
+        self.change_score(points)
 
     def event_082(self):
         """Iranian Hostage Crisis"""
@@ -1149,8 +1177,6 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
 
     def select_a_card(self, side):
-        entry_options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
-        entry_dict = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 0: 9}
         available_cards = self.get_available_cards(side)
         card_strings = self.format_available_cards(available_cards)
         available_card_numbers = []
@@ -1197,6 +1223,3 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.move_card(g.cards['China'], 'USA hand')
-# g.move_card(g.cards['Bear Trap'], 'USA hand')
-g.action_round('usa')
