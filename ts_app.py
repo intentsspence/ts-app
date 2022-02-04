@@ -650,8 +650,7 @@ class TwilightStruggleGame(CardGame):
             star = ''
             if card.removed:
                 star = '*'
-            entry = "| {0} {1:7} {2:1} {3}".format(card.ops, card.event_type, star, card.name)
-            print(entry)
+            entry = "{0} {1:7} {2:1} {3}".format(card.ops, card.event_type, star, card.name)
             hand_list.append(entry)
 
         return hand_list
@@ -675,7 +674,7 @@ class TwilightStruggleGame(CardGame):
 
         return sorted_cards
 
-    def get_available_cards(self, side, sort):
+    def get_available_cards(self, side):
         available_cards = list(self.piles[self.hands[side]].get_cards_in_pile().values())
         if self.cards['China'] in self.piles[self.china_owner[side]].get_cards_in_pile().values():
             available_cards.append(self.cards['China'])
@@ -1121,14 +1120,25 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to manage action rounds
     def action_round(self, side):
+        pass
         # TODO - add check active action round effects
-        hand = self.format_hand()
-        print(hand)
 
     def select_a_card(self, side):
-        self.get_available_cards(side)
+        entry_options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+        entry_dict = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 0: 9}
+        available_cards = self.get_available_cards(side)
+        card_strings = self.format_available_cards(available_cards)
+
+        cards_printed = 0
+        while cards_printed < len(card_strings):
+            output_string = "{c:>2}| {s}".format(c=(cards_printed + 1),
+                                                 s=card_strings[cards_printed])
+            print(output_string)
+            cards_printed += 1
+
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-clist = g.get_available_cards('ussr', 'ops')
-g.format_available_cards(clist)
+# g.move_card(g.cards['China'], 'USA hand')
+# g.move_card(g.cards['Bear Trap'], 'USA hand')
+g.select_a_card('ussr')
