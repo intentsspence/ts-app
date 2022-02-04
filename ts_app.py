@@ -43,7 +43,6 @@ class CardGame:
     def die_roll(self):
         return random.randint(1, 6)
 
-
     def __repr__(self):
         string = "<CardGame: %s on %s>" % (self.name, self.date)
         for pile in self.piles:
@@ -182,6 +181,7 @@ class TwilightStruggleChinaCard(Card):
         log_string = "China card is face up and available to play."
         print(log_string)
 
+
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
 
@@ -283,6 +283,8 @@ class TwilightStruggleGame(CardGame):
                          'Flower Power':            'An Evil Empire',
                          'Muslim Revolution':       'AWACS Sale to Saudis'}
 
+        self.line = '--------------------------------'
+
         self.__create_piles()
         self.__create_cards()
         self.__create_countries()
@@ -367,7 +369,7 @@ class TwilightStruggleGame(CardGame):
                 raise ValueError("Error adding initial influence")
             self.check_for_control(initial_influence_list[1])
 
-        log_string = "Setup complete\n-----------------------------------"
+        log_string = "Setup complete\n" + self.line
         print(log_string)
 
     # Function to adjust defcon
@@ -748,7 +750,7 @@ class TwilightStruggleGame(CardGame):
 
         if eligible:
             log_string = "Event {no} - {na}.".format(no=card.number,
-                                                            na=card.name)
+                                                     na=card.name)
             print(log_string)
             self.events[card.name](self)
             card.played = True
@@ -789,10 +791,6 @@ class TwilightStruggleGame(CardGame):
             print(log_string_2)
 
     def score_type(self, region):
-        usa_countries = 0
-        ussr_countries = 0
-        usa_bgs = 0
-        ussr_bgs = 0
         usa_type = 'no influence'
         ussr_type = 'no influence'
 
@@ -829,7 +827,7 @@ class TwilightStruggleGame(CardGame):
         ussr_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
         countries_in_region = self.countries_in_region(region)
 
-        score_dict = {'no influence': 0, 'presence': presence, 'domination': domination,'control': control}
+        score_dict = {'no influence': 0, 'presence': presence, 'domination': domination, 'control': control}
 
         for country in countries_in_region:
             border_list = country.borders
@@ -1120,8 +1118,31 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to manage action rounds
     def action_round(self, side):
-        pass
+        self.phasing = side
         # TODO - add check active action round effects
+        while True:
+            selected_card = self.select_a_card(side)
+            selected_action = self.select_action(selected_card)
+            if selected_action == 'e':
+                self.trigger_event(selected_card)
+                break
+            elif selected_action == 'c':
+                # TODO - add coup attempt function
+                break
+            elif selected_action == 'i':
+                # TODO - add place influence function
+                break
+            elif selected_action == 'r':
+                # TODO - add place influence function
+                break
+            elif selected_action == 's':
+                # TODO - add place influence function
+                break
+            elif selected_action == 'x':
+                pass
+
+        log_string = "Action round complete."
+        print(log_string)
 
     def select_a_card(self, side):
         entry_options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
@@ -1130,6 +1151,9 @@ class TwilightStruggleGame(CardGame):
         card_strings = self.format_available_cards(available_cards)
         available_card_numbers = []
         selected_card = None
+
+        print(self.line)
+        print("Select a card to play:")
 
         cards_printed = 0
         while cards_printed < len(card_strings):
@@ -1140,21 +1164,35 @@ class TwilightStruggleGame(CardGame):
             cards_printed += 1
 
         while True:
-            selected_number = int(input("Select a card to play: "))
-            if selected_number in available_card_numbers:
-                selected_card = available_cards[selected_number - 1]
-                break
-            elif 10 in available_card_numbers and selected_number == 0:
-                selected_card = available_cards[9]
-                break
-            else:
-                pass
+            user_input = input("Selection: ")
+            if user_input.isdigit():
+                selected_number = int(user_input)
+                if selected_number in available_card_numbers:
+                    selected_card = available_cards[selected_number - 1]
+                    break
+                elif 10 in available_card_numbers and selected_number == 0:
+                    selected_card = available_cards[9]
+                    break
 
         return selected_card
 
+    def select_action(self, card):
+        action_options = " e| Play event\n" \
+                         " c| Coup attempt\n" \
+                         " i| Place influence\n" \
+                         " r| Realignment roll\n" \
+                         " s| Space race\n" \
+                         " x| Choose another card"
+        print(self.line)
+        print("Select use for " + card.name + ':')
+        print(action_options)
+        while True:
+            selected_action = input("Selection: ").lower()
+            if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
+                return selected_action
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.move_card(g.cards['China'], 'USA hand')
 # g.move_card(g.cards['Bear Trap'], 'USA hand')
-g.select_a_card('ussr')
+g.action_round('usa')
