@@ -840,8 +840,8 @@ class TwilightStruggleGame(CardGame):
         usa_total = score_dict[usa_score_type] + usa_adjacent_bonus + usa_bg_bonus
         ussr_total = score_dict[ussr_score_type] + ussr_adjacent_bonus + ussr_bg_bonus
 
-        log_string_usa = "USA has {t:12}\n" \
-                         "Score for {tl}: {s}\n" \
+        log_string_usa = "USA has {t}\n" \
+                         "Base score:         {s}\n" \
                          "Adjacent countries: {a}\n" \
                          "Battlegrounds:      {b}\n" \
                          "Total:              {st}\n".format(t=usa_score_type.upper(),
@@ -850,7 +850,8 @@ class TwilightStruggleGame(CardGame):
                                                                                              a=usa_adjacent_bonus,
                                                                                              b=usa_bg_bonus,
                                                                                              st=usa_total)
-        log_string_ussr = "USSR has {t}\nScore for {tl}: {s}\n" \
+        log_string_ussr = "USSR has {t}\n" \
+                          "Base score:         {s}\n" \
                           "Adjacent countries: {a}\n" \
                           "Battlegrounds:      {b}\n" \
                           "Total:              {st}\n".format(t=ussr_score_type.upper(),
