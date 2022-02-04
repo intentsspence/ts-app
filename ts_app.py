@@ -204,6 +204,9 @@ class TwilightStrugglePlayer(Player):
         # Set winner to false
         self.winner = False
 
+        self.space_attempts = 0
+        self.ops_adjustment = 0
+
 
 class TwilightStruggleCountry(Country):
     """Class of countries specific to Twilight Struggle"""
@@ -260,6 +263,7 @@ class TwilightStruggleGame(CardGame):
         self.turn = 1
         self.game_active = True
         self.phasing = ''
+        self.action_round_complete = False
 
         self.cards = {}
         self.countries = {}
@@ -1150,9 +1154,11 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to manage action rounds
     def action_round(self, side):
+        self.action_round_complete = False
         self.phasing = side
         # TODO - add check active action round effects
-        while True:
+
+        while not self.action_round_complete:
             selected_card = self.select_a_card(side)
             selected_action = self.select_action(selected_card)
             if selected_action == 'e':
@@ -1168,8 +1174,7 @@ class TwilightStruggleGame(CardGame):
                 # TODO - add place influence function
                 break
             elif selected_action == 's':
-                # TODO - add place influence function
-                break
+                self.action_space_race(selected_card, side)
             elif selected_action == 'x':
                 pass
 
@@ -1206,6 +1211,47 @@ class TwilightStruggleGame(CardGame):
 
         return selected_card
 
+    def check_space_race(self, card, side):
+        max_space_attempts = 1
+        phasing_space_level = self.sides[side].space_level
+        opponent_space_level = self.sides[self.opponent[side]].space_level
+        adjusted_ops_value = card.ops + self.sides[side].ops_adjustment
+        required_ops = {1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 4}
+
+        if phasing_space_level >= 2 and opponent_space_level < 2:
+            max_space_attempts = 2
+
+        if (self.sides[side].space_attempts < max_space_attempts and
+                adjusted_ops_value >= required_ops[(phasing_space_level + 1)]):
+            return True
+        else:
+            return False
+
+    def action_space_race(self, card, side):
+        if self.check_space_race(card, side):
+            confirmation = input('Are you sure you want to send {c} to space? (y/n): '.format(c=card.name)).lower()
+            if confirmation == 'y':
+                self.space_race_attempt(side)
+                self.move_card(card, 'discard')
+                self.action_round_complete = True
+
+    def space_race_attempt(self, side):
+        roll_requirements = {1: 3, 2: 4, 3: 3, 4: 4, 5: 3, 6: 4, 7: 3, 8: 2}
+        max_roll = roll_requirements[(self.sides[side].space_level + 1)]
+
+        roll = self.die_roll()
+        log_string = "Roll between 1-{l}. {s} rolled {r}.".format(s=side.upper(), r=roll, l=max_roll)
+        print(log_string)
+
+        if roll <= max_roll:
+            log_string = 'Space race attempt result: Success!'
+            print(log_string)
+            self.increase_space_level(side)
+        else:
+            log_string = 'Space race attempt result: Failure.'
+            print(log_string)
+        self.sides[side].space_attempts += 1
+
     def select_action(self, card):
         action_options = " e| Play event\n" \
                          " c| Coup attempt\n" \
@@ -1221,5 +1267,10 @@ class TwilightStruggleGame(CardGame):
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
                 return selected_action
 
+    def turn_cleanup(self):
+        self.sides['usa'].space_attempts = 0
+        self.sides['ussr'].space_attempts = 0
+
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+g.action_round('ussr')
