@@ -515,9 +515,15 @@ class TwilightStruggleGame(CardGame):
         scores.update({'Central America': [1, 3, 5, self.score_card('Central America', 1, 3, 5)]})
         scores.update({'South America': [2, 5, 6, self.score_card('South America', 2, 5, 6)]})
 
+        if not self.which_pile(self.cards['Southeast Asia Scoring']) == 'removed':
+            scores.update({'Southeast Asia': self.southeast_asia_scoring()})
+
         print("Current scores:")
         for score in scores:
-            print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0], scores[score][1], scores[score][2]))
+            if score == 'Southeast Asia':
+                print("{s:>3} | {n:15}".format(s=scores[score], n=score))
+            else:
+                print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0], scores[score][1], scores[score][2]))
 
     # Functions for space race
     def space_race_awards(self, s):
