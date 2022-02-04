@@ -1177,8 +1177,6 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
 
     def select_a_card(self, side):
-        entry_options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
-        entry_dict = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 0: 9}
         available_cards = self.get_available_cards(side)
         card_strings = self.format_available_cards(available_cards)
         available_card_numbers = []
@@ -1225,11 +1223,3 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.move_card(g.cards['China'], 'USA hand')
-# g.move_card(g.cards['Bear Trap'], 'USA hand')
-# g.action_round('usa')
-g.add_influence_to_control('Thailand', 'ussr')
-g.add_influence_to_control('Malaysia', 'usa')
-
-g.trigger_event(g.cards['Southeast Asia Scoring'])
-g.get_score_in_regions()
