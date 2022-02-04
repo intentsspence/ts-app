@@ -656,13 +656,20 @@ class TwilightStruggleGame(CardGame):
 
         return hand_list
 
-    def sort_cards(self, cards_to_sort, sort):
+    def sort_cards(self, cards_to_sort, sort='ops', sort_china=True):
+
         if sort == 'ops':
-            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.ops, x.event_type), reverse=True)
+            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.ops, x.event_type, x.name), reverse=True)
         elif sort == 'side':
-            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.event_type, x.ops), reverse=True)
+            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.event_type, x.ops, x.name), reverse=True)
+        elif sort == 'name':
+            sorted_cards = sorted(cards_to_sort, key=lambda x: (x.name, x.event_type))
         else:
             raise ValueError("Sort type must be 'ops' or 'side'")
+
+        if sort_china:
+            if self.cards['China'] in sorted_cards:
+                sorted_cards.insert(0, sorted_cards.pop(sorted_cards.index(self.cards['China'])))
 
         return sorted_cards
 
