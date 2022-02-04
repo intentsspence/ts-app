@@ -1128,13 +1128,29 @@ class TwilightStruggleGame(CardGame):
         entry_dict = {1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 9: 8, 0: 9}
         available_cards = self.get_available_cards(side)
         card_strings = self.format_available_cards(available_cards)
+        available_card_numbers = []
+        selected_card = None
 
         cards_printed = 0
         while cards_printed < len(card_strings):
             output_string = "{c:>2}| {s}".format(c=(cards_printed + 1),
                                                  s=card_strings[cards_printed])
             print(output_string)
+            available_card_numbers.append(cards_printed + 1)
             cards_printed += 1
+
+        while True:
+            selected_number = int(input("Select a card to play: "))
+            if selected_number in available_card_numbers:
+                selected_card = available_cards[selected_number - 1]
+                break
+            elif 10 in available_card_numbers and selected_number == 0:
+                selected_card = available_cards[9]
+                break
+            else:
+                pass
+
+        return selected_card
 
 
 
