@@ -656,7 +656,9 @@ class TwilightStruggleGame(CardGame):
 
         return hand_list
 
-    def sort_cards(self, cards_to_sort, sort='ops', sort_china=True):
+    def sort_cards(self, cards_to_sort):
+        sort = 'ops'
+        sort_china = True
 
         if sort == 'ops':
             sorted_cards = sorted(cards_to_sort, key=lambda x: (x.ops, x.event_type, x.name), reverse=True)
@@ -678,7 +680,7 @@ class TwilightStruggleGame(CardGame):
         if self.cards['China'] in self.piles[self.china_owner[side]].get_cards_in_pile().values():
             available_cards.append(self.cards['China'])
 
-        sorted_available_cards = self.sort_cards(available_cards, sort)
+        sorted_available_cards = self.sort_cards(available_cards)
 
         return sorted_available_cards
 
@@ -1122,6 +1124,9 @@ class TwilightStruggleGame(CardGame):
         # TODO - add check active action round effects
         hand = self.format_hand()
         print(hand)
+
+    def select_a_card(self, side):
+        self.get_available_cards(side)
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
