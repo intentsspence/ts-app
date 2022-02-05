@@ -1229,8 +1229,8 @@ class TwilightStruggleGame(CardGame):
 
     def action_space_race(self, card, side):
         if self.check_space_race(card, side):
-            confirmation = input('Are you sure you want to send {c} to space? (y/n): '.format(c=card.name)).lower()
-            if confirmation == 'y':
+            confirmation = self.confirm_action(card.name, 'on the space race')
+            if confirmation:
                 self.space_race_attempt(side)
                 self.move_card(card, 'discard')
                 self.action_round_complete = True
@@ -1266,6 +1266,15 @@ class TwilightStruggleGame(CardGame):
             selected_action = input("Selection: ").lower()
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
                 return selected_action
+
+    def confirm_action(self, card_name, country_name, text=''):
+        # space: "on the space space?"
+        # coup: "attempt a coup in"
+        confirmation = input('Are you sure you want to use {c}{t} {p}? (y/n): '.format(c=card_name, p=country_name, t=text))
+        if confirmation == 'y':
+            return True
+        else:
+            return False
 
     def turn_cleanup(self):
         self.sides['usa'].space_attempts = 0
