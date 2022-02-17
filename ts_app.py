@@ -154,6 +154,7 @@ class TwilightStruggleCard(Card):
         self.optional = True if int(opt) == 1 else False
 
         self.played = False
+        self.effect_active = False
 
 
 class TwilightStruggleChinaCard(Card):
@@ -243,6 +244,7 @@ class TwilightStruggleCountry(Country):
         self.controlled = c
 
         self.borders = []
+        self.nato = False
 
 
 class TwilightStruggleGame(CardGame):
@@ -283,7 +285,7 @@ class TwilightStruggleGame(CardGame):
         self.prevents = {'Arab Israeli War':        'Camp David Accords',
                          'Socialist Governments':   'The Iron Lady',
                          'OPEC':                    'North Sea Oil',
-                         'Willy Brandt':            'Tear Down This Wall',
+                         'Willy Brandt':            'Tear Down this Wall',
                          'Flower Power':            'An Evil Empire',
                          'Muslim Revolution':       'AWACS Sale to Saudis'}
 
@@ -783,6 +785,7 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
             self.events[card.name](self)
             card.played = True
+            card.effect_active = True
 
             if card.removed:
                 self.move_card(card, 'removed')
@@ -975,9 +978,29 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Egypt', 'ussr', 2)
         self.remove_influence('Egypt', 'usa', inf_to_remove)
 
+    def event_017(self):
+        """De Gaulle Leads France"""
+        self.remove_influence('France', 'usa', 2)
+        self.add_influence('France', 'ussr', 1)
+        self.countries['France'].nato = False
+
     def event_018(self):
         """Captured Nazi Scientist"""
         self.increase_space_level(self.phasing)
+
+    def event_021(self):
+        """NATO"""
+        countries = self.countries_in_region('Europe')
+        for country in countries:
+            country.nato = True
+
+        if self.cards['De Gaulle Leads France'].effect_active:
+            self.countries['France'].nato = False
+
+        if self.cards['Willy Brandt'].effect_active:
+            self.countries['W. Germany'].nato = False
+
+        self.cards['NATO'].effect_active = True
 
     def event_034(self):
         """Nuclear Test Ban"""
@@ -1020,6 +1043,12 @@ class TwilightStruggleGame(CardGame):
     def event_054(self):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
+
+    def event_055(self):
+        """Willy Brandt"""
+        self.change_score_by_side('ussr', 1)
+        self.add_influence('W. Germany', 'ussr', 1)
+        self.countries['W. Germany'].nato = False
 
     def event_058(self):
         """Cultural Revolution"""
@@ -1128,7 +1157,9 @@ class TwilightStruggleGame(CardGame):
               'Romanian Abdication':        event_012,
               'Arab-Israeli War':           event_013,
               'Nasser':                     event_015,
+              'De Gaulle Leads France':     event_017,
               'Captured Nazi Scientist':    event_018,
+              'NATO':                       event_021,
               'Nuclear Test Ban':           event_034,
               'Central America Scoring':    event_037,
               'Southeast Asia Scoring':     event_038,
@@ -1136,6 +1167,7 @@ class TwilightStruggleGame(CardGame):
               'Kitchen Debates':            event_048,
               'Portuguese Empire Crumbles': event_052,
               'Allende':                    event_054,
+              'Willy Brandt':               event_055,
               'Cultural Revolution':        event_058,
               'OPEC':                       event_061,
               'Panama Canal Returned':      event_064,
@@ -1268,7 +1300,7 @@ class TwilightStruggleGame(CardGame):
                 return selected_action
 
     def confirm_action(self, card_name, country_name, text=''):
-        # space: "on the space space?"
+        # space: "on the space space"
         # coup: "attempt a coup in"
         confirmation = input('Are you sure you want to use {c}{t} {p}? (y/n): '.format(c=card_name, p=country_name, t=text))
         if confirmation == 'y':
@@ -1282,4 +1314,3 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
