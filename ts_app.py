@@ -1039,6 +1039,10 @@ class TwilightStruggleGame(CardGame):
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
 
+    def event_051(self):
+        """Brezhnev Doctrine"""
+        self.sides['ussr'].ops_adjustment = 1
+
     def event_052(self):
         """Portuguese Empire Crumbles"""
         self.add_influence('Angola', 'ussr', 2)
@@ -1170,6 +1174,7 @@ class TwilightStruggleGame(CardGame):
               'Southeast Asia Scoring':     event_038,
               'Arms Race':                  event_039,
               'Kitchen Debates':            event_048,
+              'Brezhnev Doctrine':          event_051,
               'Portuguese Empire Crumbles': event_052,
               'Allende':                    event_054,
               'Willy Brandt':               event_055,
@@ -1328,6 +1333,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Containment'])
-g.action_round('usa')
+g.trigger_event(g.cards['Brezhnev Doctrine'])
+g.action_round('ussr')
 
