@@ -1164,7 +1164,7 @@ class TwilightStruggleGame(CardGame):
               'Europe Scoring':             event_002,
               'Middle East Scoring':        event_003,
               'Duck and Cover':             event_004,
-              'Socialist Governments':      event_008,
+              'Fidel':                      event_008,
               'Korean War':                 event_011,
               'Romanian Abdication':        event_012,
               'Arab-Israeli War':           event_013,
@@ -1201,6 +1201,9 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to manage action rounds
     def action_round(self, side):
+        log_string = "{s} ACTION ROUND".format(s=side.upper())
+        print(log_string)
+        print(self.line)
         self.action_round_complete = False
         self.phasing = side
         # TODO - add check active action round effects
@@ -1209,7 +1212,6 @@ class TwilightStruggleGame(CardGame):
             selected_card = self.select_a_card(side)
             selected_action = self.select_action(selected_card)
             adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
-            print(adjusted_card_ops)
             if selected_action == 'e':
                 self.trigger_event(selected_card)
                 break
@@ -1229,6 +1231,7 @@ class TwilightStruggleGame(CardGame):
 
         log_string = "Action round complete."
         print(log_string)
+        print(self.line)
 
     def select_a_card(self, side):
         available_cards = self.get_available_cards(side)
@@ -1236,7 +1239,6 @@ class TwilightStruggleGame(CardGame):
         available_card_numbers = []
         selected_card = None
 
-        print(self.line)
         print("Select a card to play:")
 
         cards_printed = 0
@@ -1336,23 +1338,9 @@ class TwilightStruggleGame(CardGame):
         return adjusted_ops
 
     def turn_cleanup(self):
-        self.sides['usa'].space_attempts = 0
-        self.sides['ussr'].space_attempts = 0
+        for side in self.sides.values():
+            side.space_attempts = 0
+            side.ops_adjustment = 0
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'usa'
-g.trigger_event(g.cards['Red Scare/Purge'])
-print('USSR turn')
-g.action_round('ussr')
-print('USA turn')
-g.action_round('usa')
-print('USSR turn')
-g.action_round('ussr')
-print('USA turn')
-g.action_round('usa')
-print('USSR turn')
-g.action_round('ussr')
-print('USA turn')
-g.action_round('usa')
-
