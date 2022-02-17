@@ -1326,10 +1326,13 @@ class TwilightStruggleGame(CardGame):
 
     def adjust_ops(self, card, side, low, high):
         adjusted_ops = card.ops + self.sides[side].ops_adjustment
-        if adjusted_ops < low:
+        if card.ops == 0:
+            adjusted_ops = 0
+        elif adjusted_ops < low:
             adjusted_ops = low
         elif adjusted_ops > high:
             adjusted_ops = high
+
         return adjusted_ops
 
     def turn_cleanup(self):
@@ -1338,6 +1341,8 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+g.phasing = 'usa'
+g.trigger_event(g.cards['Red Scare/Purge'])
 print('USSR turn')
 g.action_round('ussr')
 print('USA turn')
