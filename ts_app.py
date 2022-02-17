@@ -987,6 +987,12 @@ class TwilightStruggleGame(CardGame):
         for country in countries:
             country.nato = True
 
+        if self.cards['De Gaulle Leads France'].effect_active:
+            self.countries['France'].nato = False
+
+        if self.cards['Willy Brandt'].effect_active:
+            self.countries['W. Germany'].nato = False
+
         self.cards['NATO'].effect_active = True
 
     def event_034(self):
@@ -1295,6 +1301,11 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 g.cards['Warsaw Pact Formed'].played = True
+g.cards['De Gaulle Leads France'].effect_active = True
+# g.cards['Willy Brandt'].effect_active = True
 g.trigger_event(g.cards['NATO'])
-print(g.cards['NATO'].effect_active)
-# print(g.countries['France'].nato)
+# print(g.cards['NATO'].effect_active)
+print("France:")
+print(g.countries['France'].nato)
+print("W. Germany:")
+print(g.countries['W. Germany'].nato)
