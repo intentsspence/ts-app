@@ -1002,6 +1002,14 @@ class TwilightStruggleGame(CardGame):
 
         self.cards['NATO'].effect_active = True
 
+    def event_025(self):
+        """Containment"""
+        self.sides['usa'].ops_adjustment = 1
+
+    def event_031(self):
+        """Red Scare/Purge"""
+        self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -1034,6 +1042,10 @@ class TwilightStruggleGame(CardGame):
 
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
+
+    def event_051(self):
+        """Brezhnev Doctrine"""
+        self.sides['ussr'].ops_adjustment = 1
 
     def event_052(self):
         """Portuguese Empire Crumbles"""
@@ -1152,7 +1164,7 @@ class TwilightStruggleGame(CardGame):
               'Europe Scoring':             event_002,
               'Middle East Scoring':        event_003,
               'Duck and Cover':             event_004,
-              'Socialist Governments':      event_008,
+              'Fidel':                      event_008,
               'Korean War':                 event_011,
               'Romanian Abdication':        event_012,
               'Arab-Israeli War':           event_013,
@@ -1160,11 +1172,14 @@ class TwilightStruggleGame(CardGame):
               'De Gaulle Leads France':     event_017,
               'Captured Nazi Scientist':    event_018,
               'NATO':                       event_021,
+              'Containment':                event_025,
+              'Red Scare/Purge':            event_031,
               'Nuclear Test Ban':           event_034,
               'Central America Scoring':    event_037,
               'Southeast Asia Scoring':     event_038,
               'Arms Race':                  event_039,
               'Kitchen Debates':            event_048,
+              'Brezhnev Doctrine':          event_051,
               'Portuguese Empire Crumbles': event_052,
               'Allende':                    event_054,
               'Willy Brandt':               event_055,
@@ -1186,6 +1201,9 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to manage action rounds
     def action_round(self, side):
+        log_string = "{s} ACTION ROUND".format(s=side.upper())
+        print(log_string)
+        print(self.line)
         self.action_round_complete = False
         self.phasing = side
         # TODO - add check active action round effects
@@ -1193,6 +1211,7 @@ class TwilightStruggleGame(CardGame):
         while not self.action_round_complete:
             selected_card = self.select_a_card(side)
             selected_action = self.select_action(selected_card)
+            adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
             if selected_action == 'e':
                 self.trigger_event(selected_card)
                 break
@@ -1206,12 +1225,13 @@ class TwilightStruggleGame(CardGame):
                 # TODO - add place influence function
                 break
             elif selected_action == 's':
-                self.action_space_race(selected_card, side)
+                self.action_space_race(selected_card, adjusted_card_ops, side)
             elif selected_action == 'x':
                 pass
 
         log_string = "Action round complete."
         print(log_string)
+        print(self.line)
 
     def select_a_card(self, side):
         available_cards = self.get_available_cards(side)
@@ -1219,7 +1239,6 @@ class TwilightStruggleGame(CardGame):
         available_card_numbers = []
         selected_card = None
 
-        print(self.line)
         print("Select a card to play:")
 
         cards_printed = 0
@@ -1243,24 +1262,23 @@ class TwilightStruggleGame(CardGame):
 
         return selected_card
 
-    def check_space_race(self, card, side):
+    def check_space_race(self, card, ops, side):
         max_space_attempts = 1
         phasing_space_level = self.sides[side].space_level
         opponent_space_level = self.sides[self.opponent[side]].space_level
-        adjusted_ops_value = card.ops + self.sides[side].ops_adjustment
         required_ops = {1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 4}
 
         if phasing_space_level >= 2 and opponent_space_level < 2:
             max_space_attempts = 2
 
         if (self.sides[side].space_attempts < max_space_attempts and
-                adjusted_ops_value >= required_ops[(phasing_space_level + 1)]):
+                ops >= required_ops[(phasing_space_level + 1)]):
             return True
         else:
             return False
 
-    def action_space_race(self, card, side):
-        if self.check_space_race(card, side):
+    def action_space_race(self, card, ops, side):
+        if self.check_space_race(card, ops, side):
             confirmation = self.confirm_action(card.name, 'on the space race')
             if confirmation:
                 self.space_race_attempt(side)
@@ -1308,9 +1326,21 @@ class TwilightStruggleGame(CardGame):
         else:
             return False
 
+    def adjust_ops(self, card, side, low, high):
+        adjusted_ops = card.ops + self.sides[side].ops_adjustment
+        if card.ops == 0:
+            adjusted_ops = 0
+        elif adjusted_ops < low:
+            adjusted_ops = low
+        elif adjusted_ops > high:
+            adjusted_ops = high
+
+        return adjusted_ops
+
     def turn_cleanup(self):
-        self.sides['usa'].space_attempts = 0
-        self.sides['ussr'].space_attempts = 0
+        for side in self.sides.values():
+            side.space_attempts = 0
+            side.ops_adjustment = 0
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
