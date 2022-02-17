@@ -785,6 +785,7 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
             self.events[card.name](self)
             card.played = True
+            card.effect_active = True
 
             if card.removed:
                 self.move_card(card, 'removed')
@@ -1042,6 +1043,13 @@ class TwilightStruggleGame(CardGame):
     def event_054(self):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
+
+    def event_055(self):
+        """Willy Brandt"""
+        self.change_score_by_side('ussr', 1)
+        self.add_influence('W. Germany', 'ussr', 1)
+
+
 
     def event_058(self):
         """Cultural Revolution"""
@@ -1310,14 +1318,15 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.cards['Warsaw Pact Formed'].played = True
 # g.cards['De Gaulle Leads France'].effect_active = True
 # g.cards['Willy Brandt'].effect_active = True
-g.trigger_event(g.cards['NATO'])
+g.trigger_event(g.cards['De Gaulle Leads France'])
 # print(g.cards['NATO'].effect_active)
 print("France:")
 print(g.countries['France'].nato)
 print("W. Germany:")
 print(g.countries['W. Germany'].nato)
 g.add_influence_to_control('France', 'usa')
-g.trigger_event(g.cards['De Gaulle Leads France'])
+
+g.trigger_event(g.cards['NATO'])
 print("France:")
 print(g.countries['France'].nato)
 print("W. Germany:")
