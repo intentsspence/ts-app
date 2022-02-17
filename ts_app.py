@@ -154,6 +154,7 @@ class TwilightStruggleCard(Card):
         self.optional = True if int(opt) == 1 else False
 
         self.played = False
+        self.effect_active = False
 
 
 class TwilightStruggleChinaCard(Card):
@@ -986,6 +987,8 @@ class TwilightStruggleGame(CardGame):
         for country in countries:
             country.nato = True
 
+        self.cards['NATO'].effect_active = True
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -1291,6 +1294,7 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.cards['Marshall Plan'].played = True
+g.cards['Warsaw Pact Formed'].played = True
 g.trigger_event(g.cards['NATO'])
-print(g.countries['France'].nato)
+print(g.cards['NATO'].effect_active)
+# print(g.countries['France'].nato)
