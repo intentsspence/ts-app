@@ -285,7 +285,7 @@ class TwilightStruggleGame(CardGame):
         self.prevents = {'Arab Israeli War':        'Camp David Accords',
                          'Socialist Governments':   'The Iron Lady',
                          'OPEC':                    'North Sea Oil',
-                         'Willy Brandt':            'Tear Down This Wall',
+                         'Willy Brandt':            'Tear Down this Wall',
                          'Flower Power':            'An Evil Empire',
                          'Muslim Revolution':       'AWACS Sale to Saudis'}
 
@@ -1048,8 +1048,7 @@ class TwilightStruggleGame(CardGame):
         """Willy Brandt"""
         self.change_score_by_side('ussr', 1)
         self.add_influence('W. Germany', 'ussr', 1)
-
-
+        self.countries['W. Germany'].nato = False
 
     def event_058(self):
         """Cultural Revolution"""
@@ -1168,6 +1167,7 @@ class TwilightStruggleGame(CardGame):
               'Kitchen Debates':            event_048,
               'Portuguese Empire Crumbles': event_052,
               'Allende':                    event_054,
+              'Willy Brandt':               event_055,
               'Cultural Revolution':        event_058,
               'OPEC':                       event_061,
               'Panama Canal Returned':      event_064,
@@ -1314,20 +1314,3 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.action_round('ussr')
-g.cards['Warsaw Pact Formed'].played = True
-# g.cards['De Gaulle Leads France'].effect_active = True
-# g.cards['Willy Brandt'].effect_active = True
-g.trigger_event(g.cards['De Gaulle Leads France'])
-# print(g.cards['NATO'].effect_active)
-print("France:")
-print(g.countries['France'].nato)
-print("W. Germany:")
-print(g.countries['W. Germany'].nato)
-g.add_influence_to_control('France', 'usa')
-
-g.trigger_event(g.cards['NATO'])
-print("France:")
-print(g.countries['France'].nato)
-print("W. Germany:")
-print(g.countries['W. Germany'].nato)
