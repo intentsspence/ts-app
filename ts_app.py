@@ -980,6 +980,12 @@ class TwilightStruggleGame(CardGame):
         """Captured Nazi Scientist"""
         self.increase_space_level(self.phasing)
 
+    def event_021(self):
+        """NATO"""
+        countries = self.countries_in_region('Europe')
+        for country in countries:
+            country.nato = True
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -1130,6 +1136,7 @@ class TwilightStruggleGame(CardGame):
               'Arab-Israeli War':           event_013,
               'Nasser':                     event_015,
               'Captured Nazi Scientist':    event_018,
+              'NATO':                       event_021,
               'Nuclear Test Ban':           event_034,
               'Central America Scoring':    event_037,
               'Southeast Asia Scoring':     event_038,
@@ -1284,3 +1291,6 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
+g.cards['Marshall Plan'].played = True
+g.trigger_event(g.cards['NATO'])
+print(g.countries['France'].nato)
