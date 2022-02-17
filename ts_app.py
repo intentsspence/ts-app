@@ -243,6 +243,7 @@ class TwilightStruggleCountry(Country):
         self.controlled = c
 
         self.borders = []
+        self.nato = False
 
 
 class TwilightStruggleGame(CardGame):
@@ -1268,7 +1269,7 @@ class TwilightStruggleGame(CardGame):
                 return selected_action
 
     def confirm_action(self, card_name, country_name, text=''):
-        # space: "on the space space?"
+        # space: "on the space space"
         # coup: "attempt a coup in"
         confirmation = input('Are you sure you want to use {c}{t} {p}? (y/n): '.format(c=card_name, p=country_name, t=text))
         if confirmation == 'y':
@@ -1282,4 +1283,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
+# g.action_round('ussr')
