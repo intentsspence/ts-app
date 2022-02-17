@@ -977,6 +977,12 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Egypt', 'ussr', 2)
         self.remove_influence('Egypt', 'usa', inf_to_remove)
 
+    def event_017(self):
+        """De Gaulle Leads France"""
+        self.remove_influence('France', 'usa', 2)
+        self.add_influence('France', 'ussr', 1)
+        self.countries['France'].nato = False
+
     def event_018(self):
         """Captured Nazi Scientist"""
         self.increase_space_level(self.phasing)
@@ -1144,6 +1150,7 @@ class TwilightStruggleGame(CardGame):
               'Romanian Abdication':        event_012,
               'Arab-Israeli War':           event_013,
               'Nasser':                     event_015,
+              'De Gaulle Leads France':     event_017,
               'Captured Nazi Scientist':    event_018,
               'NATO':                       event_021,
               'Nuclear Test Ban':           event_034,
@@ -1301,10 +1308,16 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 g.cards['Warsaw Pact Formed'].played = True
-g.cards['De Gaulle Leads France'].effect_active = True
+# g.cards['De Gaulle Leads France'].effect_active = True
 # g.cards['Willy Brandt'].effect_active = True
 g.trigger_event(g.cards['NATO'])
 # print(g.cards['NATO'].effect_active)
+print("France:")
+print(g.countries['France'].nato)
+print("W. Germany:")
+print(g.countries['W. Germany'].nato)
+g.add_influence_to_control('France', 'usa')
+g.trigger_event(g.cards['De Gaulle Leads France'])
 print("France:")
 print(g.countries['France'].nato)
 print("W. Germany:")
