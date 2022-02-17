@@ -1006,6 +1006,10 @@ class TwilightStruggleGame(CardGame):
         """Containment"""
         self.sides['usa'].ops_adjustment = 1
 
+    def event_031(self):
+        """Red Scare/Purge"""
+        self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -1169,6 +1173,7 @@ class TwilightStruggleGame(CardGame):
               'Captured Nazi Scientist':    event_018,
               'NATO':                       event_021,
               'Containment':                event_025,
+              'Red Scare/Purge':            event_031,
               'Nuclear Test Ban':           event_034,
               'Central America Scoring':    event_037,
               'Southeast Asia Scoring':     event_038,
@@ -1333,6 +1338,16 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Brezhnev Doctrine'])
+print('USSR turn')
 g.action_round('ussr')
+print('USA turn')
+g.action_round('usa')
+print('USSR turn')
+g.action_round('ussr')
+print('USA turn')
+g.action_round('usa')
+print('USSR turn')
+g.action_round('ussr')
+print('USA turn')
+g.action_round('usa')
 
