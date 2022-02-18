@@ -381,6 +381,8 @@ class TwilightStruggleGame(CardGame):
     # Function to adjust defcon
     def change_defcon(self, adjustment_value):
         self.defcon = self.defcon + adjustment_value
+        log_string = "DEFCON changed by {a}".format(a=adjustment_value)
+        print(log_string)
 
         # Adjust defcon to 5 if above 5
         if self.defcon > 5:
@@ -394,6 +396,9 @@ class TwilightStruggleGame(CardGame):
 
             self.defcon = 1
             self.game_active = False
+
+        log_string = "DEFCON is now {d}".format(d=self.defcon)
+        print(log_string)
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -1210,20 +1215,37 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
-        doubled_stability = country.stability * 2
+        doubled_stability = int(country.stability) * 2
         roll = self.die_roll()
         modified_roll = roll + ops
-        opponent_inf = self.get_influence(country.name, self.opponent[side])
+        opponent_inf = self.get_opponent_influence(country.name, side)
+        log_string = "Modified roll must be more than {d}. " \
+                     "{s} rolled {r} + {o} ops, total of {t}.".format(d=doubled_stability,
+                                                                      s=side.upper(),
+                                                                      r=roll,
+                                                                      o=ops,
+                                                                      t=modified_roll)
+        print(log_string)
 
         if modified_roll > doubled_stability:
-            influence_to_remove = modified_roll - doubled_stability
-            # if influence_to_remove >
-
             log_string = 'Coup attempt: Success!'
+            print(log_string)
+            influence_to_remove = modified_roll - doubled_stability
+            if influence_to_remove > opponent_inf:
+                influence_to_add = influence_to_remove - opponent_inf
+                self.remove_influence(country.name, self.opponent[side], influence_to_remove)
+                self.add_influence(country.name, side, influence_to_add)
+            else:
+                self.remove_influence(country.name, self.opponent[side], influence_to_remove)
+
         else:
             log_string = 'Coup attempt: Failure'
+            print(log_string)
 
-        print(log_string)
+        self.add_military_ops(side, ops)
+
+        if country.battleground:
+            self.change_defcon(-1)
 
     # Functions to manage action rounds
     def action_round(self, side):
@@ -1370,3 +1392,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+# print(g.sides['ussr'].military_ops)
+# g.coup_attempt(g.countries['Philippines'], 1, 'ussr')
+# print(g.sides['ussr'].military_ops)
