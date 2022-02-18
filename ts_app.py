@@ -461,6 +461,15 @@ class TwilightStruggleGame(CardGame):
             influence = self.countries[country_name].ussr_influence
         return influence
 
+    def get_opponent_influence(self, country_name, side):
+        """Returns an int with the country's current influence"""
+        influence = 0
+        if side == 'usa':
+            influence = self.countries[country_name].ussr_influence
+        elif side == 'ussr':
+            influence = self.countries[country_name].usa_influence
+        return influence
+
     def print_influence(self, country_name):
         """Quick method to see the current influence. Takes a string"""
         usa_inf = self.get_influence(country_name, 'usa')
@@ -1204,6 +1213,7 @@ class TwilightStruggleGame(CardGame):
         doubled_stability = country.stability * 2
         roll = self.die_roll()
         modified_roll = roll + ops
+        opponent_inf = self.get_influence(country.name, self.opponent[side])
 
         if modified_roll > doubled_stability:
             influence_to_remove = modified_roll - doubled_stability
