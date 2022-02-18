@@ -452,19 +452,19 @@ class TwilightStruggleGame(CardGame):
 
         self.check_for_control(country_name)
 
-    def get_influence(self, country, side):
+    def get_influence(self, country_name, side):
         """Returns an int with the country's current influence"""
         influence = 0
         if side == 'usa':
-            influence = country.usa_influence
+            influence = self.countries[country_name].usa_influence
         elif side == 'ussr':
-            influence = country.ussr_influence
+            influence = self.countries[country_name].ussr_influence
         return influence
 
     def print_influence(self, country_name):
         """Quick method to see the current influence. Takes a string"""
-        usa_inf = self.get_influence(self.countries[country_name], 'usa')
-        ussr_inf = self.get_influence(self.countries[country_name], 'ussr')
+        usa_inf = self.get_influence(country_name, 'usa')
+        ussr_inf = self.get_influence(country_name, 'ussr')
         usa_controlled = ''
         ussr_controlled = ''
         if self.countries[country_name].controlled == 'usa':
@@ -815,7 +815,7 @@ class TwilightStruggleGame(CardGame):
             log_string_2 = "Success!"
             print(log_string_2)
             self.change_score_by_side(side, points)
-            influence = self.get_influence(country, self.opponent[side])
+            influence = self.get_influence(country.name, self.opponent[side])
             self.remove_all_influence(country.name, self.opponent[side])
             self.add_influence(country.name, side, influence)
         else:
@@ -1198,6 +1198,22 @@ class TwilightStruggleGame(CardGame):
               'Reagan Bombs Libya':         event_084,
               'Terrorism':                  event_092,
               'Solidarity':                 event_101}
+
+    # Functions to attempt coups
+    def coup_attempt(self, country, ops, side):
+        doubled_stability = country.stability * 2
+        roll = self.die_roll()
+        modified_roll = roll + ops
+
+        if modified_roll > doubled_stability:
+            influence_to_remove = modified_roll - doubled_stability
+            # if influence_to_remove >
+
+            log_string = 'Coup attempt: Success!'
+        else:
+            log_string = 'Coup attempt: Failure'
+
+        print(log_string)
 
     # Functions to manage action rounds
     def action_round(self, side):
