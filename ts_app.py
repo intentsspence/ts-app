@@ -1247,6 +1247,18 @@ class TwilightStruggleGame(CardGame):
         if country.battleground:
             self.change_defcon(-1)
 
+    def action_coup_attempt(self, card, ops, side):
+        print("Select coup target: ")
+
+    def checked_coup_targets(self, country_list, side):
+        eligible_targets = []
+
+        for country in country_list:
+            if self.check_coup_attempt(country, side):
+                eligible_targets.append(country)
+
+        return eligible_targets
+
     def check_coup_attempt(self, country, side):
         opponent_influence = self.get_opponent_influence(country.name, side)
         enough_influence = True
@@ -1430,3 +1442,11 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.cards['Tear Down this Wall'].played = True
 # print(g.check_coup_attempt(g.countries['W. Germany'], 'ussr'))
 # print(g.sides['ussr'].military_ops)
+
+a = g.countries_in_region('Europe')
+g.add_influence_to_control('W. Germany', 'usa')
+g.add_influence_to_control('France', 'usa')
+g.cards['Marshall Plan'].played = True
+g.trigger_event(g.cards['NATO'])
+g.trigger_event(g.cards['De Gaulle Leads France'])
+print(g.checked_coup_targets(a, 'ussr'))
