@@ -1251,6 +1251,7 @@ class TwilightStruggleGame(CardGame):
         opponent_influence = self.get_opponent_influence(country.name, side)
         enough_influence = True
         enough_defcon = True
+        not_nato = True
 
         if opponent_influence == 0:
             enough_influence = False
@@ -1267,7 +1268,10 @@ class TwilightStruggleGame(CardGame):
                             if country.region == 'Middle East':
                                 enough_defcon = False
 
-        if enough_influence and enough_defcon:
+        if country.nato and country.controlled == 'usa':
+            not_nato = False
+
+        if enough_influence and enough_defcon and not_nato:
             return True
         else:
             return False
@@ -1418,5 +1422,11 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # print(g.sides['ussr'].military_ops)
-# g.coup_attempt(g.countries['Philippines'], 1, 'ussr')
+# g.add_influence('W. Germany', 'usa', 4)
+# g.cards['Marshall Plan'].played = True
+# g.trigger_event(g.cards['NATO'])
+# g.trigger_event(g.cards['Willy Brandt'])
+# g.add_influence_to_control('W. Germany', 'usa')
+# g.cards['Tear Down this Wall'].played = True
+# print(g.check_coup_attempt(g.countries['W. Germany'], 'ussr'))
 # print(g.sides['ussr'].military_ops)
