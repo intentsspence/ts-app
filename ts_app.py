@@ -1014,7 +1014,7 @@ class TwilightStruggleGame(CardGame):
         if self.cards['Willy Brandt'].effect_active:
             self.countries['W. Germany'].nato = False
 
-        self.cards['NATO'].effect_active = True
+        # self.cards['NATO'].effect_active = True
 
     def event_025(self):
         """Containment"""
@@ -1442,7 +1442,7 @@ class TwilightStruggleGame(CardGame):
                          " i| Place influence\n" \
                          " r| Realignment roll\n" \
                          " s| Space race\n" \
-                         " x| Choose another card"
+                         " x| --Choose another card--"
         print(self.line)
         print("Select use for " + card.name + ':')
         print(action_options)
@@ -1478,4 +1478,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('usa')
+g.action_round('ussr')
