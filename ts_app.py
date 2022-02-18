@@ -1228,7 +1228,7 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
 
         if modified_roll > doubled_stability:
-            log_string = 'Coup attempt: Success!'
+            log_string = 'Coup result: Success!'
             print(log_string)
             influence_to_remove = modified_roll - doubled_stability
             if influence_to_remove > opponent_inf:
@@ -1239,7 +1239,7 @@ class TwilightStruggleGame(CardGame):
                 self.remove_influence(country.name, self.opponent[side], influence_to_remove)
 
         else:
-            log_string = 'Coup attempt: Failure'
+            log_string = 'Coup result: Failure'
             print(log_string)
 
         self.add_military_ops(side, ops)
@@ -1248,7 +1248,21 @@ class TwilightStruggleGame(CardGame):
             self.change_defcon(-1)
 
     def action_coup_attempt(self, card, ops, side):
-        print("Select coup target: ")
+        attempt_completed = False
+        while not attempt_completed:
+            print("Coup Attempt")
+            target_list = self.countries_with_influence(self.opponent[side])
+            eligible_targets = self.checked_coup_targets(target_list, side)
+            target = self.select_a_country(eligible_targets)
+
+            if target is None:
+                break
+            else:
+                confirmation = self.confirm_action(card.name, 'for a coup attempt in {t}'.format(t=target.name))
+                if confirmation:
+                    self.coup_attempt(target, ops, side)
+                    attempt_completed = True
+                    self.action_round_complete = True
 
     def checked_coup_targets(self, country_list, side):
         eligible_targets = []
@@ -1305,18 +1319,21 @@ class TwilightStruggleGame(CardGame):
                 self.trigger_event(selected_card)
                 break
             elif selected_action == 'c':
-                # TODO - add coup attempt function
-                break
+                self.action_coup_attempt(selected_card, adjusted_card_ops, side)
             elif selected_action == 'i':
                 # TODO - add place influence function
                 break
             elif selected_action == 'r':
-                # TODO - add place influence function
+                # TODO - add realignment function
                 break
             elif selected_action == 's':
                 self.action_space_race(selected_card, adjusted_card_ops, side)
             elif selected_action == 'x':
                 pass
+
+        if selected_action == 'c' or 'i' or 'r':
+            if selected_card.event_type == self.opponent[side]:
+                self.trigger_event(selected_card)
 
         log_string = "Action round complete."
         print(log_string)
@@ -1350,6 +1367,35 @@ class TwilightStruggleGame(CardGame):
                     break
 
         return selected_card
+
+    def select_a_country(self, country_list):
+        sorted_country_list = sorted(country_list, key=lambda x: x.name)
+        available_country_numbers = []
+        selected_country = None
+
+        print("Select a country to target:")
+
+        countries_printed = 0
+        while countries_printed < len(sorted_country_list):
+            output_string = "{c:>2}| {s}".format(c=(countries_printed + 1),
+                                                 s=sorted_country_list[countries_printed].name)
+            print(output_string)
+            available_country_numbers.append(countries_printed + 1)
+            countries_printed += 1
+
+        print(" x| --Cancel--")
+        while True:
+            user_input = input("Selection: ")
+            if user_input.isdigit():
+                selected_number = int(user_input)
+                if selected_number in available_country_numbers:
+                    selected_country = sorted_country_list[selected_number - 1]
+                    break
+            elif user_input.lower() == 'x':
+                break
+
+        return selected_country
+
 
     def check_space_race(self, card, ops, side):
         max_space_attempts = 1
@@ -1443,10 +1489,12 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # print(g.check_coup_attempt(g.countries['W. Germany'], 'ussr'))
 # print(g.sides['ussr'].military_ops)
 
-a = g.countries_in_region('Europe')
-g.add_influence_to_control('W. Germany', 'usa')
-g.add_influence_to_control('France', 'usa')
-g.cards['Marshall Plan'].played = True
-g.trigger_event(g.cards['NATO'])
-g.trigger_event(g.cards['De Gaulle Leads France'])
-print(g.checked_coup_targets(a, 'ussr'))
+# a = g.countries_in_region('Europe')
+# g.add_influence_to_control('W. Germany', 'usa')
+# g.add_influence_to_control('France', 'usa')
+# g.cards['Marshall Plan'].played = True
+# g.trigger_event(g.cards['NATO'])
+# g.trigger_event(g.cards['De Gaulle Leads France'])
+# print(g.checked_coup_targets(a, 'ussr'))
+
+g.action_round('usa')
