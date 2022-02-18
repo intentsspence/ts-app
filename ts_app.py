@@ -1020,6 +1020,10 @@ class TwilightStruggleGame(CardGame):
         """Containment"""
         self.sides['usa'].ops_adjustment = 1
 
+    def event_027(self):
+        """US/Japan Mutual Defense Pact"""
+        self.add_influence_to_control('Japan', 'usa')
+
     def event_031(self):
         """Red Scare/Purge"""
         self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
@@ -1275,32 +1279,27 @@ class TwilightStruggleGame(CardGame):
 
     def check_coup_attempt(self, country, side):
         opponent_influence = self.get_opponent_influence(country.name, side)
-        enough_influence = True
-        enough_defcon = True
-        not_nato = True
+        eligible = True
 
         if opponent_influence == 0:
-            enough_influence = False
+            eligible = False
 
         if self.defcon < 5:
             if country.region == 'Europe':
-                enough_defcon = False
+                eligible = False
             else:
                 if self.defcon < 4:
                     if country.region == 'Asia':
-                        enough_defcon = False
+                        eligible = False
                     else:
                         if self.defcon < 3:
                             if country.region == 'Middle East':
-                                enough_defcon = False
+                                eligible = False
 
         if country.nato and country.controlled == 'usa':
-            not_nato = False
+            eligible = False
 
-        if enough_influence and enough_defcon and not_nato:
-            return True
-        else:
-            return False
+        return eligible
 
     # Functions to manage action rounds
     def action_round(self, side):
@@ -1478,4 +1477,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+g.cards['Marshall Plan'].played = True
+g.trigger_event(g.cards['NATO'])
 g.action_round('ussr')
