@@ -1247,6 +1247,31 @@ class TwilightStruggleGame(CardGame):
         if country.battleground:
             self.change_defcon(-1)
 
+    def check_coup_attempt(self, country, side):
+        opponent_influence = self.get_opponent_influence(country.name, side)
+        enough_influence = True
+        enough_defcon = True
+
+        if opponent_influence == 0:
+            enough_influence = False
+
+        if self.defcon < 5:
+            if country.region == 'Europe':
+                enough_defcon = False
+            else:
+                if self.defcon < 4:
+                    if country.region == 'Asia':
+                        enough_defcon = False
+                    else:
+                        if self.defcon < 3:
+                            if country.region == 'Middle East':
+                                enough_defcon = False
+
+        if enough_influence and enough_defcon:
+            return True
+        else:
+            return False
+
     # Functions to manage action rounds
     def action_round(self, side):
         log_string = "{s} ACTION ROUND".format(s=side.upper())
