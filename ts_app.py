@@ -1396,8 +1396,7 @@ class TwilightStruggleGame(CardGame):
 
         return selected_country
 
-
-    def check_space_race(self, card, ops, side):
+    def check_space_race(self, ops, side):
         max_space_attempts = 1
         phasing_space_level = self.sides[side].space_level
         opponent_space_level = self.sides[self.opponent[side]].space_level
@@ -1413,7 +1412,7 @@ class TwilightStruggleGame(CardGame):
             return False
 
     def action_space_race(self, card, ops, side):
-        if self.check_space_race(card, ops, side):
+        if self.check_space_race(ops, side):
             confirmation = self.confirm_action(card.name, 'on the space race')
             if confirmation:
                 self.space_race_attempt(side)
@@ -1479,22 +1478,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# print(g.sides['ussr'].military_ops)
-# g.add_influence('W. Germany', 'usa', 4)
-# g.cards['Marshall Plan'].played = True
-# g.trigger_event(g.cards['NATO'])
-# g.trigger_event(g.cards['Willy Brandt'])
-# g.add_influence_to_control('W. Germany', 'usa')
-# g.cards['Tear Down this Wall'].played = True
-# print(g.check_coup_attempt(g.countries['W. Germany'], 'ussr'))
-# print(g.sides['ussr'].military_ops)
-
-# a = g.countries_in_region('Europe')
-# g.add_influence_to_control('W. Germany', 'usa')
-# g.add_influence_to_control('France', 'usa')
-# g.cards['Marshall Plan'].played = True
-# g.trigger_event(g.cards['NATO'])
-# g.trigger_event(g.cards['De Gaulle Leads France'])
-# print(g.checked_coup_targets(a, 'ussr'))
-
 g.action_round('usa')
