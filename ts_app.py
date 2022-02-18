@@ -1191,6 +1191,7 @@ class TwilightStruggleGame(CardGame):
               'Captured Nazi Scientist':    event_018,
               'NATO':                       event_021,
               'Containment':                event_025,
+              'US/Japan Mutual Defense Pact':   event_027,
               'Red Scare/Purge':            event_031,
               'Nuclear Test Ban':           event_034,
               'Central America Scoring':    event_037,
@@ -1297,6 +1298,9 @@ class TwilightStruggleGame(CardGame):
                                 eligible = False
 
         if country.nato and country.controlled == 'usa':
+            eligible = False
+
+        if country.name == 'Japan' and self.cards['US/Japan Mutual Defense Pact'].effect_active:
             eligible = False
 
         return eligible
@@ -1477,6 +1481,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.cards['Marshall Plan'].played = True
-g.trigger_event(g.cards['NATO'])
 g.action_round('ussr')
