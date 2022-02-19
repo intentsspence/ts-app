@@ -632,6 +632,27 @@ class TwilightStruggleGame(CardGame):
 
         return controlled_list
 
+    def not_opponent_controlled_in_region(self, region, side):
+        country_list = self.countries_in_region(region)
+        not_controlled_list = []
+
+        for country in country_list:
+            if country.controlled != self.opponent['side']:
+                not_controlled_list.append(country)
+
+        return not_controlled_list
+
+    def not_opponent_controlled_in_subregion(self, subregion, side):
+        country_list = self.countries_in_subregion(subregion)
+        not_controlled_list = []
+
+        for country in country_list:
+            if country.controlled != self.opponent['side']:
+                not_controlled_list.append(country)
+
+        return not_controlled_list
+
+
     def battlegrounds_controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
         controlled_list = []
