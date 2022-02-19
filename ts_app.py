@@ -1067,6 +1067,19 @@ class TwilightStruggleGame(CardGame):
         if self.cards['Willy Brandt'].effect_active:
             self.countries['W. Germany'].nato = False
 
+    def event_022(self):
+        """Independent Reds"""
+        eligible_countries = [self.countries['Yugoslavia'],
+                              self.countries['Romania'],
+                              self.countries['Bulgaria'],
+                              self.countries['Hungary'],
+                              self.countries['Czechoslovakia']]
+
+        target_country = self.select_a_country(eligible_countries)
+        usa_inf = self.get_influence(target_country.name, 'usa')
+        ussr_inf = self.get_opponent_influence(target_country.name, 'usa')
+        self.add_influence(target_country.name, 'usa', (ussr_inf - usa_inf))
+
     def event_023(self):
         """Marshall Plan"""
         eligible_countries = self.not_opponent_controlled_in_subregion('Western Europe', 'usa')
@@ -1247,6 +1260,7 @@ class TwilightStruggleGame(CardGame):
               'De Gaulle Leads France':         event_017,
               'Captured Nazi Scientist':        event_018,
               'NATO':                           event_021,
+              'Independent Reds':               event_022,
               'Marshall Plan':                  event_023,
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
@@ -1671,4 +1685,4 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Marshall Plan'])
+g.trigger_event(g.cards['Independent Reds'])
