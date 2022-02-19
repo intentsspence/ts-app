@@ -1343,6 +1343,7 @@ class TwilightStruggleGame(CardGame):
             if influence_to_place == 0:
                 confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
                 if confirmation:
+                    self.place_influence_from_list(target_list, side)
                     placement_completed = True
                     self.action_round_complete = True
             else:
@@ -1350,14 +1351,18 @@ class TwilightStruggleGame(CardGame):
                 if user_input == 'y':
                     break
 
-    def place_influence(self, country, side):
-        if country.controlled == self.opponent[side]:
-            self.add_influence(country.name, side, 1)
-            influence_used = 2
-        else:
-            self.add_influence(country.name, side, 1)
-            influence_used = 1
-        return influence_used
+    def place_influence_from_list(self, country_list, side):
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            influence_used = 0
+            while influence_used < amount:
+                if country.controlled == self.opponent[side]:
+                    self.add_influence(country.name, side, 1)
+                    influence_used = influence_used + 2
+                else:
+                    self.add_influence(country.name, side, 1)
+                    influence_used = influence_used + 1
 
     def check_enough_influence(self, country, side, influence):
         eligible = True
@@ -1379,7 +1384,7 @@ class TwilightStruggleGame(CardGame):
     def select_influence_amount(self, country, ops):
         influence_amount = None
         while True:
-            user_input = input("How much influence to place in {c}:".format(c=country.name))
+            user_input = input("How much influence to place in {c}: ".format(c=country.name))
             if user_input.isdigit():
                 selection_amount = int(user_input)
                 if selection_amount <= ops:
@@ -1564,4 +1569,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+g.add_influence('Mexico', 'ussr', 1)
+g.add_influence_to_control('Mexico', 'usa')
 g.action_round('ussr')
