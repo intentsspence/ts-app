@@ -1329,7 +1329,7 @@ class TwilightStruggleGame(CardGame):
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
-                possible_targets = self.countries_with_influence(side)
+                possible_targets = self.accessible_countries(side)
                 eligible_targets = self.check_influence_targets(possible_targets, side, influence_to_place)
                 target = self.select_a_country(eligible_targets)
                 if target is None:
