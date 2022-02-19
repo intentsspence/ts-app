@@ -545,6 +545,19 @@ class TwilightStruggleGame(CardGame):
             else:
                 print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0], scores[score][1], scores[score][2]))
 
+    def final_scoring(self):
+        self.cards['Shuttle Diplomacy'].effect_active = False
+
+        asia = self.score_card('Asia', 3, 7, 9, True)
+        europe = self.score_card('Europe', 3, 7, 100, True)
+        middle_east = self.score_card('Middle East', 3, 5, 7, True)
+        central_america = self.score_card('Central America', 1, 3, 5, True)
+        africa = self.score_card('Africa', 1, 4, 6, True)
+        south_america = self.score_card('South America', 2, 5, 6, True)
+        total = asia + europe + middle_east + central_america + africa + south_america
+
+        self.change_score(total)
+
     # Functions for space race
     def space_race_awards(self, s):
         space_race_points = {1: [2, 1], 3: [2, 0], 5: [3, 1], 7: [4, 2], 8: [2, 0]}
@@ -885,6 +898,8 @@ class TwilightStruggleGame(CardGame):
 
         usa_total = score_dict[usa_score_type] + usa_adjacent_bonus + usa_bg_bonus
         ussr_total = score_dict[ussr_score_type] + ussr_adjacent_bonus + ussr_bg_bonus
+        log_string = "\n{r} SCORING".format(r=region.upper())
+        print(log_string)
 
         log_string_usa = "USA has {t}\n" \
                          "Base score:         {s}\n" \
@@ -1481,4 +1496,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
+g.trigger_event(g.cards['Europe Scoring'])
