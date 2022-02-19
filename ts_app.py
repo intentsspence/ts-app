@@ -1327,12 +1327,13 @@ class TwilightStruggleGame(CardGame):
             influence_to_place = ops
             target_list = []
             possible_targets = self.accessible_countries(side)
-            # eligible_targets = self.check_influence_targets(possible_targets, side, influence_to_place)
+            cancelled = False
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
                 target = self.select_a_country(possible_targets)
                 if target is None:
+                    cancelled = True
                     break
                 amount = self.select_influence_amount(target, influence_to_place)
                 if amount is None:
@@ -1341,18 +1342,18 @@ class TwilightStruggleGame(CardGame):
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
 
-            if influence_to_place == 0:
-                if self.check_influence_targets(target_list, side):
+            if cancelled:
+                break
+            elif self.check_influence_targets(target_list, side):
+                if influence_to_place == 0:
                     confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
                         self.action_round_complete = True
-                else:
-                    break
             else:
-                user_input = input('Choose a different card? (y/n): ').lower()
-                if user_input == 'y':
+                user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
+                if user_input == 'n':
                     break
 
     def place_influence_from_list(self, country_list, side):
@@ -1379,6 +1380,7 @@ class TwilightStruggleGame(CardGame):
             if (opp_inf - side_inf) >= stability:
                 if influence_to_add < 2:
                     eligible = False
+                    break
                 else:
                     side_inf = side_inf + 1
                     influence_to_add = influence_to_add - 2
@@ -1393,7 +1395,6 @@ class TwilightStruggleGame(CardGame):
         for item in country_list:
             country = item[0]
             amount = item[1]
-
             if not self.check_enough_influence(country, side, amount):
                 eligible = False
 
