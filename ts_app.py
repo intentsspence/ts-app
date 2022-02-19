@@ -1323,27 +1323,32 @@ class TwilightStruggleGame(CardGame):
     # Functions to place influence
     def action_place_influence(self, card, ops, side):
         placement_completed = False
-        influence_to_place = ops
         while not placement_completed:
-            print("Place {i} influence".format(i=influence_to_place))
-            target_list = self.countries_with_influence(side)
-            eligible_targets = self.check_influence_targets(target_list, side, influence_to_place)
-            target = self.select_a_country(eligible_targets)
-            if target is None:
-                break
-            amount = self.select_influence_amount(target, influence_to_place)
-            if amount is None:
-                pass
-            else:
-                confirmation = self.confirm_action(card.name, 'to place influence in {t}'.format(t=target.name))
+            influence_to_place = ops
+            target_list = []
+
+            while influence_to_place > 0:
+                print("Place {i} influence".format(i=influence_to_place))
+                possible_targets = self.countries_with_influence(side)
+                eligible_targets = self.check_influence_targets(possible_targets, side, influence_to_place)
+                target = self.select_a_country(eligible_targets)
+                if target is None:
+                    break
+                amount = self.select_influence_amount(target, influence_to_place)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                influence_to_place = influence_to_place - amount
+
+            if influence_to_place == 0:
+                confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
                 if confirmation:
-                    while amount > 0:
-                        influence_used = self.place_influence(target, side)
-                        amount = amount - influence_used
-                        influence_to_place = influence_to_place - influence_used
-                    if influence_to_place == 0:
-                        placement_completed = True
-                        self.action_round_complete = True
+                    placement_completed = True
+                    self.action_round_complete = True
+            else:
+                user_input = input('Choose a different card? (y/n): ').lower()
+                if user_input == 'y':
+                    break
 
     def place_influence(self, country, side):
         if country.controlled == self.opponent[side]:
