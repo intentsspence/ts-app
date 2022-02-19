@@ -637,7 +637,7 @@ class TwilightStruggleGame(CardGame):
         not_controlled_list = []
 
         for country in country_list:
-            if country.controlled != self.opponent['side']:
+            if country.controlled != self.opponent[side]:
                 not_controlled_list.append(country)
 
         return not_controlled_list
@@ -647,7 +647,7 @@ class TwilightStruggleGame(CardGame):
         not_controlled_list = []
 
         for country in country_list:
-            if country.controlled != self.opponent['side']:
+            if country.controlled != self.opponent[side]:
                 not_controlled_list.append(country)
 
         return not_controlled_list
@@ -1035,8 +1035,8 @@ class TwilightStruggleGame(CardGame):
 
     def event_014(self):
         """Comecon"""
-
-        self.ask_to_place_influence()
+        eligible_countries = self.not_opponent_controlled_in_subregion('Eastern Europe', 'ussr')
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1)
 
     def event_015(self):
         """Nasser"""
@@ -1239,6 +1239,7 @@ class TwilightStruggleGame(CardGame):
               'Korean War':                     event_011,
               'Romanian Abdication':            event_012,
               'Arab-Israeli War':               event_013,
+              'Comecon':                        event_014,
               'Nasser':                         event_015,
               'De Gaulle Leads France':         event_017,
               'Captured Nazi Scientist':        event_018,
@@ -1662,6 +1663,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.add_influence('Mexico', 'ussr', 1)
-g.add_influence('Mexico', 'usa', 4)
 g.action_round('ussr')
