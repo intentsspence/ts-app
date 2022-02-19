@@ -1588,5 +1588,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Mexico', 'ussr', 1)
-g.add_influence('Mexico', 'usa', 3)
+g.add_influence('Mexico', 'usa', 4)
 g.action_round('ussr')
