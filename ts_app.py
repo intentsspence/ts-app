@@ -1067,7 +1067,10 @@ class TwilightStruggleGame(CardGame):
         if self.cards['Willy Brandt'].effect_active:
             self.countries['W. Germany'].nato = False
 
-        # self.cards['NATO'].effect_active = True
+    def event_023(self):
+        """Marshall Plan"""
+        eligible_countries = self.not_opponent_controlled_in_subregion('Western Europe', 'usa')
+        self.ask_to_place_influence(eligible_countries, 7, 'usa', 1)
 
     def event_025(self):
         """Containment"""
@@ -1244,6 +1247,7 @@ class TwilightStruggleGame(CardGame):
               'De Gaulle Leads France':         event_017,
               'Captured Nazi Scientist':        event_018,
               'NATO':                           event_021,
+              'Marshall Plan':                  event_023,
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
               'Red Scare/Purge':                event_031,
@@ -1400,7 +1404,9 @@ class TwilightStruggleGame(CardGame):
         while not placement_completed:
             influence_to_place = influence
             target_list = []
-            possible_targets = country_list
+            possible_targets = []
+            for country in country_list:
+                possible_targets.append(country)
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
@@ -1413,6 +1419,7 @@ class TwilightStruggleGame(CardGame):
                 target_list.append([target, amount])
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
+            print('a')
 
             if self.check_influence_targets(target_list, side):
                 if influence_to_place == 0:
@@ -1663,4 +1670,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
+# g.action_round('ussr')
+g.trigger_event(g.cards['Marshall Plan'])
