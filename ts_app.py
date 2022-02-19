@@ -1193,45 +1193,45 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Poland', 'usa', 3)
 
     # Dictionary of the events
-    events = {'Asia Scoring':               event_001,
-              'Europe Scoring':             event_002,
-              'Middle East Scoring':        event_003,
-              'Duck and Cover':             event_004,
-              'Fidel':                      event_008,
-              'Korean War':                 event_011,
-              'Romanian Abdication':        event_012,
-              'Arab-Israeli War':           event_013,
-              'Nasser':                     event_015,
-              'De Gaulle Leads France':     event_017,
-              'Captured Nazi Scientist':    event_018,
-              'NATO':                       event_021,
-              'Containment':                event_025,
+    events = {'Asia Scoring':                   event_001,
+              'Europe Scoring':                 event_002,
+              'Middle East Scoring':            event_003,
+              'Duck and Cover':                 event_004,
+              'Fidel':                          event_008,
+              'Korean War':                     event_011,
+              'Romanian Abdication':            event_012,
+              'Arab-Israeli War':               event_013,
+              'Nasser':                         event_015,
+              'De Gaulle Leads France':         event_017,
+              'Captured Nazi Scientist':        event_018,
+              'NATO':                           event_021,
+              'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
-              'Red Scare/Purge':            event_031,
-              'Nuclear Test Ban':           event_034,
-              'Central America Scoring':    event_037,
-              'Southeast Asia Scoring':     event_038,
-              'Arms Race':                  event_039,
-              'Kitchen Debates':            event_048,
-              'Brezhnev Doctrine':          event_051,
-              'Portuguese Empire Crumbles': event_052,
-              'Allende':                    event_054,
-              'Willy Brandt':               event_055,
-              'Cultural Revolution':        event_058,
-              'OPEC':                       event_061,
-              'Panama Canal Returned':      event_064,
-              'John Paul II Elected Pope':  event_068,
-              'Nixon Plays the China Card': event_071,
-              'Sadat Expels Soviets':       event_072,
-              'Alliance for Progress':      event_078,
-              'Africa Scoring':             event_079,
-              '"One Small Step..."':        event_080,
-              'South America Scoring':      event_081,
-              'Iranian Hostage Crisis':     event_082,
-              'The Iron Lady':              event_083,
-              'Reagan Bombs Libya':         event_084,
-              'Terrorism':                  event_092,
-              'Solidarity':                 event_101}
+              'Red Scare/Purge':                event_031,
+              'Nuclear Test Ban':               event_034,
+              'Central America Scoring':        event_037,
+              'Southeast Asia Scoring':         event_038,
+              'Arms Race':                      event_039,
+              'Kitchen Debates':                event_048,
+              'Brezhnev Doctrine':              event_051,
+              'Portuguese Empire Crumbles':     event_052,
+              'Allende':                        event_054,
+              'Willy Brandt':                   event_055,
+              'Cultural Revolution':            event_058,
+              'OPEC':                           event_061,
+              'Panama Canal Returned':          event_064,
+              'John Paul II Elected Pope':      event_068,
+              'Nixon Plays the China Card':     event_071,
+              'Sadat Expels Soviets':           event_072,
+              'Alliance for Progress':          event_078,
+              'Africa Scoring':                 event_079,
+              '"One Small Step..."':            event_080,
+              'South America Scoring':          event_081,
+              'Iranian Hostage Crisis':         event_082,
+              'The Iron Lady':                  event_083,
+              'Reagan Bombs Libya':             event_084,
+              'Terrorism':                      event_092,
+              'Solidarity':                     event_101}
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
@@ -1356,6 +1356,38 @@ class TwilightStruggleGame(CardGame):
                 if user_input == 'n':
                     break
 
+    def ask_to_place_influence(self, country_list, influence, max, side):
+        placement_completed = False
+        while not placement_completed:
+            influence_to_place = influence
+            target_list = []
+            possible_targets = country_list
+            cancelled = False
+
+            while influence_to_place > 0:
+                print("Place {i} influence".format(i=influence_to_place))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                amount = self.select_influence_amount(target, influence_to_place)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                possible_targets.remove(target)
+                influence_to_place = influence_to_place - amount
+
+            if self.check_influence_targets(target_list, side):
+                if influence_to_place == 0:
+                    confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.place_influence_from_list(target_list, side)
+                        placement_completed = True
+                        self.action_round_complete = True
+            else:
+                user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
+                if user_input == 'n':
+                    break
+
     def place_influence_from_list(self, country_list, side):
         for item in country_list:
             country = item[0]
@@ -1400,15 +1432,20 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
-    def select_influence_amount(self, country, ops):
+    def select_influence_amount(self, country, ops, max_inf=None):
         influence_amount = None
         while True:
             user_input = input("How much influence to place in {c}: ".format(c=country.name))
             if user_input.isdigit():
                 selection_amount = int(user_input)
-                if selection_amount <= ops:
-                    influence_amount = selection_amount
-                    break
+                if max_inf is None:
+                    if selection_amount <= ops:
+                        influence_amount = selection_amount
+                        break
+                else:
+                    if selection_amount <= ops and selection_amount <= max_inf:
+                        influence_amount = selection_amount
+                        break
             elif user_input.lower() == 'x':
                 break
         return influence_amount
