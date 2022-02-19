@@ -1326,26 +1326,30 @@ class TwilightStruggleGame(CardGame):
         while not placement_completed:
             influence_to_place = ops
             target_list = []
+            possible_targets = self.accessible_countries(side)
+            # eligible_targets = self.check_influence_targets(possible_targets, side, influence_to_place)
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
-                possible_targets = self.accessible_countries(side)
-                eligible_targets = self.check_influence_targets(possible_targets, side, influence_to_place)
-                target = self.select_a_country(eligible_targets)
+                target = self.select_a_country(possible_targets)
                 if target is None:
                     break
                 amount = self.select_influence_amount(target, influence_to_place)
                 if amount is None:
                     break
                 target_list.append([target, amount])
+                possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
 
             if influence_to_place == 0:
-                confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
-                if confirmation:
-                    self.place_influence_from_list(target_list, side)
-                    placement_completed = True
-                    self.action_round_complete = True
+                if self.check_influence_targets(target_list, side):
+                    confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.place_influence_from_list(target_list, side)
+                        placement_completed = True
+                        self.action_round_complete = True
+                else:
+                    break
             else:
                 user_input = input('Choose a different card? (y/n): ').lower()
                 if user_input == 'y':
@@ -1366,20 +1370,34 @@ class TwilightStruggleGame(CardGame):
 
     def check_enough_influence(self, country, side, influence):
         eligible = True
+        side_inf = self.get_influence(country.name, side)
+        opp_inf = self.get_opponent_influence(country.name, side)
+        stability = country.stability
+        influence_to_add = influence
 
-        if country.controlled == self.opponent[side] and influence < 2:
-            eligible = False
+        while influence_to_add > 0:
+            if (opp_inf - side_inf) >= stability:
+                if influence_to_add < 2:
+                    eligible = False
+                else:
+                    side_inf = side_inf + 1
+                    influence_to_add = influence_to_add - 2
+            else:
+                influence_to_add = influence_to_add - 1
 
         return eligible
 
-    def check_influence_targets(self, country_list, side, amount):
-        eligible_targets = []
+    def check_influence_targets(self, country_list, side):
+        eligible = True
 
-        for country in country_list:
-            if self.check_enough_influence(country, side, amount):
-                eligible_targets.append(country)
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
 
-        return eligible_targets
+            if not self.check_enough_influence(country, side, amount):
+                eligible = False
+
+        return eligible
 
     def select_influence_amount(self, country, ops):
         influence_amount = None
@@ -1570,5 +1588,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Mexico', 'ussr', 1)
-g.add_influence_to_control('Mexico', 'usa')
+g.add_influence('Mexico', 'usa', 3)
 g.action_round('ussr')
