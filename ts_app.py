@@ -1607,6 +1607,21 @@ class TwilightStruggleGame(CardGame):
 
         return selected_country
 
+    def select_option(self, option_list):
+        option = None
+        available_options = []
+
+        print("Select an option:")
+        for option in option_list:
+            print("{l}| {t}".format(l=option[0], t=option[1]))
+            available_options.append(option[0])
+
+        while True:
+            user_input = input("Selection: ")
+            if user_input in available_options:
+                return user_input
+                break
+
     def check_space_race(self, ops, side):
         max_space_attempts = 1
         phasing_space_level = self.sides[side].space_level
