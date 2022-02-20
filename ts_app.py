@@ -1195,6 +1195,10 @@ class TwilightStruggleGame(CardGame):
 
         self.change_score_by_side('ussr', points)
 
+    def event_063(self):
+        """Colonial Rear Guards"""
+        eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
+        self.ask_to_place_influence(eligible_countries, 4, 'usa', 1, 1)
 
     def event_064(self):
         """Panama Canal Returned"""
@@ -1300,10 +1304,12 @@ class TwilightStruggleGame(CardGame):
               'Kitchen Debates':                event_048,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
+              'South African Unrest':           event_053,
               'Allende':                        event_054,
               'Willy Brandt':                   event_055,
               'Cultural Revolution':            event_058,
               'OPEC':                           event_061,
+              'Colonial Rear Guards':           event_063,
               'Panama Canal Returned':          event_064,
               'John Paul II Elected Pope':      event_068,
               'Nixon Plays the China Card':     event_071,
@@ -1735,5 +1741,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Marshall Plan'])
+g.trigger_event(g.cards['Colonial Rear Guards'])
 # g.event_053()
