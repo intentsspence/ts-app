@@ -1093,6 +1093,11 @@ class TwilightStruggleGame(CardGame):
         """US/Japan Mutual Defense Pact"""
         self.add_influence_to_control('Japan', 'usa')
 
+    def event_030(self):
+        """Decolonization"""
+        eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1)
+
     def event_031(self):
         """Red Scare/Purge"""
         self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
@@ -1264,6 +1269,7 @@ class TwilightStruggleGame(CardGame):
               'Marshall Plan':                  event_023,
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
+              'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
               'Nuclear Test Ban':               event_034,
               'Central America Scoring':        event_037,
@@ -1433,7 +1439,6 @@ class TwilightStruggleGame(CardGame):
                 target_list.append([target, amount])
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
-            print('a')
 
             if self.check_influence_targets(target_list, side):
                 if influence_to_place == 0:
@@ -1685,4 +1690,4 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Independent Reds'])
+g.trigger_event(g.cards['Decolonization'])
