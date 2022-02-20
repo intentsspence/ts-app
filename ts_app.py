@@ -620,6 +620,39 @@ class TwilightStruggleGame(CardGame):
 
         return controlled_list
 
+    def controlled_in_subregion(self, subregion, side):
+        country_list = self.countries_in_subregion(subregion)
+        controlled_list = []
+
+        for country in country_list:
+            if side == 'usa' and country.controlled == 'usa':
+                controlled_list.append(country)
+            elif side == 'ussr' and country.controlled == 'ussr':
+                controlled_list.append(country)
+
+        return controlled_list
+
+    def not_opponent_controlled_in_region(self, region, side):
+        country_list = self.countries_in_region(region)
+        not_controlled_list = []
+
+        for country in country_list:
+            if country.controlled != self.opponent[side]:
+                not_controlled_list.append(country)
+
+        return not_controlled_list
+
+    def not_opponent_controlled_in_subregion(self, subregion, side):
+        country_list = self.countries_in_subregion(subregion)
+        not_controlled_list = []
+
+        for country in country_list:
+            if country.controlled != self.opponent[side]:
+                not_controlled_list.append(country)
+
+        return not_controlled_list
+
+
     def battlegrounds_controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
         controlled_list = []
@@ -1000,6 +1033,11 @@ class TwilightStruggleGame(CardGame):
         """Arab-Israeli War"""
         self.war_card(self.countries['Israel'], 'ussr', 4, 2, 2, True)
 
+    def event_014(self):
+        """Comecon"""
+        eligible_countries = self.not_opponent_controlled_in_subregion('Eastern Europe', 'ussr')
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1)
+
     def event_015(self):
         """Nasser"""
         usa_inf = self.countries['Egypt'].usa_influence
@@ -1029,7 +1067,23 @@ class TwilightStruggleGame(CardGame):
         if self.cards['Willy Brandt'].effect_active:
             self.countries['W. Germany'].nato = False
 
-        # self.cards['NATO'].effect_active = True
+    def event_022(self):
+        """Independent Reds"""
+        eligible_countries = [self.countries['Yugoslavia'],
+                              self.countries['Romania'],
+                              self.countries['Bulgaria'],
+                              self.countries['Hungary'],
+                              self.countries['Czechoslovakia']]
+
+        target_country = self.select_a_country(eligible_countries)
+        usa_inf = self.get_influence(target_country.name, 'usa')
+        ussr_inf = self.get_opponent_influence(target_country.name, 'usa')
+        self.add_influence(target_country.name, 'usa', (ussr_inf - usa_inf))
+
+    def event_023(self):
+        """Marshall Plan"""
+        eligible_countries = self.not_opponent_controlled_in_subregion('Western Europe', 'usa')
+        self.ask_to_place_influence(eligible_countries, 7, 'usa', 1)
 
     def event_025(self):
         """Containment"""
@@ -1193,45 +1247,48 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Poland', 'usa', 3)
 
     # Dictionary of the events
-    events = {'Asia Scoring':               event_001,
-              'Europe Scoring':             event_002,
-              'Middle East Scoring':        event_003,
-              'Duck and Cover':             event_004,
-              'Fidel':                      event_008,
-              'Korean War':                 event_011,
-              'Romanian Abdication':        event_012,
-              'Arab-Israeli War':           event_013,
-              'Nasser':                     event_015,
-              'De Gaulle Leads France':     event_017,
-              'Captured Nazi Scientist':    event_018,
-              'NATO':                       event_021,
-              'Containment':                event_025,
+    events = {'Asia Scoring':                   event_001,
+              'Europe Scoring':                 event_002,
+              'Middle East Scoring':            event_003,
+              'Duck and Cover':                 event_004,
+              'Fidel':                          event_008,
+              'Korean War':                     event_011,
+              'Romanian Abdication':            event_012,
+              'Arab-Israeli War':               event_013,
+              'Comecon':                        event_014,
+              'Nasser':                         event_015,
+              'De Gaulle Leads France':         event_017,
+              'Captured Nazi Scientist':        event_018,
+              'NATO':                           event_021,
+              'Independent Reds':               event_022,
+              'Marshall Plan':                  event_023,
+              'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
-              'Red Scare/Purge':            event_031,
-              'Nuclear Test Ban':           event_034,
-              'Central America Scoring':    event_037,
-              'Southeast Asia Scoring':     event_038,
-              'Arms Race':                  event_039,
-              'Kitchen Debates':            event_048,
-              'Brezhnev Doctrine':          event_051,
-              'Portuguese Empire Crumbles': event_052,
-              'Allende':                    event_054,
-              'Willy Brandt':               event_055,
-              'Cultural Revolution':        event_058,
-              'OPEC':                       event_061,
-              'Panama Canal Returned':      event_064,
-              'John Paul II Elected Pope':  event_068,
-              'Nixon Plays the China Card': event_071,
-              'Sadat Expels Soviets':       event_072,
-              'Alliance for Progress':      event_078,
-              'Africa Scoring':             event_079,
-              '"One Small Step..."':        event_080,
-              'South America Scoring':      event_081,
-              'Iranian Hostage Crisis':     event_082,
-              'The Iron Lady':              event_083,
-              'Reagan Bombs Libya':         event_084,
-              'Terrorism':                  event_092,
-              'Solidarity':                 event_101}
+              'Red Scare/Purge':                event_031,
+              'Nuclear Test Ban':               event_034,
+              'Central America Scoring':        event_037,
+              'Southeast Asia Scoring':         event_038,
+              'Arms Race':                      event_039,
+              'Kitchen Debates':                event_048,
+              'Brezhnev Doctrine':              event_051,
+              'Portuguese Empire Crumbles':     event_052,
+              'Allende':                        event_054,
+              'Willy Brandt':                   event_055,
+              'Cultural Revolution':            event_058,
+              'OPEC':                           event_061,
+              'Panama Canal Returned':          event_064,
+              'John Paul II Elected Pope':      event_068,
+              'Nixon Plays the China Card':     event_071,
+              'Sadat Expels Soviets':           event_072,
+              'Alliance for Progress':          event_078,
+              'Africa Scoring':                 event_079,
+              '"One Small Step..."':            event_080,
+              'South America Scoring':          event_081,
+              'Iranian Hostage Crisis':         event_082,
+              'The Iron Lady':                  event_083,
+              'Reagan Bombs Libya':             event_084,
+              'Terrorism':                      event_092,
+              'Solidarity':                     event_101}
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
@@ -1320,6 +1377,138 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
+    # Functions to place influence
+    def action_place_influence(self, card, ops, side):
+        placement_completed = False
+        while not placement_completed:
+            influence_to_place = ops
+            target_list = []
+            possible_targets = self.accessible_countries(side)
+            cancelled = False
+
+            while influence_to_place > 0:
+                print("Place {i} influence".format(i=influence_to_place))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    cancelled = True
+                    break
+                amount = self.select_influence_amount(target, influence_to_place)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                possible_targets.remove(target)
+                influence_to_place = influence_to_place - amount
+
+            if cancelled:
+                break
+            elif self.check_influence_targets(target_list, side):
+                if influence_to_place == 0:
+                    confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.place_influence_from_list(target_list, side)
+                        placement_completed = True
+                        self.action_round_complete = True
+            else:
+                user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
+                if user_input == 'n':
+                    break
+
+    def ask_to_place_influence(self, country_list, influence, side, max_inf=None):
+        placement_completed = False
+        while not placement_completed:
+            influence_to_place = influence
+            target_list = []
+            possible_targets = []
+            for country in country_list:
+                possible_targets.append(country)
+
+            while influence_to_place > 0:
+                print("Place {i} influence".format(i=influence_to_place))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                amount = self.select_influence_amount(target, influence_to_place, max_inf)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                possible_targets.remove(target)
+                influence_to_place = influence_to_place - amount
+            print('a')
+
+            if self.check_influence_targets(target_list, side):
+                if influence_to_place == 0:
+                    confirmation = self.confirm_action("","to place influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.place_influence_from_list(target_list, side)
+                        placement_completed = True
+                        self.action_round_complete = True
+            else:
+                user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
+                if user_input == 'n':
+                    break
+
+    def place_influence_from_list(self, country_list, side):
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            influence_used = 0
+            while influence_used < amount:
+                if country.controlled == self.opponent[side]:
+                    self.add_influence(country.name, side, 1)
+                    influence_used = influence_used + 2
+                else:
+                    self.add_influence(country.name, side, 1)
+                    influence_used = influence_used + 1
+
+    def check_enough_influence(self, country, side, influence):
+        eligible = True
+        side_inf = self.get_influence(country.name, side)
+        opp_inf = self.get_opponent_influence(country.name, side)
+        stability = country.stability
+        influence_to_add = influence
+
+        while influence_to_add > 0:
+            if (opp_inf - side_inf) >= stability:
+                if influence_to_add < 2:
+                    eligible = False
+                    break
+                else:
+                    side_inf = side_inf + 1
+                    influence_to_add = influence_to_add - 2
+            else:
+                influence_to_add = influence_to_add - 1
+
+        return eligible
+
+    def check_influence_targets(self, country_list, side):
+        eligible = True
+
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            if not self.check_enough_influence(country, side, amount):
+                eligible = False
+
+        return eligible
+
+    def select_influence_amount(self, country, ops, max_inf=None):
+        influence_amount = None
+        while True:
+            user_input = input("How much influence to place in {c}: ".format(c=country.name))
+            if user_input.isdigit():
+                selection_amount = int(user_input)
+                if max_inf is None:
+                    if selection_amount <= ops:
+                        influence_amount = selection_amount
+                        break
+                else:
+                    if selection_amount <= ops and selection_amount <= max_inf:
+                        influence_amount = selection_amount
+                        break
+            elif user_input.lower() == 'x':
+                break
+        return influence_amount
+
     # Functions to manage action rounds
     def action_round(self, side):
         log_string = "{s} ACTION ROUND".format(s=side.upper())
@@ -1339,8 +1528,7 @@ class TwilightStruggleGame(CardGame):
             elif selected_action == 'c':
                 self.action_coup_attempt(selected_card, adjusted_card_ops, side)
             elif selected_action == 'i':
-                # TODO - add place influence function
-                break
+                self.action_place_influence(selected_card, adjusted_card_ops, side)
             elif selected_action == 'r':
                 # TODO - add realignment function
                 break
@@ -1496,4 +1684,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Europe Scoring'])
+# g.action_round('ussr')
+g.trigger_event(g.cards['Independent Reds'])
