@@ -685,6 +685,15 @@ class TwilightStruggleGame(CardGame):
 
         return len(country_list)
 
+    def adjacent_country_objects(self, country):
+        adjacent_country_strings = country.borders
+        adjacent_country_objects = []
+
+        for country in adjacent_country_strings:
+            adjacent_country_objects.append(self.countries[country])
+
+        return adjacent_country_objects
+
     # Functions for moving cards around
     def which_pile(self, c):
         for pile in self.piles:
@@ -1036,7 +1045,7 @@ class TwilightStruggleGame(CardGame):
     def event_014(self):
         """Comecon"""
         eligible_countries = self.not_opponent_controlled_in_subregion('Eastern Europe', 'ussr')
-        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1)
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 1)
 
     def event_015(self):
         """Nasser"""
@@ -1083,7 +1092,7 @@ class TwilightStruggleGame(CardGame):
     def event_023(self):
         """Marshall Plan"""
         eligible_countries = self.not_opponent_controlled_in_subregion('Western Europe', 'usa')
-        self.ask_to_place_influence(eligible_countries, 7, 'usa', 1)
+        self.ask_to_place_influence(eligible_countries, 7, 'usa', 1, 1)
 
     def event_025(self):
         """Containment"""
@@ -1096,7 +1105,7 @@ class TwilightStruggleGame(CardGame):
     def event_030(self):
         """Decolonization"""
         eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
-        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1)
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 1)
 
     def event_031(self):
         """Red Scare/Purge"""
@@ -1144,6 +1153,18 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Angola', 'ussr', 2)
         self.add_influence('SE African States', 'ussr', 2)
 
+    def event_053(self):
+        """South African Unrest"""
+        options = [['a', "USSR adds 2 influence to South Africa"],
+                   ['b', "USSR adds 1 influence to South Africa and 2 to a single country adjacent to South Africa"]]
+        response = self.select_option(options)
+        if response == 'a':
+            self.add_influence('South Africa', 'ussr', 2)
+        elif response == 'b':
+            self.add_influence('South Africa', 'ussr', 1)
+            targets = self.adjacent_country_objects(self.countries['South Africa'])
+            self.ask_to_place_influence(targets, 2, 'ussr', 2, 2)
+
     def event_054(self):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
@@ -1173,6 +1194,7 @@ class TwilightStruggleGame(CardGame):
                 points += 1
 
         self.change_score_by_side('ussr', points)
+
 
     def event_064(self):
         """Panama Canal Returned"""
@@ -1419,7 +1441,7 @@ class TwilightStruggleGame(CardGame):
                 if user_input == 'n':
                     break
 
-    def ask_to_place_influence(self, country_list, influence, side, max_inf=None):
+    def ask_to_place_influence(self, country_list, influence, side, min_inf=None, max_inf=None):
         placement_completed = False
         while not placement_completed:
             influence_to_place = influence
@@ -1433,7 +1455,7 @@ class TwilightStruggleGame(CardGame):
                 target = self.select_a_country(possible_targets)
                 if target is None:
                     break
-                amount = self.select_influence_amount(target, influence_to_place, max_inf)
+                amount = self.select_influence_amount(target, influence_to_place, min_inf, max_inf)
                 if amount is None:
                     break
                 target_list.append([target, amount])
@@ -1496,18 +1518,26 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
-    def select_influence_amount(self, country, ops, max_inf=None):
+    def select_influence_amount(self, country, ops, min_inf=None, max_inf=None):
         influence_amount = None
         while True:
             user_input = input("How much influence to place in {c}: ".format(c=country.name))
             if user_input.isdigit():
                 selection_amount = int(user_input)
-                if max_inf is None:
+                if max_inf is None and min_inf is None:
                     if selection_amount <= ops:
                         influence_amount = selection_amount
                         break
-                else:
+                elif min_inf is None:
                     if selection_amount <= ops and selection_amount <= max_inf:
+                        influence_amount = selection_amount
+                        break
+                elif max_inf is None:
+                    if selection_amount <= ops and selection_amount >= min_inf:
+                        influence_amount = selection_amount
+                        break
+                else:
+                    if selection_amount <= ops and selection_amount >= min_inf and selection_amount <= max_inf:
                         influence_amount = selection_amount
                         break
             elif user_input.lower() == 'x':
@@ -1617,7 +1647,7 @@ class TwilightStruggleGame(CardGame):
             available_options.append(option[0])
 
         while True:
-            user_input = input("Selection: ")
+            user_input = input("Selection: ").lower()
             if user_input in available_options:
                 return user_input
                 break
@@ -1705,4 +1735,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Decolonization'])
+g.trigger_event(g.cards['Marshall Plan'])
+# g.event_053()
