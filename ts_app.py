@@ -282,7 +282,7 @@ class TwilightStruggleGame(CardGame):
                             'ussr': 'USSR China'}
         self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
                          'Solidarity':  ['John Paul II Elected Pope']}
-        self.prevents = {'Arab Israeli War':        'Camp David Accords',
+        self.prevents = {'Arab-Israeli War':        'Camp David Accords',
                          'Socialist Governments':   'The Iron Lady',
                          'OPEC':                    'North Sea Oil',
                          'Willy Brandt':            'Tear Down this Wall',
@@ -1206,6 +1206,13 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Costa Rica', 'usa', 1)
         self.add_influence('Venezuela', 'usa', 1)
 
+    def event_065(self):
+        """Camp David Accords"""
+        self.change_score_by_side('usa', 1)
+        self.add_influence('Israel', 'usa', 1)
+        self.add_influence('Jordan', 'usa', 1)
+        self.add_influence('Egypt', 'usa', 1)
+
     def event_068(self):
         """John Paul II Elected Pope"""
         self.remove_influence('Poland', 'ussr', 2)
@@ -1311,6 +1318,7 @@ class TwilightStruggleGame(CardGame):
               'OPEC':                           event_061,
               'Colonial Rear Guards':           event_063,
               'Panama Canal Returned':          event_064,
+              'Camp David Accords':             event_065,
               'John Paul II Elected Pope':      event_068,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
@@ -1741,5 +1749,4 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Colonial Rear Guards'])
-# g.event_053()
+g.trigger_event(g.cards['Arab-Israeli War'])
