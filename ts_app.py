@@ -1343,6 +1343,7 @@ class TwilightStruggleGame(CardGame):
               'Europe Scoring':                 event_002,
               'Middle East Scoring':            event_003,
               'Duck and Cover':                 event_004,
+              'Socialist Governments':          event_007,
               'Fidel':                          event_008,
               'Korean War':                     event_011,
               'Romanian Abdication':            event_012,
