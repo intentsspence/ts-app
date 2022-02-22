@@ -597,6 +597,8 @@ class TwilightStruggleGame(CardGame):
         for country in self.countries.values():
             if country.subregion == subregion:
                 countries_in_subregion.append(country)
+            if (subregion == 'Eastern Europe' or subregion == 'Western Europe') and country.subregion == 'Both Europe':
+                countries_in_subregion.append(country)
 
         return countries_in_subregion
 
@@ -1071,7 +1073,6 @@ class TwilightStruggleGame(CardGame):
         elif response == 'b':
             self.ask_to_place_influence(eligible_countries, 5, 'ussr', 1, 2)
 
-
     def event_017(self):
         """De Gaulle Leads France"""
         self.remove_influence('France', 'usa', 2)
@@ -1137,6 +1138,14 @@ class TwilightStruggleGame(CardGame):
         """Suez Crisis"""
         eligible_countries = [self.countries['France'], self.countries['UK'], self.countries['Israel']]
         self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 2)
+
+    def event_029(self):
+        """East European Unrest"""
+        eligible_countries = self.countries_in_subregion('Eastern Europe')
+        if self.turn < 8:
+            self.ask_to_remove_influence(eligible_countries, 3, 'usa', 1, 1)
+        elif self.turn >=8:
+            self.ask_to_remove_influence(eligible_countries, 6, 'usa', 2, 2)
 
     def event_030(self):
         """Decolonization"""
@@ -1390,6 +1399,7 @@ class TwilightStruggleGame(CardGame):
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
               'Suez Crisis':                    event_028,
+              'East European Unrest':           event_029,
               'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
               'Nuclear Test Ban':               event_034,
@@ -1943,8 +1953,9 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.trigger_event(g.cards['NATO'])
 # g.trigger_event(g.cards['AWACS Sale to Saudis'])
 # g.action_round('ussr')
-g.add_influence('E. Germany', 'usa', 3)
+g.add_influence('E. Germany', 'ussr', 3)
 g.add_influence('Poland', 'ussr', 2)
-g.add_influence_to_control('Yugoslavia', 'usa')
-g.trigger_event(g.cards['Suez Crisis'])
+g.add_influence_to_control('Yugoslavia', 'ussr')
+g.turn = 8
+g.trigger_event(g.cards['East European Unrest'])
 
