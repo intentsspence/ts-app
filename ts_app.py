@@ -1295,6 +1295,14 @@ class TwilightStruggleGame(CardGame):
         points = self.countries['Libya'].ussr_influence // 2
         self.change_score_by_side('usa', points)
 
+    def event_087(self):
+        """The Reformer"""
+        eligible_countries = self.countries_in_region('Europe')
+        if self.score < 0:
+            self.ask_to_place_influence(eligible_countries, 6, 'ussr', 1, 2)
+        else:
+            self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 2)
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -1357,6 +1365,7 @@ class TwilightStruggleGame(CardGame):
               'Iranian Hostage Crisis':         event_082,
               'The Iron Lady':                  event_083,
               'Reagan Bombs Libya':             event_084,
+              'The Reformer':                   event_087,
               'Terrorism':                      event_092,
               'Solidarity':                     event_101}
 
