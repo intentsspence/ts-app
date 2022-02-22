@@ -1448,10 +1448,16 @@ class TwilightStruggleGame(CardGame):
                             if country.region == 'Middle East':
                                 eligible = False
 
+        # Effect 021 - NATO
         if country.nato and country.controlled == 'usa':
             eligible = False
 
+        # Effect 027 - US/Japan Mutual Defense Pact
         if country.name == 'Japan' and self.cards['US/Japan Mutual Defense Pact'].effect_active:
+            eligible = False
+
+        # Effect 087 - The Reformer
+        if country.region == 'Europe' and self.cards['The Reformer'].effect_active:
             eligible = False
 
         return eligible
@@ -1786,5 +1792,7 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Liberation Theology'])
+# g.score = -1
+# g.trigger_event(g.cards['The Reformer'])
+g.action_round('ussr')
 
