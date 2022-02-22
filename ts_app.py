@@ -1562,7 +1562,13 @@ class TwilightStruggleGame(CardGame):
                     self.add_influence(country.name, side, 1)
                     influence_used = influence_used + 1
 
-    def check_enough_influence(self, country, side, influence):
+    def remove_influence_from_list(self, country_list, side):
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            self.remove_influence(country.name, self.opponent[side], amount)
+
+    def check_enough_influence_to_add(self, country, side, influence):
         eligible = True
         side_inf = self.get_influence(country.name, side)
         opp_inf = self.get_opponent_influence(country.name, side)
@@ -1588,7 +1594,7 @@ class TwilightStruggleGame(CardGame):
         for item in country_list:
             country = item[0]
             amount = item[1]
-            if not self.check_enough_influence(country, side, amount):
+            if not self.check_enough_influence_to_add(country, side, amount):
                 eligible = False
 
         return eligible
