@@ -686,6 +686,7 @@ class TwilightStruggleGame(CardGame):
         return len(country_list)
 
     def adjacent_country_objects(self, country):
+        """Converts a country's list of borders from strings to the corresponding country objects"""
         adjacent_country_strings = country.borders
         adjacent_country_objects = []
 
@@ -1317,6 +1318,17 @@ class TwilightStruggleGame(CardGame):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
 
+    def event_105(self):
+        """Special Relationship"""
+        if self.countries['UK'].controlled == 'usa':
+            if self.cards['NATO'].effect_active:
+                eligible_countries = self.countries_in_subregion('Western Europe')
+                self.ask_to_place_influence(eligible_countries, 2, 'usa', 2, 2)
+                self.change_score_by_side('usa', 2)
+            else:
+                eligible_countries = self.adjacent_country_objects(self.countries['UK'])
+                self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
+
     # Dictionary of the events
     events = {'Asia Scoring':                   event_001,
               'Europe Scoring':                 event_002,
@@ -1367,7 +1379,8 @@ class TwilightStruggleGame(CardGame):
               'Reagan Bombs Libya':             event_084,
               'The Reformer':                   event_087,
               'Terrorism':                      event_092,
-              'Solidarity':                     event_101}
+              'Solidarity':                     event_101,
+              'Special Relationship':           event_105}
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
@@ -1792,7 +1805,8 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-# g.score = -1
-# g.trigger_event(g.cards['The Reformer'])
-g.action_round('ussr')
+g.cards['Marshall Plan'].played = True
+g.trigger_event(g.cards['NATO'])
+g.trigger_event(g.cards['Special Relationship'])
+# g.action_round('ussr')
 
