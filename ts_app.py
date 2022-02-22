@@ -1213,6 +1213,20 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Jordan', 'usa', 1)
         self.add_influence('Egypt', 'usa', 1)
 
+    def event_066(self):
+        """Puppet Governments"""
+        all_countries = self.countries.values()
+        usa_counties = self.countries_with_influence('usa')
+        ussr_countries = self.countries_with_influence('ussr')
+        eligible_countries = []
+
+        for country in all_countries:
+            if country not in usa_counties and country not in ussr_countries:
+                eligible_countries.append(country)
+
+        if len(eligible_countries) > 0:
+            self.ask_to_place_influence(eligible_countries, 3, 'usa', 1, 1)
+
     def event_068(self):
         """John Paul II Elected Pope"""
         self.remove_influence('Poland', 'ussr', 2)
@@ -1319,6 +1333,7 @@ class TwilightStruggleGame(CardGame):
               'Colonial Rear Guards':           event_063,
               'Panama Canal Returned':          event_064,
               'Camp David Accords':             event_065,
+              'Puppet Governments':             event_066,
               'John Paul II Elected Pope':      event_068,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
@@ -1749,4 +1764,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Arab-Israeli War'])
+g.trigger_event(g.cards['Puppet Governments'])
+
