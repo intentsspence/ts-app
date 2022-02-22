@@ -1588,6 +1588,15 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
+    def check_enough_influence_to_remove(self, country, side, influence):
+        eligible = True
+        opp_inf = self.get_opponent_influence(country.name, side)
+
+        if opp_inf < influence:
+            eligible = False
+
+        return eligible
+
     def check_influence_targets(self, country_list, side):
         eligible = True
 
