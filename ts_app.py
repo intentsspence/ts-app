@@ -1329,6 +1329,10 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.adjacent_country_objects(self.countries['UK'])
                 self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
 
+    def event_110(self):
+        """AWACS Sale to Saudis"""
+        self.add_influence('Saudi Arabia', 'usa', 2)
+
     # Dictionary of the events
     events = {'Asia Scoring':                   event_001,
               'Europe Scoring':                 event_002,
@@ -1380,7 +1384,8 @@ class TwilightStruggleGame(CardGame):
               'The Reformer':                   event_087,
               'Terrorism':                      event_092,
               'Solidarity':                     event_101,
-              'Special Relationship':           event_105}
+              'Special Relationship':           event_105,
+              'AWACS Sale to Saudis':           event_110}
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
@@ -1805,8 +1810,8 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.cards['Marshall Plan'].played = True
-g.trigger_event(g.cards['NATO'])
-g.trigger_event(g.cards['Special Relationship'])
+# g.cards['Marshall Plan'].played = True
+# g.trigger_event(g.cards['NATO'])
+g.trigger_event(g.cards['AWACS Sale to Saudis'])
 # g.action_round('ussr')
 
