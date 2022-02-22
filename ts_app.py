@@ -1232,6 +1232,11 @@ class TwilightStruggleGame(CardGame):
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
 
+    def event_070(self):
+        """OAS Founded"""
+        eligible_countries = self.countries_in_region('Central America') + self.countries_in_region('South America')
+        self.ask_to_place_influence(eligible_countries, 2, 'usa', 1, 2)
+
     def event_071(self):
         """Nixon Plays the China Card"""
         if self.cards['China'] in self.piles['USSR China'].get_cards_in_pile().values():
@@ -1335,6 +1340,7 @@ class TwilightStruggleGame(CardGame):
               'Camp David Accords':             event_065,
               'Puppet Governments':             event_066,
               'John Paul II Elected Pope':      event_068,
+              'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
               'Alliance for Progress':          event_078,
@@ -1764,5 +1770,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.trigger_event(g.cards['Puppet Governments'])
+g.trigger_event(g.cards['OAS Founded'])
 
