@@ -1060,6 +1060,15 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Egypt', 'ussr', 2)
         self.remove_influence('Egypt', 'usa', inf_to_remove)
 
+    # def event_016(self):
+    #     """Warsaw Pact Formed"""
+    #     options = [['a', "Remove all USA influence from 4 countries in Eastern Europe"],
+    #                ['b', "Add 5 USSR influence in Eastern Europe, no more than 2 per country"]]
+    #     response = self.select_option(options)
+    #     if response == 'a':
+    #         self.ask_to_remove_influence()
+
+
     def event_017(self):
         """De Gaulle Leads France"""
         self.remove_influence('France', 'usa', 2)
@@ -1587,6 +1596,35 @@ class TwilightStruggleGame(CardGame):
             else:
                 print('Invalid influence removal. Restart influence removal')
 
+    def ask_to_remove_all_influence(self, country_list, number_of_countries, side):
+        removal_completed = False
+        while not removal_completed:
+            countries_to_remove = number_of_countries
+            target_list = []
+            possible_targets = []
+            for country in country_list:
+                if self.get_opponent_influence(country.name, side) > 0:
+                    possible_targets.append(country)
+
+            while countries_to_remove > 0:
+                print("Remove all influence in {n} countries".format(n=countries_to_remove))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                target_list.append([target])
+                possible_targets.remove(target)
+                countries_to_remove = countries_to_remove - 1
+                if len(possible_targets) == 0:
+                    break
+
+            if self.check_influence_targets_remove(target_list, side):
+                if countries_to_remove == 0 or len(possible_targets) == 0:
+                    confirmation = self.confirm_action("", "to remove all influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.remove_all_influence_from_list(target_list, side)
+                        removal_completed = True
+            else:
+                print('Invalid influence removal. Restart influence removal')
 
     def place_influence_from_list(self, country_list, side):
         for item in country_list:
@@ -1606,6 +1644,10 @@ class TwilightStruggleGame(CardGame):
             country = item[0]
             amount = item[1]
             self.remove_influence(country.name, self.opponent[side], amount)
+
+    def remove_add_influence_from_list(self, country_list, side):
+        for country in country_list:
+            self.remove_all_influence(country.name, self.opponent[side])
 
     def check_enough_influence_to_add(self, country, side, influence):
         eligible = True
