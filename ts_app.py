@@ -1082,6 +1082,19 @@ class TwilightStruggleGame(CardGame):
         """Captured Nazi Scientist"""
         self.increase_space_level(self.phasing)
 
+    def event_019(self):
+        """Truman Doctrine"""
+        europe_countries = self.countries_in_region('Europe')
+        usa_controlled = self.controlled_in_region('Europe', 'usa')
+        ussr_controlled = self.controlled_in_region('Europe', 'ussr')
+        eligible_countries = []
+
+        for country in europe_countries:
+            if country not in usa_controlled and country not in ussr_controlled:
+                eligible_countries.append(country)
+
+        self.ask_to_remove_all_influence(eligible_countries, 1, 'usa')
+
     def event_021(self):
         """NATO"""
         countries = self.countries_in_region('Europe')
@@ -1365,6 +1378,7 @@ class TwilightStruggleGame(CardGame):
               'Warsaw Pact Formed':             event_016,
               'De Gaulle Leads France':         event_017,
               'Captured Nazi Scientist':        event_018,
+              'Truman Doctrine':                event_019,
               'NATO':                           event_021,
               'Independent Reds':               event_022,
               'Marshall Plan':                  event_023,
@@ -1622,7 +1636,8 @@ class TwilightStruggleGame(CardGame):
                     break
 
             if countries_to_remove == 0 or len(possible_targets) == 0:
-                confirmation = self.confirm_action("", "to remove all influence in {t}".format(t=target_list))
+                confirmation = self.confirm_action("", "to remove all {s} influence in {t}".format(t=target_list,
+                                                                                                   s=self.opponent[side].upper()))
                 if confirmation:
                     self.remove_all_influence_from_list(target_list, side)
                     removal_completed = True
@@ -1922,8 +1937,8 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.trigger_event(g.cards['NATO'])
 # g.trigger_event(g.cards['AWACS Sale to Saudis'])
 # g.action_round('ussr')
-g.add_influence_to_control('E. Germany', 'usa')
-g.add_influence_to_control('Poland', 'usa')
+g.add_influence('E. Germany', 'usa', 3)
+g.add_influence('Poland', 'ussr', 2)
 g.add_influence_to_control('Yugoslavia', 'usa')
-g.event_016()
+g.event_019()
 
