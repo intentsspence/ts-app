@@ -1133,6 +1133,11 @@ class TwilightStruggleGame(CardGame):
         """US/Japan Mutual Defense Pact"""
         self.add_influence_to_control('Japan', 'usa')
 
+    def event_028(self):
+        """Suez Crisis"""
+        eligible_countries = [self.countries['France'], self.countries['UK'], self.countries['Israel']]
+        self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 2)
+
     def event_030(self):
         """Decolonization"""
         eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
@@ -1384,6 +1389,7 @@ class TwilightStruggleGame(CardGame):
               'Marshall Plan':                  event_023,
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
+              'Suez Crisis':                    event_028,
               'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
               'Nuclear Test Ban':               event_034,
@@ -1940,5 +1946,5 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('E. Germany', 'usa', 3)
 g.add_influence('Poland', 'ussr', 2)
 g.add_influence_to_control('Yugoslavia', 'usa')
-g.event_019()
+g.trigger_event(g.cards['Suez Crisis'])
 
