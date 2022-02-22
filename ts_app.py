@@ -1220,6 +1220,19 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('W. Germany', 'ussr', 1)
         self.countries['W. Germany'].nato = False
 
+    def event_056(self):
+        """Muslim Revolution"""
+        eligible_countries = [self.countries["Sudan"],
+                              self.countries["Iran"],
+                              self.countries["Iraq"],
+                              self.countries["Egypt"],
+                              self.countries["Libya"],
+                              self.countries["Saudi Arabia"],
+                              self.countries["Syria"],
+                              self.countries["Jordan"]]
+
+        self.ask_to_remove_all_influence(eligible_countries, 2, 'ussr')
+
     def event_058(self):
         """Cultural Revolution"""
         if self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
@@ -1412,6 +1425,7 @@ class TwilightStruggleGame(CardGame):
               'South African Unrest':           event_053,
               'Allende':                        event_054,
               'Willy Brandt':                   event_055,
+              'Muslim Revolution':              event_056,
               'Cultural Revolution':            event_058,
               'OPEC':                           event_061,
               'Colonial Rear Guards':           event_063,
@@ -1948,14 +1962,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.action_round('ussr')
-# g.cards['Marshall Plan'].played = True
-# g.trigger_event(g.cards['NATO'])
-# g.trigger_event(g.cards['AWACS Sale to Saudis'])
-# g.action_round('ussr')
-g.add_influence('E. Germany', 'ussr', 3)
 g.add_influence('Poland', 'ussr', 2)
-g.add_influence_to_control('Yugoslavia', 'ussr')
-g.turn = 8
-g.trigger_event(g.cards['East European Unrest'])
-
+g.add_influence_to_control('Iraq', 'usa')
+g.trigger_event(g.cards['Muslim Revolution'])
