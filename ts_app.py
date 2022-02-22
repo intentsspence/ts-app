@@ -1504,7 +1504,7 @@ class TwilightStruggleGame(CardGame):
 
             if cancelled:
                 break
-            elif self.check_influence_targets(target_list, side):
+            elif self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
                     confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
                     if confirmation:
@@ -1537,15 +1537,46 @@ class TwilightStruggleGame(CardGame):
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
 
-            if self.check_influence_targets(target_list, side):
+            if self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
                     confirmation = self.confirm_action("","to place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
-                        self.action_round_complete = True
             else:
                 user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
+                if user_input == 'n':
+                    break
+
+    def ask_to_remove_influence(self, country_list, influence, side, min_inf=None, max_inf=None):
+        removal_completed = False
+        while not removal_completed:
+            influence_to_remove = influence
+            target_list = []
+            possible_targets = []
+            for country in country_list:
+                possible_targets.append(country)
+
+            while influence_to_remove > 0:
+                print("Remove {i} influence".format(i=influence_to_remove))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                amount = self.select_influence_amount(target, influence_to_remove, min_inf, max_inf)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                possible_targets.remove(target)
+                influence_to_remove = influence_to_remove - amount
+
+            if self.check_influence_targets_remove(target_list, side):
+                if influence_to_remove == 0:
+                    confirmation = self.confirm_action("", "to remove influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.remove_influence_from_list(target_list, side)
+                        removal_completed = True
+            else:
+                user_input = input('Invalid influence removal. Restart influence removal? (y/n): ').lower()
                 if user_input == 'n':
                     break
 
@@ -1597,13 +1628,24 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
-    def check_influence_targets(self, country_list, side):
+    def check_influence_targets_add(self, country_list, side):
         eligible = True
 
         for item in country_list:
             country = item[0]
             amount = item[1]
             if not self.check_enough_influence_to_add(country, side, amount):
+                eligible = False
+
+        return eligible
+
+    def check_influence_targets_remove(self, country_list, side):
+        eligible = True
+
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            if not self.check_enough_influence_to_remove(country, side, amount):
                 eligible = False
 
         return eligible
