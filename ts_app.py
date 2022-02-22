@@ -1025,6 +1025,11 @@ class TwilightStruggleGame(CardGame):
         points = 5 - self.defcon
         self.change_score_by_side('usa', points)
 
+    def event_007(self):
+        """Socialist Governments"""
+        eligible_countries = self.countries_in_subregion('Western Europe')
+        self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 2)
+
     def event_008(self):
         """Fidel"""
         self.remove_all_influence('Cuba', 'usa')
@@ -1555,7 +1560,8 @@ class TwilightStruggleGame(CardGame):
             target_list = []
             possible_targets = []
             for country in country_list:
-                possible_targets.append(country)
+                if self.get_opponent_influence(country.name, side) > 0:
+                    possible_targets.append(country)
 
             while influence_to_remove > 0:
                 print("Remove {i} influence".format(i=influence_to_remove))
@@ -1576,9 +1582,8 @@ class TwilightStruggleGame(CardGame):
                         self.remove_influence_from_list(target_list, side)
                         removal_completed = True
             else:
-                user_input = input('Invalid influence removal. Restart influence removal? (y/n): ').lower()
-                if user_input == 'n':
-                    break
+                print('Invalid influence removal. Restart influence removal')
+
 
     def place_influence_from_list(self, country_list, side):
         for item in country_list:
@@ -1653,7 +1658,7 @@ class TwilightStruggleGame(CardGame):
     def select_influence_amount(self, country, ops, min_inf=None, max_inf=None):
         influence_amount = None
         while True:
-            user_input = input("How much influence to place in {c}: ".format(c=country.name))
+            user_input = input("How much influence in {c}: ".format(c=country.name))
             if user_input.isdigit():
                 selection_amount = int(user_input)
                 if max_inf is None and min_inf is None:
@@ -1869,6 +1874,8 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 # g.cards['Marshall Plan'].played = True
 # g.trigger_event(g.cards['NATO'])
-g.trigger_event(g.cards['AWACS Sale to Saudis'])
+# g.trigger_event(g.cards['AWACS Sale to Saudis'])
 # g.action_round('ussr')
+g.add_influence_to_control('W. Germany', 'usa')
+g.event_007()
 
