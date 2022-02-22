@@ -1574,9 +1574,11 @@ class TwilightStruggleGame(CardGame):
                 target_list.append([target, amount])
                 possible_targets.remove(target)
                 influence_to_remove = influence_to_remove - amount
+                if len(possible_targets) == 0:
+                    break
 
             if self.check_influence_targets_remove(target_list, side):
-                if influence_to_remove == 0:
+                if influence_to_remove == 0 or len(possible_targets) == 0:
                     confirmation = self.confirm_action("", "to remove influence in {t}".format(t=target_list))
                     if confirmation:
                         self.remove_influence_from_list(target_list, side)
@@ -1876,6 +1878,6 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.trigger_event(g.cards['NATO'])
 # g.trigger_event(g.cards['AWACS Sale to Saudis'])
 # g.action_round('ussr')
-g.add_influence_to_control('W. Germany', 'usa')
+# g.add_influence_to_control('W. Germany', 'usa')
 g.event_007()
 
