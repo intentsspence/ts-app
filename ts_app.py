@@ -1392,6 +1392,12 @@ class TwilightStruggleGame(CardGame):
         self.change_score_by_side('usa', 1)
         self.cards['Flower Power'].effect_active = False
 
+    def event_099(self):
+        """Pershing II Deployed"""
+        eligible_countries = self.countries_in_subregion('Western Europe')
+        self.change_score_by_side('ussr', 1)
+        self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 1)
+
     def event_101(self):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
@@ -1470,6 +1476,7 @@ class TwilightStruggleGame(CardGame):
               'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
               '"An Evil Empire"':               event_097,
+              'Pershing II Deployed':           event_099,
               'Solidarity':                     event_101,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
@@ -1987,9 +1994,6 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Poland', 'ussr', 2)
-g.add_influence_to_control('Iraq', 'usa')
-g.add_influence_to_control('Lebanon', 'usa')
-g.cards["Flower Power"].effect_active = True
-print(g.cards["Flower Power"].effect_active)
-g.trigger_event(g.cards['"An Evil Empire"'])
-print(g.cards["Flower Power"].effect_active)
+g.add_influence_to_control('W. Germany', 'usa')
+g.add_influence_to_control('Italy', 'usa')
+g.trigger_event(g.cards['Pershing II Deployed'])
