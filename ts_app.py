@@ -1402,6 +1402,34 @@ class TwilightStruggleGame(CardGame):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
 
+    def event_104(self):
+        """The Cambridge Five"""
+        scoring_conversion = {'Asia Scoring': 'Asia',
+                              'Europe Scoring': 'Europe',
+                              'Middle East Scoring': 'Middle East',
+                              'Africa Scoring': 'Africa',
+                              'Central America Scoring': 'Central America',
+                              'South America Scoring': 'South America'}
+
+        eligible_countries = []
+
+        if self.turn < 8:
+            usa_hand = self.piles['USA hand'].get_cards_in_pile()
+            print(usa_hand)
+            for card in usa_hand.values():
+                if card.name == 'Southeast Asia':
+                    country_list = self.countries_in_subregion('Southeast Asia')
+                    for country in country_list:
+                        eligible_countries.append(country)
+                elif card.name in scoring_conversion:
+                    country_list = self.countries_in_region(scoring_conversion[card.name])
+                    for country in country_list:
+                        eligible_countries.append(country)
+
+            print(eligible_countries)
+            if len(eligible_countries) > 0:
+                self.ask_to_place_influence(eligible_countries, 1, 'ussr', 1, 1)
+
     def event_105(self):
         """Special Relationship"""
         if self.countries['UK'].controlled == 'usa':
@@ -1478,6 +1506,7 @@ class TwilightStruggleGame(CardGame):
               '"An Evil Empire"':               event_097,
               'Pershing II Deployed':           event_099,
               'Solidarity':                     event_101,
+              'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
 
@@ -1996,4 +2025,5 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Poland', 'ussr', 2)
 g.add_influence_to_control('W. Germany', 'usa')
 g.add_influence_to_control('Italy', 'usa')
-g.trigger_event(g.cards['Pershing II Deployed'])
+# g.trigger_event(g.cards['Pershing II Deployed'])
+g.event_104()
