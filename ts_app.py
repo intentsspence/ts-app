@@ -1415,18 +1415,18 @@ class TwilightStruggleGame(CardGame):
 
         if self.turn < 8:
             usa_hand = self.piles['USA hand'].get_cards_in_pile()
-            print(usa_hand)
             for card in usa_hand.values():
                 if card.name == 'Southeast Asia':
+                    print(card.name)
                     country_list = self.countries_in_subregion('Southeast Asia')
                     for country in country_list:
                         eligible_countries.append(country)
                 elif card.name in scoring_conversion:
+                    print(card.name)
                     country_list = self.countries_in_region(scoring_conversion[card.name])
                     for country in country_list:
                         eligible_countries.append(country)
 
-            print(eligible_countries)
             if len(eligible_countries) > 0:
                 self.ask_to_place_influence(eligible_countries, 1, 'ussr', 1, 1)
 
@@ -2022,8 +2022,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.add_influence('Poland', 'ussr', 2)
-g.add_influence_to_control('W. Germany', 'usa')
-g.add_influence_to_control('Italy', 'usa')
-# g.trigger_event(g.cards['Pershing II Deployed'])
-g.event_104()
+g.trigger_event(g.cards['The Cambridge Five'])
