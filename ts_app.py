@@ -1126,6 +1126,18 @@ class TwilightStruggleGame(CardGame):
         eligible_countries = self.not_opponent_controlled_in_subregion('Western Europe', 'usa')
         self.ask_to_place_influence(eligible_countries, 7, 'usa', 1, 1)
 
+    def event_024(self):
+        """Indo-Pakistani War"""
+        options = [['i', "Invade India"],
+                   ['p', "Invade Pakistan"]]
+        response = self.select_option(options)
+
+        if response == 'i':
+            self.war_card(self.countries['India'], self.phasing, 4, 2, 2, False)
+        elif response == 'p':
+            self.war_card(self.countries['Pakistan'], self.phasing, 4, 2, 2, False)
+
+
     def event_025(self):
         """Containment"""
         self.sides['usa'].ops_adjustment = 1
@@ -1464,6 +1476,7 @@ class TwilightStruggleGame(CardGame):
               'NATO':                           event_021,
               'Independent Reds':               event_022,
               'Marshall Plan':                  event_023,
+              'Indo-Pakistani War':             event_024,
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
               'Suez Crisis':                    event_028,
@@ -2022,4 +2035,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['The Cambridge Five'])
+g.action_round('ussr')
