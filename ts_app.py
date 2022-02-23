@@ -1137,7 +1137,6 @@ class TwilightStruggleGame(CardGame):
         elif response == 'p':
             self.war_card(self.countries['Pakistan'], self.phasing, 4, 2, 2, False)
 
-
     def event_025(self):
         """Containment"""
         self.sides['usa'].ops_adjustment = 1
@@ -1414,6 +1413,17 @@ class TwilightStruggleGame(CardGame):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
 
+    def event_102(self):
+        """Iran-Iraq War"""
+        options = [['a', "Invade Iran"],
+                   ['b', "Invade Iraq"]]
+        response = self.select_option(options)
+
+        if response == 'a':
+            self.war_card(self.countries['Iran'], self.phasing, 4, 2, 2, False)
+        elif response == 'b':
+            self.war_card(self.countries['Iraq'], self.phasing, 4, 2, 2, False)
+
     def event_104(self):
         """The Cambridge Five"""
         scoring_conversion = {'Asia Scoring': 'Asia',
@@ -1519,6 +1529,7 @@ class TwilightStruggleGame(CardGame):
               '"An Evil Empire"':               event_097,
               'Pershing II Deployed':           event_099,
               'Solidarity':                     event_101,
+              'Iran-Iraq War':                  event_102,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
@@ -2035,4 +2046,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
+g.trigger_event(g.cards['Iran-Iraq War'])
