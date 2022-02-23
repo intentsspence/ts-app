@@ -282,7 +282,7 @@ class TwilightStruggleGame(CardGame):
                             'ussr': 'USSR China'}
         self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
                          'Solidarity':  ['John Paul II Elected Pope']}
-        self.prevents = {'Arab Israeli War':        'Camp David Accords',
+        self.prevents = {'Arab-Israeli War':        'Camp David Accords',
                          'Socialist Governments':   'The Iron Lady',
                          'OPEC':                    'North Sea Oil',
                          'Willy Brandt':            'Tear Down this Wall',
@@ -597,6 +597,8 @@ class TwilightStruggleGame(CardGame):
         for country in self.countries.values():
             if country.subregion == subregion:
                 countries_in_subregion.append(country)
+            if (subregion == 'Eastern Europe' or subregion == 'Western Europe') and country.subregion == 'Both Europe':
+                countries_in_subregion.append(country)
 
         return countries_in_subregion
 
@@ -684,6 +686,16 @@ class TwilightStruggleGame(CardGame):
                 country_list.append(country.name)
 
         return len(country_list)
+
+    def adjacent_country_objects(self, country):
+        """Converts a country's list of borders from strings to the corresponding country objects"""
+        adjacent_country_strings = country.borders
+        adjacent_country_objects = []
+
+        for country in adjacent_country_strings:
+            adjacent_country_objects.append(self.countries[country])
+
+        return adjacent_country_objects
 
     # Functions for moving cards around
     def which_pile(self, c):
@@ -1015,6 +1027,11 @@ class TwilightStruggleGame(CardGame):
         points = 5 - self.defcon
         self.change_score_by_side('usa', points)
 
+    def event_007(self):
+        """Socialist Governments"""
+        eligible_countries = self.countries_in_subregion('Western Europe')
+        self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 2)
+
     def event_008(self):
         """Fidel"""
         self.remove_all_influence('Cuba', 'usa')
@@ -1036,7 +1053,7 @@ class TwilightStruggleGame(CardGame):
     def event_014(self):
         """Comecon"""
         eligible_countries = self.not_opponent_controlled_in_subregion('Eastern Europe', 'ussr')
-        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1)
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 1)
 
     def event_015(self):
         """Nasser"""
@@ -1044,6 +1061,17 @@ class TwilightStruggleGame(CardGame):
         inf_to_remove = math.ceil(usa_inf / 2)
         self.add_influence('Egypt', 'ussr', 2)
         self.remove_influence('Egypt', 'usa', inf_to_remove)
+
+    def event_016(self):
+        """Warsaw Pact Formed"""
+        eligible_countries = self.countries_in_subregion('Eastern Europe')
+        options = [['a', "Remove all USA influence from 4 countries in Eastern Europe"],
+                   ['b', "Add 5 USSR influence in Eastern Europe, no more than 2 per country"]]
+        response = self.select_option(options)
+        if response == 'a':
+            self.ask_to_remove_all_influence(eligible_countries, 4, 'ussr')
+        elif response == 'b':
+            self.ask_to_place_influence(eligible_countries, 5, 'ussr', 1, 2)
 
     def event_017(self):
         """De Gaulle Leads France"""
@@ -1054,6 +1082,19 @@ class TwilightStruggleGame(CardGame):
     def event_018(self):
         """Captured Nazi Scientist"""
         self.increase_space_level(self.phasing)
+
+    def event_019(self):
+        """Truman Doctrine"""
+        europe_countries = self.countries_in_region('Europe')
+        usa_controlled = self.controlled_in_region('Europe', 'usa')
+        ussr_controlled = self.controlled_in_region('Europe', 'ussr')
+        eligible_countries = []
+
+        for country in europe_countries:
+            if country not in usa_controlled and country not in ussr_controlled:
+                eligible_countries.append(country)
+
+        self.ask_to_remove_all_influence(eligible_countries, 1, 'usa')
 
     def event_021(self):
         """NATO"""
@@ -1083,7 +1124,7 @@ class TwilightStruggleGame(CardGame):
     def event_023(self):
         """Marshall Plan"""
         eligible_countries = self.not_opponent_controlled_in_subregion('Western Europe', 'usa')
-        self.ask_to_place_influence(eligible_countries, 7, 'usa', 1)
+        self.ask_to_place_influence(eligible_countries, 7, 'usa', 1, 1)
 
     def event_025(self):
         """Containment"""
@@ -1092,6 +1133,24 @@ class TwilightStruggleGame(CardGame):
     def event_027(self):
         """US/Japan Mutual Defense Pact"""
         self.add_influence_to_control('Japan', 'usa')
+
+    def event_028(self):
+        """Suez Crisis"""
+        eligible_countries = [self.countries['France'], self.countries['UK'], self.countries['Israel']]
+        self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 2)
+
+    def event_029(self):
+        """East European Unrest"""
+        eligible_countries = self.countries_in_subregion('Eastern Europe')
+        if self.turn < 8:
+            self.ask_to_remove_influence(eligible_countries, 3, 'usa', 1, 1)
+        elif self.turn >=8:
+            self.ask_to_remove_influence(eligible_countries, 6, 'usa', 2, 2)
+
+    def event_030(self):
+        """Decolonization"""
+        eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
+        self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 1)
 
     def event_031(self):
         """Red Scare/Purge"""
@@ -1139,6 +1198,18 @@ class TwilightStruggleGame(CardGame):
         self.add_influence('Angola', 'ussr', 2)
         self.add_influence('SE African States', 'ussr', 2)
 
+    def event_053(self):
+        """South African Unrest"""
+        options = [['a', "USSR adds 2 influence to South Africa"],
+                   ['b', "USSR adds 1 influence to South Africa and 2 to a single country adjacent to South Africa"]]
+        response = self.select_option(options)
+        if response == 'a':
+            self.add_influence('South Africa', 'ussr', 2)
+        elif response == 'b':
+            self.add_influence('South Africa', 'ussr', 1)
+            targets = self.adjacent_country_objects(self.countries['South Africa'])
+            self.ask_to_place_influence(targets, 2, 'ussr', 2, 2)
+
     def event_054(self):
         """Allende"""
         self.add_influence('Chile', 'ussr', 2)
@@ -1148,6 +1219,19 @@ class TwilightStruggleGame(CardGame):
         self.change_score_by_side('ussr', 1)
         self.add_influence('W. Germany', 'ussr', 1)
         self.countries['W. Germany'].nato = False
+
+    def event_056(self):
+        """Muslim Revolution"""
+        eligible_countries = [self.countries["Sudan"],
+                              self.countries["Iran"],
+                              self.countries["Iraq"],
+                              self.countries["Egypt"],
+                              self.countries["Libya"],
+                              self.countries["Saudi Arabia"],
+                              self.countries["Syria"],
+                              self.countries["Jordan"]]
+
+        self.ask_to_remove_all_influence(eligible_countries, 2, 'ussr')
 
     def event_058(self):
         """Cultural Revolution"""
@@ -1169,16 +1253,47 @@ class TwilightStruggleGame(CardGame):
 
         self.change_score_by_side('ussr', points)
 
+    def event_063(self):
+        """Colonial Rear Guards"""
+        eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
+        self.ask_to_place_influence(eligible_countries, 4, 'usa', 1, 1)
+
     def event_064(self):
         """Panama Canal Returned"""
         self.add_influence('Panama', 'usa', 1)
         self.add_influence('Costa Rica', 'usa', 1)
         self.add_influence('Venezuela', 'usa', 1)
 
+    def event_065(self):
+        """Camp David Accords"""
+        self.change_score_by_side('usa', 1)
+        self.add_influence('Israel', 'usa', 1)
+        self.add_influence('Jordan', 'usa', 1)
+        self.add_influence('Egypt', 'usa', 1)
+
+    def event_066(self):
+        """Puppet Governments"""
+        all_countries = self.countries.values()
+        usa_counties = self.countries_with_influence('usa')
+        ussr_countries = self.countries_with_influence('ussr')
+        eligible_countries = []
+
+        for country in all_countries:
+            if country not in usa_counties and country not in ussr_countries:
+                eligible_countries.append(country)
+
+        if len(eligible_countries) > 0:
+            self.ask_to_place_influence(eligible_countries, 3, 'usa', 1, 1)
+
     def event_068(self):
         """John Paul II Elected Pope"""
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
+
+    def event_070(self):
+        """OAS Founded"""
+        eligible_countries = self.countries_in_region('Central America') + self.countries_in_region('South America')
+        self.ask_to_place_influence(eligible_countries, 2, 'usa', 1, 2)
 
     def event_071(self):
         """Nixon Plays the China Card"""
@@ -1193,6 +1308,22 @@ class TwilightStruggleGame(CardGame):
         """Sadat Expels Soviets"""
         self.remove_all_influence('Egypt', 'ussr')
         self.add_influence('Egypt', 'usa', 1)
+
+    def event_074(self):
+        """The Voice of America"""
+        eligible_countries = (self.countries_in_region('Asia') +
+                              self.countries_in_region('Middle East') +
+                              self.countries_in_region('Africa') +
+                              self.countries_in_region('Central America') +
+                              self.countries_in_region('South America'))
+
+        self.ask_to_remove_influence(eligible_countries, 4, 'usa', 1, 2)
+
+    def event_075(self):
+        """Liberation Theology"""
+        eligible_countries = self.countries_in_region('Central America')
+        self.ask_to_place_influence(eligible_countries, 3, 'ussr', 1, 2)
+
 
     def event_078(self):
         """Alliance for Progress"""
@@ -1232,6 +1363,20 @@ class TwilightStruggleGame(CardGame):
         points = self.countries['Libya'].ussr_influence // 2
         self.change_score_by_side('usa', points)
 
+    def event_087(self):
+        """The Reformer"""
+        eligible_countries = self.countries_in_region('Europe')
+        if self.score < 0:
+            self.ask_to_place_influence(eligible_countries, 6, 'ussr', 1, 2)
+        else:
+            self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 2)
+
+    def event_088(self):
+        """Marine Barracks Bombing"""
+        eligible_countries = self.countries_in_region('Middle East')
+        self.remove_all_influence('Lebanon', 'usa')
+        self.ask_to_remove_influence(eligible_countries, 2, 'ussr', 1, 2)
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -1242,28 +1387,88 @@ class TwilightStruggleGame(CardGame):
                 discard = self.piles['USA hand'].random_card()
                 self.move_card(discard, 'discard')
 
+    def event_097(self):
+        """An Evil Empire"""
+        self.change_score_by_side('usa', 1)
+        self.cards['Flower Power'].effect_active = False
+
+    def event_099(self):
+        """Pershing II Deployed"""
+        eligible_countries = self.countries_in_subregion('Western Europe')
+        self.change_score_by_side('ussr', 1)
+        self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 1)
+
     def event_101(self):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
+
+    def event_104(self):
+        """The Cambridge Five"""
+        scoring_conversion = {'Asia Scoring': 'Asia',
+                              'Europe Scoring': 'Europe',
+                              'Middle East Scoring': 'Middle East',
+                              'Africa Scoring': 'Africa',
+                              'Central America Scoring': 'Central America',
+                              'South America Scoring': 'South America'}
+
+        eligible_countries = []
+
+        if self.turn < 8:
+            usa_hand = self.piles['USA hand'].get_cards_in_pile()
+            for card in usa_hand.values():
+                if card.name == 'Southeast Asia':
+                    print(card.name)
+                    country_list = self.countries_in_subregion('Southeast Asia')
+                    for country in country_list:
+                        eligible_countries.append(country)
+                elif card.name in scoring_conversion:
+                    print(card.name)
+                    country_list = self.countries_in_region(scoring_conversion[card.name])
+                    for country in country_list:
+                        eligible_countries.append(country)
+
+            if len(eligible_countries) > 0:
+                self.ask_to_place_influence(eligible_countries, 1, 'ussr', 1, 1)
+
+    def event_105(self):
+        """Special Relationship"""
+        if self.countries['UK'].controlled == 'usa':
+            if self.cards['NATO'].effect_active:
+                eligible_countries = self.countries_in_subregion('Western Europe')
+                self.ask_to_place_influence(eligible_countries, 2, 'usa', 2, 2)
+                self.change_score_by_side('usa', 2)
+            else:
+                eligible_countries = self.adjacent_country_objects(self.countries['UK'])
+                self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
+
+    def event_110(self):
+        """AWACS Sale to Saudis"""
+        self.add_influence('Saudi Arabia', 'usa', 2)
 
     # Dictionary of the events
     events = {'Asia Scoring':                   event_001,
               'Europe Scoring':                 event_002,
               'Middle East Scoring':            event_003,
               'Duck and Cover':                 event_004,
+              'Socialist Governments':          event_007,
               'Fidel':                          event_008,
               'Korean War':                     event_011,
               'Romanian Abdication':            event_012,
               'Arab-Israeli War':               event_013,
               'Comecon':                        event_014,
               'Nasser':                         event_015,
+              'Warsaw Pact Formed':             event_016,
               'De Gaulle Leads France':         event_017,
               'Captured Nazi Scientist':        event_018,
+              'Truman Doctrine':                event_019,
               'NATO':                           event_021,
               'Independent Reds':               event_022,
               'Marshall Plan':                  event_023,
               'Containment':                    event_025,
               'US/Japan Mutual Defense Pact':   event_027,
+              'Suez Crisis':                    event_028,
+              'East European Unrest':           event_029,
+              'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
               'Nuclear Test Ban':               event_034,
               'Central America Scoring':        event_037,
@@ -1272,14 +1477,22 @@ class TwilightStruggleGame(CardGame):
               'Kitchen Debates':                event_048,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
+              'South African Unrest':           event_053,
               'Allende':                        event_054,
               'Willy Brandt':                   event_055,
+              'Muslim Revolution':              event_056,
               'Cultural Revolution':            event_058,
               'OPEC':                           event_061,
+              'Colonial Rear Guards':           event_063,
               'Panama Canal Returned':          event_064,
+              'Camp David Accords':             event_065,
+              'Puppet Governments':             event_066,
               'John Paul II Elected Pope':      event_068,
+              'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
+              'The Voice of America':           event_074,
+              'Liberation Theology':            event_075,
               'Alliance for Progress':          event_078,
               'Africa Scoring':                 event_079,
               '"One Small Step..."':            event_080,
@@ -1287,8 +1500,15 @@ class TwilightStruggleGame(CardGame):
               'Iranian Hostage Crisis':         event_082,
               'The Iron Lady':                  event_083,
               'Reagan Bombs Libya':             event_084,
+              'The Reformer':                   event_087,
+              'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
-              'Solidarity':                     event_101}
+              '"An Evil Empire"':               event_097,
+              'Pershing II Deployed':           event_099,
+              'Solidarity':                     event_101,
+              'The Cambridge Five':             event_104,
+              'Special Relationship':           event_105,
+              'AWACS Sale to Saudis':           event_110}
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
@@ -1369,10 +1589,16 @@ class TwilightStruggleGame(CardGame):
                             if country.region == 'Middle East':
                                 eligible = False
 
+        # Effect 021 - NATO
         if country.nato and country.controlled == 'usa':
             eligible = False
 
+        # Effect 027 - US/Japan Mutual Defense Pact
         if country.name == 'Japan' and self.cards['US/Japan Mutual Defense Pact'].effect_active:
+            eligible = False
+
+        # Effect 087 - The Reformer
+        if country.region == 'Europe' and self.cards['The Reformer'].effect_active:
             eligible = False
 
         return eligible
@@ -1401,7 +1627,7 @@ class TwilightStruggleGame(CardGame):
 
             if cancelled:
                 break
-            elif self.check_influence_targets(target_list, side):
+            elif self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
                     confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
                     if confirmation:
@@ -1413,7 +1639,7 @@ class TwilightStruggleGame(CardGame):
                 if user_input == 'n':
                     break
 
-    def ask_to_place_influence(self, country_list, influence, side, max_inf=None):
+    def ask_to_place_influence(self, country_list, influence, side, min_inf=None, max_inf=None):
         placement_completed = False
         while not placement_completed:
             influence_to_place = influence
@@ -1427,25 +1653,84 @@ class TwilightStruggleGame(CardGame):
                 target = self.select_a_country(possible_targets)
                 if target is None:
                     break
-                amount = self.select_influence_amount(target, influence_to_place, max_inf)
+                amount = self.select_influence_amount(target, influence_to_place, min_inf, max_inf)
                 if amount is None:
                     break
                 target_list.append([target, amount])
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
-            print('a')
 
-            if self.check_influence_targets(target_list, side):
+            if self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
                     confirmation = self.confirm_action("","to place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
-                        self.action_round_complete = True
             else:
                 user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
                 if user_input == 'n':
                     break
+
+    def ask_to_remove_influence(self, country_list, influence, side, min_inf=None, max_inf=None):
+        removal_completed = False
+        while not removal_completed:
+            influence_to_remove = influence
+            target_list = []
+            possible_targets = []
+            for country in country_list:
+                if self.get_opponent_influence(country.name, side) > 0:
+                    possible_targets.append(country)
+
+            while influence_to_remove > 0:
+                print("Remove {i} influence".format(i=influence_to_remove))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                amount = self.select_influence_amount(target, influence_to_remove, min_inf, max_inf)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                possible_targets.remove(target)
+                influence_to_remove = influence_to_remove - amount
+                if len(possible_targets) == 0:
+                    break
+
+            if self.check_influence_targets_remove(target_list, side):
+                if influence_to_remove == 0 or len(possible_targets) == 0:
+                    confirmation = self.confirm_action("", "to remove influence in {t}".format(t=target_list))
+                    if confirmation:
+                        self.remove_influence_from_list(target_list, side)
+                        removal_completed = True
+            else:
+                print('Invalid influence removal. Restart influence removal')
+
+    def ask_to_remove_all_influence(self, country_list, number_of_countries, side):
+        removal_completed = False
+        while not removal_completed:
+            countries_to_remove = number_of_countries
+            target_list = []
+            possible_targets = []
+            for country in country_list:
+                if self.get_opponent_influence(country.name, side) > 0:
+                    possible_targets.append(country)
+
+            while countries_to_remove > 0:
+                print("Remove all influence in {n} countries".format(n=countries_to_remove))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                target_list.append(target)
+                possible_targets.remove(target)
+                countries_to_remove = countries_to_remove - 1
+                if len(possible_targets) == 0:
+                    break
+
+            if countries_to_remove == 0 or len(possible_targets) == 0:
+                confirmation = self.confirm_action("", "to remove all {s} influence in {t}".format(t=target_list,
+                                                                                                   s=self.opponent[side].upper()))
+                if confirmation:
+                    self.remove_all_influence_from_list(target_list, side)
+                    removal_completed = True
 
     def place_influence_from_list(self, country_list, side):
         for item in country_list:
@@ -1460,7 +1745,17 @@ class TwilightStruggleGame(CardGame):
                     self.add_influence(country.name, side, 1)
                     influence_used = influence_used + 1
 
-    def check_enough_influence(self, country, side, influence):
+    def remove_influence_from_list(self, country_list, side):
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            self.remove_influence(country.name, self.opponent[side], amount)
+
+    def remove_all_influence_from_list(self, country_list, side):
+        for country in country_list:
+            self.remove_all_influence(country.name, self.opponent[side])
+
+    def check_enough_influence_to_add(self, country, side, influence):
         eligible = True
         side_inf = self.get_influence(country.name, side)
         opp_inf = self.get_opponent_influence(country.name, side)
@@ -1480,29 +1775,57 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
-    def check_influence_targets(self, country_list, side):
+    def check_enough_influence_to_remove(self, country, side, influence):
+        eligible = True
+        opp_inf = self.get_opponent_influence(country.name, side)
+
+        if opp_inf < influence:
+            eligible = False
+
+        return eligible
+
+    def check_influence_targets_add(self, country_list, side):
         eligible = True
 
         for item in country_list:
             country = item[0]
             amount = item[1]
-            if not self.check_enough_influence(country, side, amount):
+            if not self.check_enough_influence_to_add(country, side, amount):
                 eligible = False
 
         return eligible
 
-    def select_influence_amount(self, country, ops, max_inf=None):
+    def check_influence_targets_remove(self, country_list, side):
+        eligible = True
+
+        for item in country_list:
+            country = item[0]
+            amount = item[1]
+            if not self.check_enough_influence_to_remove(country, side, amount):
+                eligible = False
+
+        return eligible
+
+    def select_influence_amount(self, country, ops, min_inf=None, max_inf=None):
         influence_amount = None
         while True:
-            user_input = input("How much influence to place in {c}: ".format(c=country.name))
+            user_input = input("How much influence in {c}: ".format(c=country.name))
             if user_input.isdigit():
                 selection_amount = int(user_input)
-                if max_inf is None:
+                if max_inf is None and min_inf is None:
                     if selection_amount <= ops:
                         influence_amount = selection_amount
                         break
-                else:
+                elif min_inf is None:
                     if selection_amount <= ops and selection_amount <= max_inf:
+                        influence_amount = selection_amount
+                        break
+                elif max_inf is None:
+                    if selection_amount <= ops and selection_amount >= min_inf:
+                        influence_amount = selection_amount
+                        break
+                else:
+                    if selection_amount <= ops and selection_amount >= min_inf and selection_amount <= max_inf:
                         influence_amount = selection_amount
                         break
             elif user_input.lower() == 'x':
@@ -1602,6 +1925,21 @@ class TwilightStruggleGame(CardGame):
 
         return selected_country
 
+    def select_option(self, option_list):
+        option = None
+        available_options = []
+
+        print("Select an option:")
+        for option in option_list:
+            print("{l}| {t}".format(l=option[0], t=option[1]))
+            available_options.append(option[0])
+
+        while True:
+            user_input = input("Selection: ").lower()
+            if user_input in available_options:
+                return user_input
+                break
+
     def check_space_race(self, ops, side):
         max_space_attempts = 1
         phasing_space_level = self.sides[side].space_level
@@ -1684,5 +2022,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.action_round('ussr')
-g.trigger_event(g.cards['Independent Reds'])
+g.trigger_event(g.cards['The Cambridge Five'])
