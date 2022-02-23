@@ -1309,6 +1309,16 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('Egypt', 'ussr')
         self.add_influence('Egypt', 'usa', 1)
 
+    def event_074(self):
+        """The Voice of America"""
+        eligible_countries = (self.countries_in_region('Asia') +
+                              self.countries_in_region('Middle East') +
+                              self.countries_in_region('Africa') +
+                              self.countries_in_region('Central America') +
+                              self.countries_in_region('South America'))
+
+        self.ask_to_remove_influence(eligible_countries, 4, 'usa', 1, 2)
+
     def event_075(self):
         """Liberation Theology"""
         eligible_countries = self.countries_in_region('Central America')
@@ -1436,6 +1446,7 @@ class TwilightStruggleGame(CardGame):
               'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
+              'The Voice of America':           event_074,
               'Liberation Theology':            event_075,
               'Alliance for Progress':          event_078,
               'Africa Scoring':                 event_079,
@@ -1964,4 +1975,4 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Poland', 'ussr', 2)
 g.add_influence_to_control('Iraq', 'usa')
-g.trigger_event(g.cards['Muslim Revolution'])
+g.trigger_event(g.cards['The Voice of America'])
