@@ -1173,6 +1173,18 @@ class TwilightStruggleGame(CardGame):
         self.change_score_by_side(self.phasing, points)
         self.change_defcon(2)
 
+    def event_036(self):
+        """Brush War"""
+        eligible_countries = []
+        for country in self.countries.values():
+            if country.stability <= 2:
+                if not country.nato:
+                    eligible_countries.append(country)
+
+        if len(eligible_countries) > 0:
+            target = self.select_a_country(eligible_countries)
+            self.war_card(self.countries[target.name], self.phasing, 3, 3, 1, False)
+
     def event_037(self):
         """Central America Scoring"""
         points = self.score_card('Central America', 1, 3, 5, True)
@@ -1494,6 +1506,7 @@ class TwilightStruggleGame(CardGame):
               'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
               'Nuclear Test Ban':               event_034,
+              'Brush War':                      event_036,
               'Central America Scoring':        event_037,
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
@@ -2046,4 +2059,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Iran-Iraq War'])
+g.trigger_event(g.cards['Brush War'])
