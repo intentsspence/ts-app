@@ -1387,6 +1387,11 @@ class TwilightStruggleGame(CardGame):
                 discard = self.piles['USA hand'].random_card()
                 self.move_card(discard, 'discard')
 
+    def event_097(self):
+        """An Evil Empire"""
+        self.change_score_by_side('usa', 1)
+        self.cards['Flower Power'].effect_active = False
+
     def event_101(self):
         """Solidarity"""
         self.add_influence('Poland', 'usa', 3)
@@ -1464,6 +1469,7 @@ class TwilightStruggleGame(CardGame):
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
+              '"An Evil Empire"':               event_097,
               'Solidarity':                     event_101,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
@@ -1983,4 +1989,7 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Poland', 'ussr', 2)
 g.add_influence_to_control('Iraq', 'usa')
 g.add_influence_to_control('Lebanon', 'usa')
-g.trigger_event(g.cards['Marine Barracks Bombing'])
+g.cards["Flower Power"].effect_active = True
+print(g.cards["Flower Power"].effect_active)
+g.trigger_event(g.cards['"An Evil Empire"'])
+print(g.cards["Flower Power"].effect_active)
