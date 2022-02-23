@@ -1371,6 +1371,12 @@ class TwilightStruggleGame(CardGame):
         else:
             self.ask_to_place_influence(eligible_countries, 4, 'ussr', 1, 2)
 
+    def event_088(self):
+        """Marine Barracks Bombing"""
+        eligible_countries = self.countries_in_region('Middle East')
+        self.remove_all_influence('Lebanon', 'usa')
+        self.ask_to_remove_influence(eligible_countries, 2, 'ussr', 1, 2)
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -1456,6 +1462,7 @@ class TwilightStruggleGame(CardGame):
               'The Iron Lady':                  event_083,
               'Reagan Bombs Libya':             event_084,
               'The Reformer':                   event_087,
+              'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
               'Solidarity':                     event_101,
               'Special Relationship':           event_105,
@@ -1975,4 +1982,5 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence('Poland', 'ussr', 2)
 g.add_influence_to_control('Iraq', 'usa')
-g.trigger_event(g.cards['The Voice of America'])
+g.add_influence_to_control('Lebanon', 'usa')
+g.trigger_event(g.cards['Marine Barracks Bombing'])
