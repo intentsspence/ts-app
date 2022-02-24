@@ -1889,8 +1889,13 @@ class TwilightStruggleGame(CardGame):
             self.phasing = headline[0]
             self.trigger_event(headline[1])
 
-    # def select_a_headline(self, side):
-    #     return headline
+    def select_a_headline(self, side):
+        eligible_cards = self.get_available_cards(side)
+        if self.cards['China'] in eligible_cards:
+            eligible_cards.remove(self.cards['China'])
+
+        headline = self.select_a_card(eligible_cards, side)
+        return headline
 
     def evaluate_headlines(self, usa_headline, ussr_headline):
         order = []
