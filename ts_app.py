@@ -391,7 +391,8 @@ class TwilightStruggleGame(CardGame):
 
         if self.defcon < 2:
             self.defcon = 1
-            self.check_defcon_game_end()
+
+        self.check_defcon_game_end()
 
         log_string = "DEFCON is now {d}".format(d=self.defcon)
         print(log_string)
@@ -403,8 +404,9 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
 
     def check_defcon_game_end(self):
-        self.sides[self.opponent[self.phasing]].winner = True
-        self.game_active = False
+        if self.defcon < 2:
+            self.sides[self.opponent[self.phasing]].winner = True
+            self.game_active = False
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -1254,11 +1256,12 @@ class TwilightStruggleGame(CardGame):
     def event_046(self):
         """How I Learned to Stop Worrying"""
         options = [['5', "Set DEFCON to 5"],
-                   ['4', "Set DEFCON to 5"],
-                   ['3', "Set DEFCON to 5"],
-                   ['2', "Set DEFCON to 5"],
-                   ['1', "Set DEFCON to 5"]]
+                   ['4', "Set DEFCON to 4"],
+                   ['3', "Set DEFCON to 3"],
+                   ['2', "Set DEFCON to 2"],
+                   ['1', "Set DEFCON to 1"]]
         response = int(self.select_option(options))
+        self.change_defcon_to_value(response)
 
     def event_048(self):
         """Kitchen Debates"""
@@ -1573,6 +1576,7 @@ class TwilightStruggleGame(CardGame):
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
               'SALT Negotiations':              event_043,
+              'How I Learned to Stop Worrying': event_046,
               'Kitchen Debates':                event_048,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
@@ -2190,8 +2194,4 @@ g.add_influence_to_control('W. Germany', 'usa')
 # g.action_round('usa')
 # g.action_round('ussr')
 g.defcon = 2
-g.phasing = 'usa'
-g.change_defcon(-1)
-print(g.game_active)
-print(g.sides['usa'].winner)
-print(g.sides['ussr'].winner)
+g.trigger_event(g.cards['How I Learned to Stop Worrying'])
