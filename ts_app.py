@@ -790,6 +790,16 @@ class TwilightStruggleGame(CardGame):
 
         return sorted_available_cards
 
+    def get_available_cards_in_discard(self):
+        available_cards = list(self.piles['discard'].get_cards_in_pile().values())
+        for card in available_cards:
+            if card.event_type == 'scoring':
+                available_cards.remove(card)
+
+        sorted_available_cards = self.sort_cards(available_cards)
+
+        return sorted_available_cards
+
     # Functions to change military ops
     def add_military_ops(self, side, amount):
         if side == 'usa':
@@ -1226,6 +1236,10 @@ class TwilightStruggleGame(CardGame):
             self.change_score_by_side(self.phasing, 1)
         elif (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops >= self.defcon):
             self.change_score_by_side(self.phasing, 3)
+
+    def event_043(self):
+        """SALT Negotiations"""
+        pass
 
     def event_048(self):
         """Kitchen Debates"""
