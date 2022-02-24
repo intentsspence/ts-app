@@ -675,8 +675,10 @@ class TwilightStruggleGame(CardGame):
         for country in influenced_countries:
             border_list = country.borders
             for border in border_list:
-                if border not in accessible_countries and border != 'USA' and border != 'USSR':
-                    accessible_countries.append(self.countries[border])
+                if border != 'USA' and border != 'USSR':
+                    if self.countries[border] not in accessible_countries:
+                        accessible_countries.append(self.countries[border])
+
         return accessible_countries
 
     def total_battlegrounds_controlled(self, side):
