@@ -1239,7 +1239,10 @@ class TwilightStruggleGame(CardGame):
 
     def event_043(self):
         """SALT Negotiations"""
-        pass
+        self.change_defcon(2)
+        eligible_cards = self.get_available_cards_in_discard()
+        selected_card = self.select_a_card(eligible_cards, self.phasing)
+        self.move_card(selected_card, self.hands[self.phasing])
 
     def event_048(self):
         """Kitchen Debates"""
@@ -1553,6 +1556,7 @@ class TwilightStruggleGame(CardGame):
               'Central America Scoring':        event_037,
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
+              'SALT Negotiations':              event_043,
               'Kitchen Debates':                event_048,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
@@ -1596,12 +1600,20 @@ class TwilightStruggleGame(CardGame):
         doubled_stability = int(country.stability) * 2
         roll = self.die_roll()
         modified_roll = roll + ops
+
+        # Event 43 - SALT Negotiations
+        log_string_salt = ""
+        if self.cards['SALT Negotiations'].effect_active:
+            modified_roll = modified_roll - 1
+            log_string_salt = " - 1 from SALT Negotiations"
+
         opponent_inf = self.get_opponent_influence(country.name, side)
         log_string = "Modified roll must be more than {d}. " \
-                     "{s} rolled {r} + {o} ops, total of {t}.".format(d=doubled_stability,
+                     "{s} rolled {r} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
                                                                       s=side.upper(),
                                                                       r=roll,
                                                                       o=ops,
+                                                                             salt=log_string_salt,
                                                                       t=modified_roll)
         print(log_string)
 
@@ -1988,6 +2000,8 @@ class TwilightStruggleGame(CardGame):
         if selected_action == 'c' or 'i' or 'r':
             if selected_card.event_type == self.opponent[side]:
                 self.trigger_event(selected_card)
+            else:
+                self.move_card(selected_card, 'discard')
 
         log_string = "Action round complete."
         print(log_string)
@@ -2149,8 +2163,13 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.headline_phase()
 # g.action_round('ussr')
-print(g.get_available_cards('usa', False))
+# print(g.get_available_cards('usa', False))
 g.add_influence_to_control('W. Germany', 'usa')
-g.phasing = 'ussr'
+
 # g.trigger_event(g.cards['Red Scare/Purge'])
-g.trigger_event(g.cards['Blockade'])
+g.action_round('usa')
+g.phasing = 'ussr'
+g.trigger_event(g.cards['SALT Negotiations'])
+print(g.get_available_cards('ussr', True))
+g.action_round('usa')
+g.action_round('ussr')
