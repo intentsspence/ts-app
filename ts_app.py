@@ -2112,6 +2112,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.trigger_event(g.cards['Brush War'])
 # g.headline_phase()
 g.action_round('usa')
