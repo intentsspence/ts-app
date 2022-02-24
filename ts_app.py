@@ -352,7 +352,7 @@ class TwilightStruggleGame(CardGame):
         player_list = [['Player 1', 'ussr', 'usa'], ['Player 2', 'usa', 'ussr']]
 
         for p_list in player_list:
-            player = TwilightStrugglePlayer(p_list[0], p_list[1])
+            player = TwilightStrugglePlayer(p_list[0], p_list[1], p_list[2])
             self.players.update({player.name: player})
             self.sides.update({player.side: player})
 
@@ -870,6 +870,8 @@ class TwilightStruggleGame(CardGame):
             usa_controlled_middle_east = self.controlled_in_region('Middle East', 'usa')
             if len(usa_controlled_middle_east) > 0:
                 eligible = True
+        elif card.name == 'Wargames':
+                eligible = True if self.defcon == 2 else False
         else:
             eligible = True
 
@@ -1517,7 +1519,8 @@ class TwilightStruggleGame(CardGame):
                        ['b', "Pass"]]
             response = self.select_option(options)
             if response == 'a':
-                self.change_score_by_side(self.opponent[self.active_player.side])
+                self.change_score_by_side(self.active_player.opponent, 6)
+                self.game_active = False
 
     def event_101(self):
         """Solidarity"""
@@ -1650,6 +1653,7 @@ class TwilightStruggleGame(CardGame):
               'Terrorism':                      event_092,
               '"An Evil Empire"':               event_097,
               'Pershing II Deployed':           event_099,
+              'Wargames':                       event_100,
               'Solidarity':                     event_101,
               'Iran-Iraq War':                  event_102,
               'Defectors':                      event_103,
@@ -2257,22 +2261,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.headline_phase()
-# g.action_round('ussr')
-# print(g.get_available_cards('usa', False))
-g.add_influence_to_control('W. Germany', 'usa')
-
-# g.trigger_event(g.cards['Red Scare/Purge'])
-# g.action_round('usa')
-# g.phasing = 'ussr'
-# g.trigger_event(g.cards['SALT Negotiations'])
-# print(g.get_available_cards('ussr', True))
-# g.action_round('usa')
-# g.action_round('ussr')
-# g.move_china_card('USA China', True)
-# g.move_card(g.cards['Fidel'], 'discard')
-# g.move_card(g.cards['Europe Scoring'], 'discard')
-# g.increase_space_level('usa')
-g.active_player = g.sides['usa']
-g.trigger_event(g.cards['Flower Power'])
-g.trigger_event(g.cards['Korean War'])
+g.headline_phase()
+g.action_round('ussr')
+g.trigger_event(g.cards['Wargames'])
