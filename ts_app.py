@@ -1406,6 +1406,15 @@ class TwilightStruggleGame(CardGame):
         eligible_countries = self.countries_in_region('Central America')
         self.ask_to_place_influence(eligible_countries, 3, 'ussr', 1, 2)
 
+    def event_076(self):
+        """Ussuri River Skirmish"""
+        if self.cards['China'] in self.piles['USSR China'].get_cards_in_pile().values():
+            self.move_china_card('USA China', True)
+        elif self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
+            eligible_countries = self.countries_in_region('Asia')
+            self.ask_to_place_influence(eligible_countries, 4, 'usa', 1, 2)
+        else:
+            raise ValueError("China card must be in USA hand or USSR hand")
 
     def event_078(self):
         """Alliance for Progress"""
@@ -1596,6 +1605,7 @@ class TwilightStruggleGame(CardGame):
               'Sadat Expels Soviets':           event_072,
               'The Voice of America':           event_074,
               'Liberation Theology':            event_075,
+              'Ussuri River Skirmish':          event_076,
               'Alliance for Progress':          event_078,
               'Africa Scoring':                 event_079,
               '"One Small Step..."':            event_080,
@@ -2193,5 +2203,5 @@ g.add_influence_to_control('W. Germany', 'usa')
 # print(g.get_available_cards('ussr', True))
 # g.action_round('usa')
 # g.action_round('ussr')
-g.defcon = 2
-g.trigger_event(g.cards['How I Learned to Stop Worrying'])
+g.move_china_card('USA China', True)
+g.trigger_event(g.cards['Ussuri River Skirmish'])
