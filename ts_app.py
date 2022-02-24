@@ -266,6 +266,8 @@ class TwilightStruggleGame(CardGame):
         self.game_active = True
         self.phase = ''
         self.phasing = ''
+        self.active_player = None
+        self.active_card = None
         self.action_round_complete = False
 
         self.cards = {}
@@ -287,7 +289,7 @@ class TwilightStruggleGame(CardGame):
                          'Socialist Governments':   'The Iron Lady',
                          'OPEC':                    'North Sea Oil',
                          'Willy Brandt':            'Tear Down this Wall',
-                         'Flower Power':            'An Evil Empire',
+                         'Flower Power':            '"An Evil Empire"',
                          'Muslim Revolution':       'AWACS Sale to Saudis'}
 
         self.line = '--------------------------------'
@@ -871,6 +873,7 @@ class TwilightStruggleGame(CardGame):
 
     def trigger_event(self, card):
         eligible = self.check_event_eligibility(card)
+        self.active_card = card
 
         if eligible:
             log_string = "Event {no} - {na}.".format(no=card.number,
@@ -879,6 +882,9 @@ class TwilightStruggleGame(CardGame):
             self.events[card.name](self)
             card.played = True
             card.effect_active = True
+
+            # Check for active effects
+            self.trigger_effect(self.cards['Flower Power'])
 
             if card.removed:
                 self.move_card(card, 'removed')
@@ -1324,6 +1330,10 @@ class TwilightStruggleGame(CardGame):
         else:
             raise ValueError("China card must be in USA hand or USSR hand")
 
+    def event_059(self):
+        """Flower Power"""
+        pass
+
     def event_061(self):
         """OPEC"""
         opec_list = ['Egypt', 'Iran', 'Libya', 'Saudi Arabia', 'Iraq', 'Gulf States', 'Venezuela']
@@ -1601,6 +1611,7 @@ class TwilightStruggleGame(CardGame):
               'Willy Brandt':                   event_055,
               'Muslim Revolution':              event_056,
               'Cultural Revolution':            event_058,
+              'Flower Power':                   event_059,
               'OPEC':                           event_061,
               'Colonial Rear Guards':           event_063,
               'Panama Canal Returned':          event_064,
@@ -1632,6 +1643,36 @@ class TwilightStruggleGame(CardGame):
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
+
+    # Effects
+    def effect_059(self):
+        """Flower Power - Effect"""
+        card = self.active_card
+        if self.active_player.side == 'usa':
+            if self.cards['Flower Power'].effect_active:
+                impacted_cards = [self.cards['Arab-Israeli War'],
+                                  self.cards['Korean War'],
+                                  self.cards['Brush War'],
+                                  self.cards['Indo-Pakistani War'],
+                                  self.cards['Iran-Iraq War']]
+
+                # Remove AI War if Camp David is in effect
+                if self.cards['Camp David Accords'].effect_active:
+                    impacted_cards.remove(self.cards['Arab-Israeli War'])
+
+                if card in impacted_cards:
+                    log_string = "Flower Power in effect"
+                    print(log_string)
+                    self.change_score_by_side('ussr', 2)
+
+    # Dictionary of the effects
+    effects = {'Flower Power': effect_059}
+
+    # Functions to manipulate effects
+    def trigger_effect(self, effect_card):
+        eligible = effect_card.effect_active
+        if eligible:
+            self.effects[effect_card.name](self)
 
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side):
@@ -1983,6 +2024,7 @@ class TwilightStruggleGame(CardGame):
 
         for headline in headline_order:
             self.phasing = headline[0]
+            self.active_card = headline[1]
             self.trigger_event(headline[1])
             if headline[1].name == 'Defectors':
                 self.move_card(ussr_headline, 'discard')
@@ -2010,6 +2052,7 @@ class TwilightStruggleGame(CardGame):
         self.action_round_complete = False
         self.phase = "{s} action round".format(s=side)
         self.phasing = side
+        self.active_player = self.sides[side]
         log_string = self.phase.upper()
         print(log_string)
         print(self.line)
@@ -2018,6 +2061,7 @@ class TwilightStruggleGame(CardGame):
         while not self.action_round_complete:
             eligible_cards = self.get_available_cards(side, True)
             selected_card = self.select_a_card(eligible_cards, side)
+            self.active_card = selected_card
             selected_action = self.select_action(selected_card)
             adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
             if selected_action == 'e':
@@ -2039,6 +2083,7 @@ class TwilightStruggleGame(CardGame):
             if selected_card.event_type == self.opponent[side]:
                 self.trigger_event(selected_card)
             else:
+                self.trigger_effect(self.cards['Flower Power'])
                 self.move_card(selected_card, 'discard')
 
         log_string = "Action round complete."
@@ -2215,4 +2260,6 @@ g.add_influence_to_control('W. Germany', 'usa')
 # g.move_card(g.cards['Fidel'], 'discard')
 # g.move_card(g.cards['Europe Scoring'], 'discard')
 # g.increase_space_level('usa')
-g.trigger_event(g.cards['Star Wars'])
+g.active_player = g.sides['usa']
+g.trigger_event(g.cards['Flower Power'])
+g.trigger_event(g.cards['Korean War'])
