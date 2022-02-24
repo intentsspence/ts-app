@@ -780,7 +780,7 @@ class TwilightStruggleGame(CardGame):
 
         return sorted_cards
 
-    def get_available_cards(self, side, include_china=True):
+    def get_available_cards(self, side, include_china):
         available_cards = list(self.piles[self.hands[side]].get_cards_in_pile().values())
         if include_china:
             if self.cards['China'] in self.piles[self.china_owner[side]].get_cards_in_pile().values():
@@ -1038,6 +1038,27 @@ class TwilightStruggleGame(CardGame):
         """Fidel"""
         self.remove_all_influence('Cuba', 'usa')
         self.add_influence_to_control('Cuba', 'ussr')
+
+    def event_010(self):
+        """Blockade"""
+        eligible_cards = []
+        usa_hand = self.get_available_cards('usa', False)
+
+        for card in usa_hand:
+            if (card.ops + self.sides['usa'].ops_adjustment) >= 3:
+                eligible_cards.append(card)
+
+        if len(eligible_cards) == 0:
+            self.remove_all_influence('W. Germany', 'usa')
+        else:
+            options = [['a', "Discard a card with operations value of 3 or more"],
+                       ['b', "Remove all US influence from W. Germany"]]
+            response = self.select_option(options)
+            if response == 'a':
+                selected_card = self.select_a_card(eligible_cards, 'usa')
+                self.move_card(selected_card, 'discard')
+            elif response == 'b':
+                self.remove_all_influence('W. Germany', 'usa')
 
     def event_011(self):
         """Korean War"""
@@ -1493,6 +1514,7 @@ class TwilightStruggleGame(CardGame):
               'Duck and Cover':                 event_004,
               'Socialist Governments':          event_007,
               'Fidel':                          event_008,
+              'Blockade':                       event_010,
               'Korean War':                     event_011,
               'Romanian Abdication':            event_012,
               'Arab-Israeli War':               event_013,
@@ -2111,5 +2133,10 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.headline_phase()
-g.action_round('ussr')
+# g.headline_phase()
+# g.action_round('ussr')
+print(g.get_available_cards('usa', False))
+g.add_influence_to_control('W. Germany', 'usa')
+g.phasing = 'ussr'
+# g.trigger_event(g.cards['Red Scare/Purge'])
+g.trigger_event(g.cards['Blockade'])
