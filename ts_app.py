@@ -1893,11 +1893,12 @@ class TwilightStruggleGame(CardGame):
             ussr_headline = self.select_a_headline('ussr')
 
         headline_order = self.evaluate_headlines(usa_headline, ussr_headline)
-        print(headline_order)
 
         for headline in headline_order:
             self.phasing = headline[0]
             self.trigger_event(headline[1])
+            if headline[1].name == 'Defectors':
+                self.move_card(ussr_headline, 'discard')
 
     def select_a_headline(self, side):
         eligible_cards = self.get_available_cards(side)
@@ -1911,7 +1912,7 @@ class TwilightStruggleGame(CardGame):
         order = []
 
         if usa_headline.name == 'Defectors':
-            order = ['usa', usa_headline]
+            order = [['usa', usa_headline]]
         elif usa_headline.ops > ussr_headline.ops or usa_headline.ops == ussr_headline.ops:
             order = [['usa', usa_headline], ['ussr', ussr_headline]]
         elif ussr_headline.ops > usa_headline.ops:
@@ -1921,12 +1922,12 @@ class TwilightStruggleGame(CardGame):
 
     # Functions to manage action rounds
     def action_round(self, side):
-        log_string = "{s} ACTION ROUND".format(s=side.upper())
+        self.action_round_complete = False
+        self.phase = "{s} action round".format(s=side)
+        self.phasing = side
+        log_string = self.phase.upper()
         print(log_string)
         print(self.line)
-        self.action_round_complete = False
-        self.phase = "{s} action round".format(side)
-        self.phasing = side
         # TODO - add check active action round effects
 
         while not self.action_round_complete:
@@ -2112,4 +2113,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.trigger_event(g.cards['Brush War'])
-g.headline_phase()
+# g.headline_phase()
+g.action_round('usa')
