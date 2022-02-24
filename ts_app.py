@@ -264,6 +264,7 @@ class TwilightStruggleGame(CardGame):
         self.score = 0
         self.turn = 1
         self.game_active = True
+        self.phase = ''
         self.phasing = ''
         self.action_round_complete = False
 
@@ -1436,6 +1437,11 @@ class TwilightStruggleGame(CardGame):
         elif response == 'b':
             self.war_card(self.countries['Iraq'], self.phasing, 4, 2, 2, False)
 
+    def event_103(self):
+        """Defectors"""
+        if self.phase == 'ussr action round':
+            self.change_score_by_side('usa', 1)
+
     def event_104(self):
         """The Cambridge Five"""
         scoring_conversion = {'Asia Scoring': 'Asia',
@@ -1543,6 +1549,7 @@ class TwilightStruggleGame(CardGame):
               'Pershing II Deployed':           event_099,
               'Solidarity':                     event_101,
               'Iran-Iraq War':                  event_102,
+              'Defectors':                      event_103,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
@@ -1869,17 +1876,63 @@ class TwilightStruggleGame(CardGame):
                 break
         return influence_amount
 
+    # Functions for the headline phase
+    def headline_phase(self):
+        self.phase = 'headline'
+        print('HEADLINE PHASE')
+        if self.sides['usa'].space_level >= 4 and self.sides['ussr'].space_level < 4:
+            ussr_headline = self.select_a_headline('ussr')
+            print(ussr_headline.name)
+            usa_headline = self.select_a_headline('usa')
+        elif self.sides['ussr'].space_level >= 4 and self.sides['usa'].space_level < 4:
+            usa_headline = self.select_a_headline('usa')
+            print(usa_headline.name)
+            ussr_headline = self.select_a_headline('ussr')
+        else:
+            usa_headline = self.select_a_headline('usa')
+            ussr_headline = self.select_a_headline('ussr')
+
+        headline_order = self.evaluate_headlines(usa_headline, ussr_headline)
+
+        for headline in headline_order:
+            self.phasing = headline[0]
+            self.trigger_event(headline[1])
+            if headline[1].name == 'Defectors':
+                self.move_card(ussr_headline, 'discard')
+
+    def select_a_headline(self, side):
+        eligible_cards = self.get_available_cards(side)
+        if self.cards['China'] in eligible_cards:
+            eligible_cards.remove(self.cards['China'])
+
+        headline = self.select_a_card(eligible_cards, side)
+        return headline
+
+    def evaluate_headlines(self, usa_headline, ussr_headline):
+        order = []
+
+        if usa_headline.name == 'Defectors':
+            order = [['usa', usa_headline]]
+        elif usa_headline.ops > ussr_headline.ops or usa_headline.ops == ussr_headline.ops:
+            order = [['usa', usa_headline], ['ussr', ussr_headline]]
+        elif ussr_headline.ops > usa_headline.ops:
+            order = [['ussr', ussr_headline], ['usa', usa_headline]]
+
+        return order
+
     # Functions to manage action rounds
     def action_round(self, side):
-        log_string = "{s} ACTION ROUND".format(s=side.upper())
+        self.action_round_complete = False
+        self.phase = "{s} action round".format(s=side)
+        self.phasing = side
+        log_string = self.phase.upper()
         print(log_string)
         print(self.line)
-        self.action_round_complete = False
-        self.phasing = side
         # TODO - add check active action round effects
 
         while not self.action_round_complete:
-            selected_card = self.select_a_card(side)
+            eligible_cards = self.get_available_cards(side)
+            selected_card = self.select_a_card(eligible_cards, side)
             selected_action = self.select_action(selected_card)
             adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
             if selected_action == 'e':
@@ -1905,13 +1958,13 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
         print(self.line)
 
-    def select_a_card(self, side):
-        available_cards = self.get_available_cards(side)
+    def select_a_card(self, card_list, side):
+        available_cards = card_list
         card_strings = self.format_available_cards(available_cards)
         available_card_numbers = []
         selected_card = None
 
-        print("Select a card to play:")
+        print("{s} select a card:".format(s=side.upper()))
 
         cards_printed = 0
         while cards_printed < len(card_strings):
@@ -2059,4 +2112,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Brush War'])
+# g.headline_phase()
+g.action_round('usa')
