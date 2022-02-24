@@ -390,16 +390,21 @@ class TwilightStruggleGame(CardGame):
             self.defcon = 5
 
         if self.defcon < 2:
-            if self.sides['usa'].phasing:
-                self.sides['ussr'].winner = True
-            elif self.sides['ussr'].phasing:
-                self.sides['usa'].winner = True
-
             self.defcon = 1
-            self.game_active = False
+            self.check_defcon_game_end()
 
         log_string = "DEFCON is now {d}".format(d=self.defcon)
         print(log_string)
+
+    def change_defcon_to_value(self, value):
+        self.defcon = value
+        self.check_defcon_game_end()
+        log_string = "DEFCON is now {d}".format(d=self.defcon)
+        print(log_string)
+
+    def check_defcon_game_end(self):
+        self.sides[self.opponent[self.phasing]].winner = True
+        self.game_active = False
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -1245,6 +1250,15 @@ class TwilightStruggleGame(CardGame):
         eligible_cards = self.get_available_cards_in_discard()
         selected_card = self.select_a_card(eligible_cards, self.phasing)
         self.move_card(selected_card, self.hands[self.phasing])
+
+    def event_046(self):
+        """How I Learned to Stop Worrying"""
+        options = [['5', "Set DEFCON to 5"],
+                   ['4', "Set DEFCON to 5"],
+                   ['3', "Set DEFCON to 5"],
+                   ['2', "Set DEFCON to 5"],
+                   ['1', "Set DEFCON to 5"]]
+        response = int(self.select_option(options))
 
     def event_048(self):
         """Kitchen Debates"""
@@ -2169,9 +2183,15 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.add_influence_to_control('W. Germany', 'usa')
 
 # g.trigger_event(g.cards['Red Scare/Purge'])
-g.action_round('usa')
-g.phasing = 'ussr'
-g.trigger_event(g.cards['SALT Negotiations'])
-print(g.get_available_cards('ussr', True))
-g.action_round('usa')
-g.action_round('ussr')
+# g.action_round('usa')
+# g.phasing = 'ussr'
+# g.trigger_event(g.cards['SALT Negotiations'])
+# print(g.get_available_cards('ussr', True))
+# g.action_round('usa')
+# g.action_round('ussr')
+g.defcon = 2
+g.phasing = 'usa'
+g.change_defcon(-1)
+print(g.game_active)
+print(g.sides['usa'].winner)
+print(g.sides['ussr'].winner)
