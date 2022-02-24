@@ -186,12 +186,16 @@ class TwilightStruggleChinaCard(Card):
 class TwilightStrugglePlayer(Player):
     """Class of players specific to Twilight Struggle"""
 
-    def __init__(self, n, s):
+    def __init__(self, n, s, o):
         Player.__init__(self, n)
 
         if s not in ['usa', 'ussr']:
             raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa' or 'ussr'")
         self.side = s
+
+        if o not in ['usa', 'ussr']:
+            raise ValueError("Error creating Twilight Struggle country. Controlled must be 'usa' or 'ussr'")
+        self.opponent = o
 
         # Set phasing player to false
         self.phasing = False
@@ -345,7 +349,7 @@ class TwilightStruggleGame(CardGame):
     def __create_players(self):
         # TODO - Change the "create players" function to allow for user input
 
-        player_list = [['Player 1', 'ussr'], ['Player 2', 'usa']]
+        player_list = [['Player 1', 'ussr', 'usa'], ['Player 2', 'usa', 'ussr']]
 
         for p_list in player_list:
             player = TwilightStrugglePlayer(p_list[0], p_list[1])
@@ -1505,6 +1509,15 @@ class TwilightStruggleGame(CardGame):
         eligible_countries = self.countries_in_subregion('Western Europe')
         self.change_score_by_side('ussr', 1)
         self.ask_to_remove_influence(eligible_countries, 3, 'ussr', 1, 1)
+
+    def event_100(self):
+        """Wargames"""
+        if self.defcon == 2:
+            options = [['a', "Give your opponent 6 points and immediately end game"],
+                       ['b', "Pass"]]
+            response = self.select_option(options)
+            if response == 'a':
+                self.change_score_by_side(self.opponent[self.active_player.side])
 
     def event_101(self):
         """Solidarity"""
