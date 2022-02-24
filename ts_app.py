@@ -1454,6 +1454,13 @@ class TwilightStruggleGame(CardGame):
         points = self.countries['Libya'].ussr_influence // 2
         self.change_score_by_side('usa', points)
 
+    def event_085(self):
+        """Star Wars"""
+        eligible_cards = self.get_available_cards_in_discard()
+        if len(eligible_cards) > 0:
+            selected_card = self.select_a_card(eligible_cards, 'usa')
+            self.trigger_event(selected_card)
+
     def event_087(self):
         """The Reformer"""
         eligible_countries = self.countries_in_region('Europe')
@@ -1613,6 +1620,7 @@ class TwilightStruggleGame(CardGame):
               'Iranian Hostage Crisis':         event_082,
               'The Iron Lady':                  event_083,
               'Reagan Bombs Libya':             event_084,
+              'Star Wars':                      event_085,
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
@@ -2203,5 +2211,8 @@ g.add_influence_to_control('W. Germany', 'usa')
 # print(g.get_available_cards('ussr', True))
 # g.action_round('usa')
 # g.action_round('ussr')
-g.move_china_card('USA China', True)
-g.trigger_event(g.cards['Ussuri River Skirmish'])
+# g.move_china_card('USA China', True)
+# g.move_card(g.cards['Fidel'], 'discard')
+# g.move_card(g.cards['Europe Scoring'], 'discard')
+# g.increase_space_level('usa')
+g.trigger_event(g.cards['Star Wars'])
