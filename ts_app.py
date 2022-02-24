@@ -780,10 +780,11 @@ class TwilightStruggleGame(CardGame):
 
         return sorted_cards
 
-    def get_available_cards(self, side):
+    def get_available_cards(self, side, include_china=True):
         available_cards = list(self.piles[self.hands[side]].get_cards_in_pile().values())
-        if self.cards['China'] in self.piles[self.china_owner[side]].get_cards_in_pile().values():
-            available_cards.append(self.cards['China'])
+        if include_china:
+            if self.cards['China'] in self.piles[self.china_owner[side]].get_cards_in_pile().values():
+                available_cards.append(self.cards['China'])
 
         sorted_available_cards = self.sort_cards(available_cards)
 
@@ -1901,9 +1902,7 @@ class TwilightStruggleGame(CardGame):
                 self.move_card(ussr_headline, 'discard')
 
     def select_a_headline(self, side):
-        eligible_cards = self.get_available_cards(side)
-        if self.cards['China'] in eligible_cards:
-            eligible_cards.remove(self.cards['China'])
+        eligible_cards = self.get_available_cards(side, False)
 
         headline = self.select_a_card(eligible_cards, side)
         return headline
@@ -1931,7 +1930,7 @@ class TwilightStruggleGame(CardGame):
         # TODO - add check active action round effects
 
         while not self.action_round_complete:
-            eligible_cards = self.get_available_cards(side)
+            eligible_cards = self.get_available_cards(side, True)
             selected_card = self.select_a_card(eligible_cards, side)
             selected_action = self.select_action(selected_card)
             adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
@@ -2112,5 +2111,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.headline_phase()
-g.action_round('usa')
+g.headline_phase()
+g.action_round('ussr')
