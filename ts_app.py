@@ -264,6 +264,7 @@ class TwilightStruggleGame(CardGame):
         self.score = 0
         self.turn = 1
         self.game_active = True
+        self.phase = ''
         self.phasing = ''
         self.action_round_complete = False
 
@@ -1436,6 +1437,11 @@ class TwilightStruggleGame(CardGame):
         elif response == 'b':
             self.war_card(self.countries['Iraq'], self.phasing, 4, 2, 2, False)
 
+    def event_103(self):
+        """Defectors"""
+        if self.phase == 'ussr action round':
+            self.change_score_by_side('usa', 1)
+
     def event_104(self):
         """The Cambridge Five"""
         scoring_conversion = {'Asia Scoring': 'Asia',
@@ -1543,6 +1549,7 @@ class TwilightStruggleGame(CardGame):
               'Pershing II Deployed':           event_099,
               'Solidarity':                     event_101,
               'Iran-Iraq War':                  event_102,
+              'Defectors':                      event_103,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
               'AWACS Sale to Saudis':           event_110}
@@ -1871,6 +1878,8 @@ class TwilightStruggleGame(CardGame):
 
     # Functions for the headline phase
     def headline_phase(self):
+        self.phase = 'headline'
+        print('HEADLINE PHASE')
         if self.sides['usa'].space_level >= 4 and self.sides['ussr'].space_level < 4:
             ussr_headline = self.select_a_headline('ussr')
             print(ussr_headline.name)
@@ -1884,6 +1893,7 @@ class TwilightStruggleGame(CardGame):
             ussr_headline = self.select_a_headline('ussr')
 
         headline_order = self.evaluate_headlines(usa_headline, ussr_headline)
+        print(headline_order)
 
         for headline in headline_order:
             self.phasing = headline[0]
@@ -1915,6 +1925,7 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
         print(self.line)
         self.action_round_complete = False
+        self.phase = "{s} action round".format(side)
         self.phasing = side
         # TODO - add check active action round effects
 
@@ -2101,4 +2112,4 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.trigger_event(g.cards['Brush War'])
-g.action_round('ussr')
+g.headline_phase()
