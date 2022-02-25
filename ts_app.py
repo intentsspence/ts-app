@@ -430,10 +430,16 @@ class TwilightStruggleGame(CardGame):
         border_list = country.borders
 
         for border in border_list:
-            if self.countries[border].controlled == side or border == side.upper():
+            if border == 'USA' or border == 'USSR':
+                pass
+            elif self.countries[border].controlled == side:
                 adjacent_controlled.append(self.countries[border])
 
         return adjacent_controlled
+
+    def adjacent_to_superpower(self, country, side):
+        adjacent = True if side.upper() in country.borders else False
+        return adjacent
 
     def add_influence(self, country_name, side, i):
         if side == 'usa':
@@ -904,6 +910,8 @@ class TwilightStruggleGame(CardGame):
         if itself:
             if country.controlled == self.opponent[side]:
                 number_adjacent += 1
+        if self.adjacent_to_superpower(country, self.opponent[side]):
+            number_adjacent += 1
 
         roll = self.die_roll()
         modified_die_roll = roll - number_adjacent
@@ -1795,33 +1803,73 @@ class TwilightStruggleGame(CardGame):
     # Functions to attempt realignment rolls
     def realignment_roll(self, country, side):
         offense_roll = self.die_roll()
-        offense_modifiers = 0
         defense_roll = self.die_roll()
-        defense_modifiers = 0
+        offense_influence = self.get_influence(country.name, side)
+        defense_influence = self.get_opponent_influence(country.name, side)
+        offense_more_inf = 0
+        defense_more_inf = 0
+        offense_adjacent_superpower = 0
+        defense_adjacent_superpower = 0
 
-        offense_roll_modified = offense_roll + offense_modifiers
-        defense_roll_modified = defense_roll + defense_modifiers
+        # + 1 for each adjacent controlled country
+        offense_adjacent_controlled = len(self.get_adjacent_controlled(country, side))
+        defense_adjacent_controlled = len(self.get_adjacent_controlled(country, self.opponent[side]))
+
+        # + 1 for having more influence in the target country
+        if offense_influence > defense_influence:
+            offense_more_inf = 1
+        elif defense_influence > offense_influence:
+            defense_more_inf = 1
+
+        # + 1 for superpower adjacent
+        border_list = country.borders
+        for border in border_list:
+            if border == side.upper():
+                offense_adjacent_superpower = 1
+            elif border == self.opponent[side].upper():
+                defense_adjacent_superpower = 1
+
+        offense_roll_modified = (offense_roll +
+                                 offense_adjacent_controlled +
+                                 offense_more_inf +
+                                 offense_adjacent_superpower)
+        defense_roll_modified = (defense_roll +
+                                 defense_adjacent_controlled +
+                                 defense_more_inf +
+                                 defense_adjacent_superpower)
 
         log_string = "{s} realignment attempt in {c}\n" \
-                     "{o} rolled {o1} + {o2} modification. Total {o3}\n" \
-                     "{d} rolled {d1} + {d2} modification. Total {d3}\n".format(s=side.upper(),
-                                                                                c=country.name,
-                                                                                o=side.upper(),
-                                                                                o1=offense_roll,
-                                                                                o2=offense_modifiers,
-                                                                                o3=offense_roll_modified,
-                                                                                d=self.opponents[side].upper(),
-                                                                                d1=defense_roll,
-                                                                                d2=defense_modifiers,
-                                                                                d3=defense_roll_modified)
+                     "{o:4}\n" \
+                     "Rolled: {o1}\n" \
+                     "Adjacent controlled: {o2}\n" \
+                     "More influence: {o3}\n" \
+                     "Adjacent superpower: {o4}\n" \
+                     "\n" \
+                     "{d:4}\n" \
+                     "Rolled: {d1}\n" \
+                     "Adjacent controlled: {d2}\n" \
+                     "More influence: {d3}\n" \
+                     "Adjacent superpower: {d4}\n" \
+                     "\n" \
+                     "TOTAL = {t}\n".format(s=side.upper(),
+                                            c=country.name,
+                                            o=side.upper(),
+                                            o1=offense_roll,
+                                            o2=offense_adjacent_controlled,
+                                            o3=offense_more_inf,
+                                            o4=offense_adjacent_superpower,
+                                            d=self.opponent[side].upper(),
+                                            d1=defense_roll,
+                                            d2=defense_adjacent_controlled,
+                                            d3=defense_more_inf,
+                                            d4=defense_adjacent_superpower,
+                                            t=offense_roll_modified - defense_roll_modified)
         print(log_string)
 
         if offense_roll_modified > defense_roll_modified:
-            self.remove_influence(country.name, (offense_roll_modified - defense_roll_modified), self.opponents[side])
+            self.remove_influence(country.name, self.opponent[side], (offense_roll_modified - defense_roll_modified))
         elif defense_roll_modified > offense_roll_modified:
-            self.remove_influence(country.name, (offense_roll_modified - defense_roll_modified), side)
-
-
+            self.remove_influence(country.name, side, (defense_roll_modified - offense_roll_modified))
 
     # Functions to place influence
     def action_place_influence(self, card, ops, side):
@@ -2292,6 +2340,14 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.headline_phase()
-g.action_round('ussr')
-g.trigger_event(g.cards['Wargames'])
+# g.headline_phase()
+# g.action_round('ussr')
+
+# g.add_influence_to_control('Mexico', 'usa')
+g.add_influence('Mexico', 'ussr', 3)
+g.add_influence('Guatemala', 'ussr', 3)
+# g.realignment_roll(g.countries['Mexico'], 'ussr')
+# print(g.get_adjacent_controlled(g.countries['Mexico'], 'ussr'))
+# print(g.adjacent_to_superpower(g.countries['Finland'], 'usa'))
+g.phasing = 'ussr'
+g.trigger_event(g.cards['Brush War'])
