@@ -1752,7 +1752,8 @@ class TwilightStruggleGame(CardGame):
             if target is None:
                 break
             else:
-                confirmation = self.confirm_action(card.name, 'for a coup attempt in {t}'.format(t=target.name))
+                confirmation = self.confirm_action("Use {c} for a coup attempt in {t}".format(c=card.name,
+                                                                                              t=target.name))
                 if confirmation:
                     self.coup_attempt(target, ops, side)
                     attempt_completed = True
@@ -1893,7 +1894,7 @@ class TwilightStruggleGame(CardGame):
                 if realignments_to_attempt == 0:
                     realignments_completed = True
                 elif realignments_to_attempt < ops:
-                    continue_confirmation = self.confirm_action("", "continue realignment attempts")
+                    continue_confirmation = self.confirm_action("Continue realignment attempts")
                     if not continue_confirmation:
                         realignments_completed = True
                         break
@@ -1905,13 +1906,13 @@ class TwilightStruggleGame(CardGame):
                     cancellation = True
                     break
 
-                target_confirmation = self.confirm_action("", "attempt a realignment in {t}".format(t=target.name))
+                target_confirmation = self.confirm_action("Attempt a realignment in {t}".format(t=target.name))
                 if target_confirmation:
                     self.realignment_roll(target, side)
                     realignments_to_attempt = realignments_to_attempt - 1
 
             if cancellation:
-                continue_confirmation = self.confirm_action("", "continue realignment attempts")
+                continue_confirmation = self.confirm_action("Continue realignment attempts")
                 if not continue_confirmation:
                     realignments_completed = True
 
@@ -1981,7 +1982,7 @@ class TwilightStruggleGame(CardGame):
                 break
             elif self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
-                    confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
+                    confirmation = self.confirm_action("Place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
@@ -2014,7 +2015,7 @@ class TwilightStruggleGame(CardGame):
 
             if self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
-                    confirmation = self.confirm_action("","to place influence in {t}".format(t=target_list))
+                    confirmation = self.confirm_action("Place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
@@ -2049,7 +2050,7 @@ class TwilightStruggleGame(CardGame):
 
             if self.check_influence_targets_remove(target_list, side):
                 if influence_to_remove == 0 or len(possible_targets) == 0:
-                    confirmation = self.confirm_action("", "to remove influence in {t}".format(t=target_list))
+                    confirmation = self.confirm_action("Remove influence in {t}".format(t=target_list))
                     if confirmation:
                         self.remove_influence_from_list(target_list, side)
                         removal_completed = True
@@ -2078,8 +2079,13 @@ class TwilightStruggleGame(CardGame):
                     break
 
             if countries_to_remove == 0 or len(possible_targets) == 0:
-                confirmation = self.confirm_action("", "to remove all {s} influence in {t}".format(t=target_list,
-                                                                                                   s=self.opponent[side].upper()))
+                # Logging
+                log_countries = '\n'
+                for country in target_list:
+                    log_countries = log_countries + country.name + '\n'
+
+                confirmation = self.confirm_action("Remove all {s} influence in:{t}".format(s=self.opponent[side].upper(),
+                                                                                            t=log_countries))
                 if confirmation:
                     self.remove_all_influence_from_list(target_list, side)
                     removal_completed = True
@@ -2258,7 +2264,7 @@ class TwilightStruggleGame(CardGame):
             elif selected_action == 'x':
                 pass
 
-        if selected_action == 'c' or 'i' or 'r':
+        if selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             if selected_card.event_type == self.opponent[side]:
                 self.trigger_event(selected_card)
             else:
@@ -2358,7 +2364,7 @@ class TwilightStruggleGame(CardGame):
 
     def action_space_race(self, card, ops, side):
         if self.check_space_race(ops, side):
-            confirmation = self.confirm_action(card.name, 'on the space race')
+            confirmation = self.confirm_action("Make a space race attempt with {c}".format(c=card.name))
             if confirmation:
                 self.space_race_attempt(side)
                 self.move_card(card, 'discard')
@@ -2396,14 +2402,14 @@ class TwilightStruggleGame(CardGame):
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
                 return selected_action
 
-    def confirm_action(self, card_name, country_name, text=''):
-        # space: "on the space space"
-        # coup: "attempt a coup in"
-        confirmation = input('Are you sure you want to use {c}{t} {p}? (y/n): '.format(c=card_name, p=country_name, t=text))
-        if confirmation == 'y':
-            return True
-        else:
-            return False
+    def confirm_action(self, text):
+        while True:
+            confirmation = input("Confirm action - {t} (y/n): ".format(t=text)).lower()
+            if confirmation == 'y':
+                return True
+            elif confirmation == 'n':
+                return False
+
 
     def adjust_ops(self, card, side, low, high):
         adjusted_ops = card.ops + self.sides[side].ops_adjustment
@@ -2424,8 +2430,9 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.headline_phase()
-g.defcon = 4
-g.remove_all_influence('Panama', 'usa')
+g.add_influence_to_control('Romania', 'usa')
+# g.add_influence('Finland', 'ussr', 1)
+g.add_influence_to_control('Finland', 'usa')
 g.action_round('ussr')
 
 # g.add_influence_to_control('Mexico', 'usa')
