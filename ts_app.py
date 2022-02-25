@@ -55,6 +55,7 @@ class CardGame:
 
 class CardPile:
     """Base class for a collection of Card objects"""
+
     def __init__(self, n, card_dict={}):
         self.name = n
         self.cards = {}
@@ -101,6 +102,7 @@ class CardPile:
 
 class Country:
     """Base class for a country in a game"""
+
     def __init__(self, n):
         self.name = n
 
@@ -113,6 +115,7 @@ class Country:
 
 class Player:
     """Base class for a player in a game"""
+
     def __init__(self, n):
         self.name = n
 
@@ -159,7 +162,6 @@ class TwilightStruggleCard(Card):
 
 class TwilightStruggleChinaCard(Card):
     """Class for the china card"""
-    # TODO - change name of china card to 'The China Card' here and in rest of program. Maybe
 
     def __init__(self, n, no, o):
         Card.__init__(self, n)
@@ -287,14 +289,14 @@ class TwilightStruggleGame(CardGame):
                       'ussr': 'USSR hand'}
         self.china_owner = {'usa': 'USA China',
                             'ussr': 'USSR China'}
-        self.pre_reqs = {'NATO':        ['Marshall Plan', 'Warsaw Pact Formed'],
-                         'Solidarity':  ['John Paul II Elected Pope']}
-        self.prevents = {'Arab-Israeli War':        'Camp David Accords',
-                         'Socialist Governments':   'The Iron Lady',
-                         'OPEC':                    'North Sea Oil',
-                         'Willy Brandt':            'Tear Down this Wall',
-                         'Flower Power':            '"An Evil Empire"',
-                         'Muslim Revolution':       'AWACS Sale to Saudis'}
+        self.pre_reqs = {'NATO': ['Marshall Plan', 'Warsaw Pact Formed'],
+                         'Solidarity': ['John Paul II Elected Pope']}
+        self.prevents = {'Arab-Israeli War': 'Camp David Accords',
+                         'Socialist Governments': 'The Iron Lady',
+                         'OPEC': 'North Sea Oil',
+                         'Willy Brandt': 'Tear Down this Wall',
+                         'Flower Power': '"An Evil Empire"',
+                         'Muslim Revolution': 'AWACS Sale to Saudis'}
 
         self.line = '--------------------------------'
 
@@ -341,7 +343,8 @@ class TwilightStruggleGame(CardGame):
             self.countries[borders_list[0]].borders = borders_list[1:]
 
     def __create_piles(self):
-        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand', 'USA China', 'USSR China']
+        pile_list = ['early war', 'mid war', 'late war', 'deck', 'discard', 'removed', 'USA hand', 'USSR hand',
+                     'USA China', 'USSR China']
 
         for pile in pile_list:
             self.add_pile(CardPile(pile))
@@ -430,10 +433,16 @@ class TwilightStruggleGame(CardGame):
         border_list = country.borders
 
         for border in border_list:
-            if self.countries[border].controlled == side or border == side.upper():
+            if border == 'USA' or border == 'USSR':
+                pass
+            elif self.countries[border].controlled == side:
                 adjacent_controlled.append(self.countries[border])
 
         return adjacent_controlled
+
+    def adjacent_to_superpower(self, country, side):
+        adjacent = True if side.upper() in country.borders else False
+        return adjacent
 
     def add_influence(self, country_name, side, i):
         if side == 'usa':
@@ -557,7 +566,8 @@ class TwilightStruggleGame(CardGame):
             if score == 'Southeast Asia':
                 print("{s:>3} | {n:15}".format(s=scores[score], n=score))
             else:
-                print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0], scores[score][1], scores[score][2]))
+                print("{0:>3} | {1:15} [{2:^3}|{3:^3}|{4:^3}]".format(scores[score][3], score, scores[score][0],
+                                                                      scores[score][1], scores[score][2]))
 
     def final_scoring(self):
         self.cards['Shuttle Diplomacy'].effect_active = False
@@ -667,7 +677,6 @@ class TwilightStruggleGame(CardGame):
                 not_controlled_list.append(country)
 
         return not_controlled_list
-
 
     def battlegrounds_controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
@@ -871,7 +880,7 @@ class TwilightStruggleGame(CardGame):
             if len(usa_controlled_middle_east) > 0:
                 eligible = True
         elif card.name == 'Wargames':
-                eligible = True if self.defcon == 2 else False
+            eligible = True if self.defcon == 2 else False
         else:
             eligible = True
 
@@ -904,6 +913,8 @@ class TwilightStruggleGame(CardGame):
         if itself:
             if country.controlled == self.opponent[side]:
                 number_adjacent += 1
+        if self.adjacent_to_superpower(country, self.opponent[side]):
+            number_adjacent += 1
 
         roll = self.die_roll()
         modified_die_roll = roll - number_adjacent
@@ -984,21 +995,21 @@ class TwilightStruggleGame(CardGame):
                          "Adjacent countries: {a}\n" \
                          "Battlegrounds:      {b}\n" \
                          "Total:              {st}\n".format(t=usa_score_type.upper(),
-                                                                                             tl=usa_score_type,
-                                                                                             s=score_dict[usa_score_type],
-                                                                                             a=usa_adjacent_bonus,
-                                                                                             b=usa_bg_bonus,
-                                                                                             st=usa_total)
+                                                             tl=usa_score_type,
+                                                             s=score_dict[usa_score_type],
+                                                             a=usa_adjacent_bonus,
+                                                             b=usa_bg_bonus,
+                                                             st=usa_total)
         log_string_ussr = "USSR has {t}\n" \
                           "Base score:         {s}\n" \
                           "Adjacent countries: {a}\n" \
                           "Battlegrounds:      {b}\n" \
                           "Total:              {st}\n".format(t=ussr_score_type.upper(),
-                                                                                              tl=ussr_score_type,
-                                                                                              s=score_dict[ussr_score_type],
-                                                                                              a=ussr_adjacent_bonus,
-                                                                                              b=ussr_bg_bonus,
-                                                                                              st=ussr_total)
+                                                              tl=ussr_score_type,
+                                                              s=score_dict[ussr_score_type],
+                                                              a=ussr_adjacent_bonus,
+                                                              b=ussr_bg_bonus,
+                                                              st=ussr_total)
         if log:
             print(log_string_usa)
             print(log_string_ussr)
@@ -1209,7 +1220,7 @@ class TwilightStruggleGame(CardGame):
         eligible_countries = self.countries_in_subregion('Eastern Europe')
         if self.turn < 8:
             self.ask_to_remove_influence(eligible_countries, 3, 'usa', 1, 1)
-        elif self.turn >=8:
+        elif self.turn >= 8:
             self.ask_to_remove_influence(eligible_countries, 6, 'usa', 2, 2)
 
     def event_030(self):
@@ -1501,6 +1512,10 @@ class TwilightStruggleGame(CardGame):
                 discard = self.piles['USA hand'].random_card()
                 self.move_card(discard, 'discard')
 
+    def event_093(self):
+        """Iran-Contral Scandal"""
+        pass
+
     def event_097(self):
         """An Evil Empire"""
         self.change_score_by_side('usa', 1)
@@ -1651,6 +1666,7 @@ class TwilightStruggleGame(CardGame):
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
+              'Iran-Contra Scandal':            event_093,
               '"An Evil Empire"':               event_097,
               'Pershing II Deployed':           event_099,
               'Wargames':                       event_100,
@@ -1706,11 +1722,11 @@ class TwilightStruggleGame(CardGame):
         opponent_inf = self.get_opponent_influence(country.name, side)
         log_string = "Modified roll must be more than {d}. " \
                      "{s} rolled {r} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
-                                                                      s=side.upper(),
-                                                                      r=roll,
-                                                                      o=ops,
-                                                                             salt=log_string_salt,
-                                                                      t=modified_roll)
+                                                                            s=side.upper(),
+                                                                            r=roll,
+                                                                            o=ops,
+                                                                            salt=log_string_salt,
+                                                                            t=modified_roll)
         print(log_string)
 
         if modified_roll > doubled_stability:
@@ -1744,7 +1760,8 @@ class TwilightStruggleGame(CardGame):
             if target is None:
                 break
             else:
-                confirmation = self.confirm_action(card.name, 'for a coup attempt in {t}'.format(t=target.name))
+                confirmation = self.confirm_action("Use {c} for a coup attempt in {t}".format(c=card.name,
+                                                                                              t=target.name))
                 if confirmation:
                     self.coup_attempt(target, ops, side)
                     attempt_completed = True
@@ -1792,6 +1809,177 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
+    # Functions to attempt realignment rolls
+    def realignment_roll(self, country, side):
+        offense_roll = self.die_roll()
+        defense_roll = self.die_roll()
+        offense_influence = self.get_influence(country.name, side)
+        defense_influence = self.get_opponent_influence(country.name, side)
+        offense_more_inf = 0
+        defense_more_inf = 0
+        offense_adjacent_superpower = 0
+        defense_adjacent_superpower = 0
+        offense_iran_contra = 0
+        defense_iran_contra = 0
+
+        # Effect 93 - Iran-Contra Scandal
+        if self.cards['Iran-Contra Scandal'].effect_active:
+            if side == 'usa':
+                offense_iran_contra = -1
+            else:
+                defense_iran_contra = -1
+
+        # + 1 for each adjacent controlled country
+        offense_adjacent_controlled = len(self.get_adjacent_controlled(country, side))
+        defense_adjacent_controlled = len(self.get_adjacent_controlled(country, self.opponent[side]))
+
+        # + 1 for having more influence in the target country
+        if offense_influence > defense_influence:
+            offense_more_inf = 1
+        elif defense_influence > offense_influence:
+            defense_more_inf = 1
+
+        # + 1 for superpower adjacent
+        if self.adjacent_to_superpower(country, side):
+            offense_adjacent_superpower = 1
+        if self.adjacent_to_superpower(country, self.opponent[side]):
+            defense_adjacent_superpower = 1
+
+        offense_roll_modified = (offense_roll +
+                                 offense_adjacent_controlled +
+                                 offense_more_inf +
+                                 offense_adjacent_superpower +
+                                 offense_iran_contra)
+        defense_roll_modified = (defense_roll +
+                                 defense_adjacent_controlled +
+                                 defense_more_inf +
+                                 defense_adjacent_superpower +
+                                 defense_iran_contra)
+
+        log_string = "{s} realignment attempt in {c}\n" \
+                     "{o:4}\n" \
+                     "Rolled:              {o1}\n" \
+                     "Adjacent controlled: {o2}\n" \
+                     "More influence:      {o3}\n" \
+                     "Adjacent superpower: {o4}\n" \
+                     "Iran-Contra effect:  {o5}\n" \
+                     "\n" \
+                     "{d:4}\n" \
+                     "Rolled:              {d1}\n" \
+                     "Adjacent controlled: {d2}\n" \
+                     "More influence:      {d3}\n" \
+                     "Adjacent superpower: {d4}\n" \
+                     "Iran-Contra effect:  {d5}\n" \
+                     "\n" \
+                     "             TOTAL = {t}\n".format(s=side.upper(),
+                                                         c=country.name,
+                                                         o=side.upper(),
+                                                         o1=offense_roll,
+                                                         o2=offense_adjacent_controlled,
+                                                         o3=offense_more_inf,
+                                                         o4=offense_adjacent_superpower,
+                                                         o5=offense_iran_contra,
+                                                         d=self.opponent[side].upper(),
+                                                         d1=defense_roll,
+                                                         d2=defense_adjacent_controlled,
+                                                         d3=defense_more_inf,
+                                                         d4=defense_adjacent_superpower,
+                                                         d5=defense_iran_contra,
+                                                         t=offense_roll_modified - defense_roll_modified)
+        print(log_string)
+
+        if offense_roll_modified > defense_roll_modified:
+            self.remove_influence(country.name, self.opponent[side], (offense_roll_modified - defense_roll_modified))
+        elif defense_roll_modified > offense_roll_modified:
+            self.remove_influence(country.name, side, (defense_roll_modified - offense_roll_modified))
+
+    def action_realignment_roll(self, card, ops, side):
+        possible_targets = self.countries_with_influence(self.opponent[side])
+        attempts_made = self.ask_to_realignment_roll(possible_targets, ops, side)
+        if attempts_made < ops:
+            self.action_round_complete = True
+
+    def ask_to_realignment_roll(self, country_list, ops, side):
+        realignments_completed = False
+        realignments_to_attempt = ops
+        cancellation = False
+
+        while not realignments_completed:
+            possible_targets = []
+            for country in country_list:
+                possible_targets.append(country)
+
+            while realignments_to_attempt >= 0:
+                eligible_targets = self.checked_realignment_targets(possible_targets, side)
+                if len(eligible_targets) == 0:
+                    realignments_completed = True
+                    break
+
+                if realignments_to_attempt == 0:
+                    realignments_completed = True
+                elif realignments_to_attempt < ops:
+                    continue_confirmation = self.confirm_action("Continue realignment attempts")
+                    if not continue_confirmation:
+                        realignments_completed = True
+                        break
+
+                print("Attempt a realignment roll ({r} remaining)".format(r=realignments_to_attempt))
+                target = self.select_a_country(eligible_targets)
+                print(target)
+                if target is None:
+                    cancellation = True
+                    break
+
+                target_confirmation = self.confirm_action("Attempt a realignment in {t}".format(t=target.name))
+                if target_confirmation:
+                    self.realignment_roll(target, side)
+                    realignments_to_attempt = realignments_to_attempt - 1
+
+            if cancellation:
+                continue_confirmation = self.confirm_action("Continue realignment attempts")
+                if not continue_confirmation:
+                    realignments_completed = True
+
+        return realignments_to_attempt
+
+    def checked_realignment_targets(self, country_list, side):
+        eligible_targets = []
+
+        for country in country_list:
+            if self.check_realignment_roll(country, side):
+                eligible_targets.append(country)
+
+        return eligible_targets
+
+    def check_realignment_roll(self, country, side):
+        opponent_influence = self.get_opponent_influence(country.name, side)
+        eligible = True
+
+        if opponent_influence == 0:
+            eligible = False
+
+        if self.defcon < 5:
+            if country.region == 'Europe':
+                eligible = False
+            else:
+                if self.defcon < 4:
+                    if country.region == 'Asia':
+                        eligible = False
+                    else:
+                        if self.defcon < 3:
+                            if country.region == 'Middle East':
+                                eligible = False
+
+        # Effect 021 - NATO
+        if country.nato and country.controlled == 'usa':
+            eligible = False
+
+        # Effect 027 - US/Japan Mutual Defense Pact
+        if country.name == 'Japan' and self.cards['US/Japan Mutual Defense Pact'].effect_active:
+            eligible = False
+
+        return eligible
+
     # Functions to place influence
     def action_place_influence(self, card, ops, side):
         placement_completed = False
@@ -1818,7 +2006,7 @@ class TwilightStruggleGame(CardGame):
                 break
             elif self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
-                    confirmation = self.confirm_action(card.name, "to place influence in {t}".format(t=target_list))
+                    confirmation = self.confirm_action("Place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
@@ -1851,7 +2039,7 @@ class TwilightStruggleGame(CardGame):
 
             if self.check_influence_targets_add(target_list, side):
                 if influence_to_place == 0:
-                    confirmation = self.confirm_action("","to place influence in {t}".format(t=target_list))
+                    confirmation = self.confirm_action("Place influence in {t}".format(t=target_list))
                     if confirmation:
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
@@ -1886,7 +2074,7 @@ class TwilightStruggleGame(CardGame):
 
             if self.check_influence_targets_remove(target_list, side):
                 if influence_to_remove == 0 or len(possible_targets) == 0:
-                    confirmation = self.confirm_action("", "to remove influence in {t}".format(t=target_list))
+                    confirmation = self.confirm_action("Remove influence in {t}".format(t=target_list))
                     if confirmation:
                         self.remove_influence_from_list(target_list, side)
                         removal_completed = True
@@ -1915,8 +2103,14 @@ class TwilightStruggleGame(CardGame):
                     break
 
             if countries_to_remove == 0 or len(possible_targets) == 0:
-                confirmation = self.confirm_action("", "to remove all {s} influence in {t}".format(t=target_list,
-                                                                                                   s=self.opponent[side].upper()))
+                # Logging
+                log_countries = '\n'
+                for country in target_list:
+                    log_countries = log_countries + country.name + '\n'
+
+                confirmation = self.confirm_action(
+                    "Remove all {s} influence in:{t}".format(s=self.opponent[side].upper(),
+                                                             t=log_countries))
                 if confirmation:
                     self.remove_all_influence_from_list(target_list, side)
                     removal_completed = True
@@ -2089,14 +2283,13 @@ class TwilightStruggleGame(CardGame):
             elif selected_action == 'i':
                 self.action_place_influence(selected_card, adjusted_card_ops, side)
             elif selected_action == 'r':
-                # TODO - add realignment function
-                break
+                self.action_realignment_roll(selected_card, adjusted_card_ops, side)
             elif selected_action == 's':
                 self.action_space_race(selected_card, adjusted_card_ops, side)
             elif selected_action == 'x':
                 pass
 
-        if selected_action == 'c' or 'i' or 'r':
+        if selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             if selected_card.event_type == self.opponent[side]:
                 self.trigger_event(selected_card)
             else:
@@ -2196,7 +2389,7 @@ class TwilightStruggleGame(CardGame):
 
     def action_space_race(self, card, ops, side):
         if self.check_space_race(ops, side):
-            confirmation = self.confirm_action(card.name, 'on the space race')
+            confirmation = self.confirm_action("Make a space race attempt with {c}".format(c=card.name))
             if confirmation:
                 self.space_race_attempt(side)
                 self.move_card(card, 'discard')
@@ -2234,14 +2427,13 @@ class TwilightStruggleGame(CardGame):
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
                 return selected_action
 
-    def confirm_action(self, card_name, country_name, text=''):
-        # space: "on the space space"
-        # coup: "attempt a coup in"
-        confirmation = input('Are you sure you want to use {c}{t} {p}? (y/n): '.format(c=card_name, p=country_name, t=text))
-        if confirmation == 'y':
-            return True
-        else:
-            return False
+    def confirm_action(self, text):
+        while True:
+            confirmation = input("Confirm action - {t} (y/n): ".format(t=text)).lower()
+            if confirmation == 'y':
+                return True
+            elif confirmation == 'n':
+                return False
 
     def adjust_ops(self, card, side, low, high):
         adjusted_ops = card.ops + self.sides[side].ops_adjustment
@@ -2261,6 +2453,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.headline_phase()
+
+g.trigger_event(g.cards['Iran-Contra Scandal'])
 g.action_round('ussr')
-g.trigger_event(g.cards['Wargames'])
