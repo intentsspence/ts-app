@@ -1869,6 +1869,83 @@ class TwilightStruggleGame(CardGame):
         elif defense_roll_modified > offense_roll_modified:
             self.remove_influence(country.name, side, (defense_roll_modified - offense_roll_modified))
 
+    def action_realignment_roll(self, card, ops, side):
+        realignments_completed = False
+        while not realignments_completed:
+            realignments_to_attempt = ops
+            target_list = []
+            possible_targets = self.countries_with_influence(self.opponent[side])
+
+    def ask_to_realignment_roll(self, country_list, ops, side):
+        realignments_completed = False
+        realignments_to_attempt = ops
+        while not realignments_completed:
+            possible_targets = []
+            for country in country_list:
+                possible_targets.append(country)
+
+            while realignments_to_attempt > 0:
+                eligible_targets = self.checked_realignment_targets(possible_targets, side)
+                if len(eligible_targets) == 0:
+                    realignments_completed = True
+                    break
+
+                print("Attempt a realignment roll ({r} remaining)".format(r=realignments_to_attempt))
+                target = self.select_a_country(eligible_targets)
+                if target is None:
+                    break
+
+                target_confirmation = self.confirm_action("", "attempt a realignment in {t}".format(t=target.name))
+                if target_confirmation:
+                    self.realignment_roll(country, side)
+                    realignments_to_attempt = realignments_to_attempt - 1
+
+                if realignments_to_attempt > 0:
+                    continue_confirmation = self.confirm_action("","continue realignment attempts")
+                    if not continue_confirmation:
+                        realignments_completed = True
+                        break
+                else:
+                    realignments_completed = True
+
+    def checked_realignment_targets(self, country_list, side):
+        eligible_targets = []
+
+        for country in country_list:
+            if self.check_realignment_roll(country, side):
+                eligible_targets.append(country)
+
+        return eligible_targets
+
+    def check_realignment_roll(self, country, side):
+        opponent_influence = self.get_opponent_influence(country.name, side)
+        eligible = True
+
+        if opponent_influence == 0:
+            eligible = False
+
+        if self.defcon < 5:
+            if country.region == 'Europe':
+                eligible = False
+            else:
+                if self.defcon < 4:
+                    if country.region == 'Asia':
+                        eligible = False
+                    else:
+                        if self.defcon < 3:
+                            if country.region == 'Middle East':
+                                eligible = False
+
+        # Effect 021 - NATO
+        if country.nato and country.controlled == 'usa':
+            eligible = False
+
+        # Effect 027 - US/Japan Mutual Defense Pact
+        if country.name == 'Japan' and self.cards['US/Japan Mutual Defense Pact'].effect_active:
+            eligible = False
+
+        return eligible
+
     # Functions to place influence
     def action_place_influence(self, card, ops, side):
         placement_completed = False
