@@ -1822,12 +1822,10 @@ class TwilightStruggleGame(CardGame):
             defense_more_inf = 1
 
         # + 1 for superpower adjacent
-        border_list = country.borders
-        for border in border_list:
-            if border == side.upper():
-                offense_adjacent_superpower = 1
-            elif border == self.opponent[side].upper():
-                defense_adjacent_superpower = 1
+        if self.adjacent_to_superpower(country, side):
+            offense_adjacent_superpower = 1
+        if self.adjacent_to_superpower(country, self.opponent[side]):
+            defense_adjacent_superpower = 1
 
         offense_roll_modified = (offense_roll +
                                  offense_adjacent_controlled +
@@ -2344,10 +2342,7 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 
 # g.add_influence_to_control('Mexico', 'usa')
-g.add_influence('Mexico', 'ussr', 3)
-g.add_influence('Guatemala', 'ussr', 3)
-# g.realignment_roll(g.countries['Mexico'], 'ussr')
-# print(g.get_adjacent_controlled(g.countries['Mexico'], 'ussr'))
-# print(g.adjacent_to_superpower(g.countries['Finland'], 'usa'))
-g.phasing = 'ussr'
-g.trigger_event(g.cards['Brush War'])
+g.add_influence('Finland', 'ussr', 1)
+g.add_influence_to_control('Finland', 'usa')
+g.add_influence('Sweden', 'ussr', 4)
+g.realignment_roll(g.countries['Finland'], 'usa')
