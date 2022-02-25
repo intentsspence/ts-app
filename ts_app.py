@@ -1870,43 +1870,52 @@ class TwilightStruggleGame(CardGame):
             self.remove_influence(country.name, side, (defense_roll_modified - offense_roll_modified))
 
     def action_realignment_roll(self, card, ops, side):
-        realignments_completed = False
-        while not realignments_completed:
-            realignments_to_attempt = ops
-            target_list = []
-            possible_targets = self.countries_with_influence(self.opponent[side])
+        possible_targets = self.countries_with_influence(self.opponent[side])
+        attempts_made = self.ask_to_realignment_roll(possible_targets, ops, side)
+        if attempts_made < ops:
+            self.action_round_complete = True
 
     def ask_to_realignment_roll(self, country_list, ops, side):
         realignments_completed = False
         realignments_to_attempt = ops
+        cancellation = False
         while not realignments_completed:
             possible_targets = []
             for country in country_list:
                 possible_targets.append(country)
 
-            while realignments_to_attempt > 0:
+            while realignments_to_attempt >= 0:
                 eligible_targets = self.checked_realignment_targets(possible_targets, side)
                 if len(eligible_targets) == 0:
                     realignments_completed = True
                     break
 
+                if realignments_to_attempt == 0:
+                    realignments_completed = True
+                elif realignments_to_attempt < ops:
+                    continue_confirmation = self.confirm_action("", "continue realignment attempts")
+                    if not continue_confirmation:
+                        realignments_completed = True
+                        break
+
                 print("Attempt a realignment roll ({r} remaining)".format(r=realignments_to_attempt))
                 target = self.select_a_country(eligible_targets)
+                print(target)
                 if target is None:
+                    cancellation = True
                     break
 
                 target_confirmation = self.confirm_action("", "attempt a realignment in {t}".format(t=target.name))
                 if target_confirmation:
-                    self.realignment_roll(country, side)
+                    self.realignment_roll(target, side)
                     realignments_to_attempt = realignments_to_attempt - 1
 
-                if realignments_to_attempt > 0:
-                    continue_confirmation = self.confirm_action("","continue realignment attempts")
-                    if not continue_confirmation:
-                        realignments_completed = True
-                        break
-                else:
+            if cancellation:
+                continue_confirmation = self.confirm_action("", "continue realignment attempts")
+                if not continue_confirmation:
                     realignments_completed = True
+
+        return realignments_to_attempt
 
     def checked_realignment_targets(self, country_list, side):
         eligible_targets = []
@@ -2243,8 +2252,7 @@ class TwilightStruggleGame(CardGame):
             elif selected_action == 'i':
                 self.action_place_influence(selected_card, adjusted_card_ops, side)
             elif selected_action == 'r':
-                # TODO - add realignment function
-                break
+                self.action_realignment_roll(selected_card, adjusted_card_ops, side)
             elif selected_action == 's':
                 self.action_space_race(selected_card, adjusted_card_ops, side)
             elif selected_action == 'x':
@@ -2416,10 +2424,12 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.headline_phase()
-# g.action_round('ussr')
+g.defcon = 4
+g.remove_all_influence('Panama', 'usa')
+g.action_round('ussr')
 
 # g.add_influence_to_control('Mexico', 'usa')
-g.add_influence('Finland', 'ussr', 1)
-g.add_influence_to_control('Finland', 'usa')
-g.add_influence('Sweden', 'ussr', 4)
-g.realignment_roll(g.countries['Finland'], 'usa')
+# g.add_influence('Finland', 'ussr', 1)
+# g.add_influence_to_control('Finland', 'usa')
+
+# g.realignment_roll(g.countries['Finland'], 'usa')
