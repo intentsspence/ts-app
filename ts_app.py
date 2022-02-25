@@ -1792,6 +1792,37 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
+    # Functions to attempt realignment rolls
+    def realignment_roll(self, country, side):
+        offense_roll = self.die_roll()
+        offense_modifiers = 0
+        defense_roll = self.die_roll()
+        defense_modifiers = 0
+
+        offense_roll_modified = offense_roll + offense_modifiers
+        defense_roll_modified = defense_roll + defense_modifiers
+
+        log_string = "{s} realignment attempt in {c}\n" \
+                     "{o} rolled {o1} + {o2} modification. Total {o3}\n" \
+                     "{d} rolled {d1} + {d2} modification. Total {d3}\n".format(s=side.upper(),
+                                                                                c=country.name,
+                                                                                o=side.upper(),
+                                                                                o1=offense_roll,
+                                                                                o2=offense_modifiers,
+                                                                                o3=offense_roll_modified,
+                                                                                d=self.opponents[side].upper(),
+                                                                                d1=defense_roll,
+                                                                                d2=defense_modifiers,
+                                                                                d3=defense_roll_modified)
+        print(log_string)
+
+        if offense_roll_modified > defense_roll_modified:
+            self.remove_influence(country.name, (offense_roll_modified - defense_roll_modified), self.opponents[side])
+        elif defense_roll_modified > offense_roll_modified:
+            self.remove_influence(country.name, (offense_roll_modified - defense_roll_modified), side)
+
+
+
     # Functions to place influence
     def action_place_influence(self, card, ops, side):
         placement_completed = False
