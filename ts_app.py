@@ -1457,7 +1457,6 @@ class TwilightStruggleGame(CardGame):
     def event_077(self):
         """Ask Not What Your Country..."""
         while True:
-            # card_options = self.piles['USA hand'].get_cards_in_pile().values()
             card_options = self.get_available_cards('usa', False)
             selected_list = []
             card_list_names = ''
@@ -1699,6 +1698,39 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.adjacent_country_objects(self.countries['UK'])
                 self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
 
+    def event_108(self):
+        """Our Man In Tehran"""
+        drawn_cards = []
+        number_drawn = 0
+
+        draw_pile = list(self.piles['deck'].get_cards_in_pile().values())
+        if len(draw_pile) >= 5:
+            cards_to_draw = 5
+        else:
+            cards_to_draw = len(draw_pile)
+
+        print('USA draws following cards:')
+
+        while number_drawn < cards_to_draw:
+            card = self.piles['deck'].random_card()
+            if card not in drawn_cards:
+                drawn_cards.append(card)
+                print(card.name)
+                number_drawn += 1
+
+        while True:
+            target_cards = []
+            target_card_names = ''
+            for card in drawn_cards:
+                if self.confirm_action("Discard {c}".format(c=card.name)):
+                    target_cards.append(card)
+                    target_card_names = target_card_names + card.name + '\n'
+
+            if self.confirm_action("Discard the following cards:\n{c}".format(c=target_card_names)):
+                for card in target_cards:
+                    self.move_card(card, 'discard')
+                break
+
     def event_110(self):
         """AWACS Sale to Saudis"""
         self.add_influence('Saudi Arabia', 'usa', 2)
@@ -1782,6 +1814,7 @@ class TwilightStruggleGame(CardGame):
               'Defectors':                      event_103,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
+              'Our Man in Tehran':              event_108,
               'AWACS Sale to Saudis':           event_110}
 
     # Effects
@@ -2564,7 +2597,7 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 print(g.get_available_cards('usa', False))
 g.trigger_event(g.cards['Containment'])
 g.add_influence('Argentina', 'ussr', 3)
-g.add_influence('Brazil', 'usa', 6)
+g.add_influence('Iraq', 'usa', 6)
 g.add_influence('Brazil', 'ussr', 4)
-g.trigger_event(g.cards['Aldrich Ames Remix'])
+g.trigger_event(g.cards['Our Man in Tehran'])
 # g.action_round('ussr')
