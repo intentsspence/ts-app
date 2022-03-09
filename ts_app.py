@@ -1612,6 +1612,18 @@ class TwilightStruggleGame(CardGame):
         self.change_score_by_side('usa', 1)
         self.cards['Flower Power'].effect_active = False
 
+    def event_098(self):
+        """Aldrich Ames Remix"""
+        eligible_cards = self.get_available_cards('usa', False)
+        print(eligible_cards)
+
+        while True:
+            print("Discard a card from the USA hand.")
+            card = self.select_a_card(eligible_cards, 'ussr')
+            if self.confirm_action("Discard {c} from USA hand".format(c=card.name)):
+                self.move_card(card, 'discard')
+                break
+
     def event_099(self):
         """Pershing II Deployed"""
         eligible_countries = self.countries_in_subregion('Western Europe')
@@ -1762,6 +1774,7 @@ class TwilightStruggleGame(CardGame):
               'Iran-Contra Scandal':            event_093,
               'Latin American Debt Crisis':     event_095,
               '"An Evil Empire"':               event_097,
+              'Aldrich Ames Remix':             event_098,
               'Pershing II Deployed':           event_099,
               'Wargames':                       event_100,
               'Solidarity':                     event_101,
@@ -2553,6 +2566,5 @@ g.trigger_event(g.cards['Containment'])
 g.add_influence('Argentina', 'ussr', 3)
 g.add_influence('Brazil', 'usa', 6)
 g.add_influence('Brazil', 'ussr', 4)
-g.trigger_event(g.cards['Latin American Debt Crisis'])
+g.trigger_event(g.cards['Aldrich Ames Remix'])
 # g.action_round('ussr')
-
