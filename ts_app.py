@@ -2593,11 +2593,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-
-print(g.get_available_cards('usa', False))
 g.trigger_event(g.cards['Containment'])
-g.add_influence('Argentina', 'ussr', 3)
-g.add_influence('Iraq', 'usa', 6)
-g.add_influence('Brazil', 'ussr', 4)
-g.trigger_event(g.cards['Our Man in Tehran'])
 # g.action_round('ussr')
