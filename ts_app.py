@@ -734,7 +734,7 @@ class TwilightStruggleGame(CardGame):
         current_pile = self.which_pile(c)
         self.piles[current_pile].remove_card(c)
         self.piles[pile_name].add_card(c)
-        log_string = "{c} moved to {p}.\n".format(c=c.name, p=pile_name)
+        log_string = "{c} moved to {p}.".format(c=c.name, p=pile_name)
         print(log_string)
 
     def move_all_cards(self, pile_to_name, pile_from_name):
@@ -1454,6 +1454,40 @@ class TwilightStruggleGame(CardGame):
         else:
             raise ValueError("China card must be in USA hand or USSR hand")
 
+    def event_077(self):
+        """Ask Not What Your Country..."""
+        while True:
+            # card_options = self.piles['USA hand'].get_cards_in_pile().values()
+            card_options = self.get_available_cards('usa', False)
+            selected_list = []
+            card_list_names = ''
+
+            print('Discard up to entire hard:')
+
+            while True:
+                card = self.select_a_card(card_options, 'usa')
+                selected_list.append(card)
+                card_options.remove(card)
+
+                if self.confirm_action('Finish discarding cards') or len(card_options) == 0:
+                    break
+
+            # Format a string with the card names
+            for card in selected_list:
+                card_list_names = card_list_names + card.name + '\n'
+
+            confirmation = self.confirm_action("Discard these cards:\n{l}".format(l=card_list_names))
+
+            if confirmation:
+                for card in selected_list:
+                    self.move_card(card, 'discard')
+                draw_number = 0
+                while draw_number < len(selected_list):
+                    dealt_card = self.piles['deck'].random_card()
+                    self.move_card(dealt_card, 'USA hand')
+                    draw_number += 1
+                break
+
     def event_078(self):
         """Alliance for Progress"""
         ca_battlegrounds = len(self.battlegrounds_controlled_in_region('Central America', 'usa'))
@@ -1667,6 +1701,7 @@ class TwilightStruggleGame(CardGame):
               'The Voice of America':           event_074,
               'Liberation Theology':            event_075,
               'Ussuri River Skirmish':          event_076,
+              '"Ask Not What Your Country..."': event_077,
               'Alliance for Progress':          event_078,
               'Africa Scoring':                 event_079,
               '"One Small Step..."':            event_080,
@@ -2466,6 +2501,6 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
-g.trigger_event(g.cards['Iran-Contra Scandal'])
-g.action_round('ussr')
+g.trigger_event(g.cards['"Ask Not What Your Country..."'])
+# g.action_round('ussr')
 
