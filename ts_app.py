@@ -1561,6 +1561,52 @@ class TwilightStruggleGame(CardGame):
         """Iran-Contral Scandal"""
         pass
 
+    def event_095(self):
+        """Latin American Debt Crisis"""
+        eligible_cards = []
+        usa_hand = self.get_available_cards('usa', False)
+        double_influence = False
+
+        for card in usa_hand:
+            if (card.ops + self.sides['usa'].ops_adjustment) >= 3:
+                eligible_cards.append(card)
+
+        if len(eligible_cards) == 0:
+            double_influence = True
+        else:
+            options = [['a', "Discard a card with operations value of 3 or more"],
+                       ['b', "USSR may double amount of USSR influence in 2 countries in South America"]]
+            response = self.select_option(options)
+            if response == 'a':
+                selected_card = self.select_a_card(eligible_cards, 'usa')
+                self.move_card(selected_card, 'discard')
+            elif response == 'b':
+                double_influence = True
+
+        if double_influence:
+            while True:
+                target_list = []
+                target_list_names = ''
+                eligible_countries = self.countries_in_region('South America')
+                targeted_countries = 0
+
+                while targeted_countries < 2:
+                    country = self.select_a_country(eligible_countries)
+                    target_list.append(country)
+                    eligible_countries.remove(country)
+                    targeted_countries += 1
+
+                for country in target_list:
+                    target_list_names = target_list_names + country.name + '\n'
+
+                confirmation = self.confirm_action("Double USSR influence in:\n{l}".format(l=target_list_names))
+
+                if confirmation:
+                    for country in target_list:
+                        current_inf = self.get_influence(country.name, 'ussr')
+                        self.add_influence(country.name, 'ussr', current_inf)
+                    break
+
     def event_097(self):
         """An Evil Empire"""
         self.change_score_by_side('usa', 1)
@@ -1714,6 +1760,7 @@ class TwilightStruggleGame(CardGame):
               'Marine Barracks Bombing':        event_088,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
+              'Latin American Debt Crisis':     event_095,
               '"An Evil Empire"':               event_097,
               'Pershing II Deployed':           event_099,
               'Wargames':                       event_100,
@@ -2501,6 +2548,11 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
-g.trigger_event(g.cards['"Ask Not What Your Country..."'])
+print(g.get_available_cards('usa', False))
+g.trigger_event(g.cards['Containment'])
+g.add_influence('Argentina', 'ussr', 3)
+g.add_influence('Brazil', 'usa', 6)
+g.add_influence('Brazil', 'ussr', 4)
+g.trigger_event(g.cards['Latin American Debt Crisis'])
 # g.action_round('ussr')
 
