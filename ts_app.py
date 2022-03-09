@@ -1071,6 +1071,17 @@ class TwilightStruggleGame(CardGame):
         points = 5 - self.defcon
         self.change_score_by_side('usa', points)
 
+    def event_005(self):
+        """Five Year Plan"""
+        card = self.piles['USSR hand'].random_card()
+        log_string = "USSR randomly discards {c}.".format(c=card.name)
+        print(log_string)
+
+        if card.event_type == 'usa':
+            self.trigger_event(card)
+        else:
+            self.move_card(card, 'discard')
+
     def event_007(self):
         """Socialist Governments"""
         eligible_countries = self.countries_in_subregion('Western Europe')
@@ -1605,6 +1616,7 @@ class TwilightStruggleGame(CardGame):
               'Europe Scoring':                 event_002,
               'Middle East Scoring':            event_003,
               'Duck and Cover':                 event_004,
+              'Five Year Plan':                 event_005,
               'Socialist Governments':          event_007,
               'Fidel':                          event_008,
               'Blockade':                       event_010,
@@ -2456,3 +2468,4 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
 g.trigger_event(g.cards['Iran-Contra Scandal'])
 g.action_round('ussr')
+
