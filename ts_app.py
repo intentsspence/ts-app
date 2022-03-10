@@ -1218,6 +1218,13 @@ class TwilightStruggleGame(CardGame):
         """Containment"""
         self.sides['usa'].ops_adjustment = 1
 
+    def event_026(self):
+        """CIA Created"""
+        visible_cards = self.get_available_cards('ussr', False)
+        print(visible_cards)
+
+        self.conduct_operations('usa', self.cards['CIA Created'].ops)
+
     def event_027(self):
         """US/Japan Mutual Defense Pact"""
         self.add_influence_to_control('Japan', 'usa')
@@ -1759,6 +1766,7 @@ class TwilightStruggleGame(CardGame):
               'Marshall Plan':                  event_023,
               'Indo-Pakistani War':             event_024,
               'Containment':                    event_025,
+              'CIA Created':                    event_026,
               'US/Japan Mutual Defense Pact':   event_027,
               'Suez Crisis':                    event_028,
               'East European Unrest':           event_029,
@@ -2623,6 +2631,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'usa'
-g.trigger_event(g.cards['Red Scare/Purge'])
-g.conduct_operations('ussr', 4)
+g.action_round('ussr')
+# g.trigger_event(g.cards['CIA Created'])
+# g.conduct_operations('ussr', 4)
