@@ -1173,6 +1173,37 @@ class TwilightStruggleGame(CardGame):
 
         self.ask_to_remove_all_influence(eligible_countries, 1, 'usa')
 
+    def event_020(self):
+        """Olympic Games"""
+        options = [['a', "Participate - Each player roll, sponsor adds 2 to roll. Highest modified roll receives 2 VP"],
+                   ['b', "Boycott - Degrade DEFCON by 1, sponsor may conduct operations as if they played 4 op card"]]
+        response = self.select_option(options)
+
+        if response == 'a':
+            while True:
+                sponsor_roll = self.die_roll() + 2
+                print("Sponsor {p} rolled {r1} + 2".format(p=self.phasing.upper(),
+                                                           r1=(sponsor_roll - 2)))
+
+                opponent_roll = self.die_roll()
+                print("Opponent {o} rolled {r2}".format(o=self.opponent[self.phasing].upper(),
+                                                        r2=opponent_roll))
+
+                if sponsor_roll > opponent_roll:
+                    print("Sponsor {p} wins!".format(p=self.phasing.upper()))
+                    self.change_score_by_side(self.phasing, 2)
+                    break
+                elif opponent_roll > sponsor_roll:
+                    print("Opponent {o} wins!".format(o=self.opponent[self.phasing].upper()))
+                    self.change_score_by_side(self.opponent[self.phasing], 2)
+                    break
+                else:
+                    log_string = 'Tied - rerolling'
+                    print(log_string)
+        elif response == 'b':
+            self.change_defcon(-1)
+            self.conduct_operations(self.phasing, 4)
+
     def event_021(self):
         """NATO"""
         countries = self.countries_in_region('Europe')
@@ -1773,6 +1804,7 @@ class TwilightStruggleGame(CardGame):
               'De Gaulle Leads France':         event_017,
               'Captured Nazi Scientist':        event_018,
               'Truman Doctrine':                event_019,
+              'Olympic Games':                  event_020,
               'NATO':                           event_021,
               'Independent Reds':               event_022,
               'Marshall Plan':                  event_023,
@@ -2645,8 +2677,8 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.phasing = 'ussr'
+g.phasing = 'ussr'
 # g.action_round('ussr')
 # g.change_defcon(-2)
-g.trigger_event(g.cards['"Lone Gunman"'])
+g.trigger_event(g.cards['Olympic Games'])
 # g.conduct_operations('ussr', 4)
