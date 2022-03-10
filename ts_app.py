@@ -1074,14 +1074,15 @@ class TwilightStruggleGame(CardGame):
 
     def event_005(self):
         """Five Year Plan"""
-        card = self.piles['USSR hand'].random_card()
-        log_string = "USSR randomly discards {c}.".format(c=card.name)
-        print(log_string)
+        if len(self.get_available_cards('ussr', False)) > 0:
+            card = self.piles['USSR hand'].random_card()
+            log_string = "USSR randomly discards {c}.".format(c=card.name)
+            print(log_string)
 
-        if card.event_type == 'usa':
-            self.trigger_event(card)
-        else:
-            self.move_card(card, 'discard')
+            if card.event_type == 'usa':
+                self.trigger_event(card)
+            else:
+                self.move_card(card, 'discard')
 
     def event_007(self):
         """Socialist Governments"""
@@ -1455,6 +1456,12 @@ class TwilightStruggleGame(CardGame):
 
         if len(eligible_countries) > 0:
             self.ask_to_place_influence(eligible_countries, 3, 'usa', 1, 1)
+
+    def event_067(self):
+        """Grain Sales to Soviets"""
+        card = self.piles['USSR hand'].random_card()
+        log_string = "USSR randomly discards {c}.".format(c=card.name)
+        print(log_string)
 
     def event_068(self):
         """John Paul II Elected Pope"""
@@ -2680,5 +2687,7 @@ g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.phasing = 'ussr'
 # g.action_round('ussr')
 # g.change_defcon(-2)
-g.trigger_event(g.cards['Olympic Games'])
+g.move_all_cards('discard', 'USSR hand')
+g.trigger_event(g.cards['Five Year Plan'])
 # g.conduct_operations('ussr', 4)
+
