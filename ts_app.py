@@ -2355,6 +2355,23 @@ class TwilightStruggleGame(CardGame):
                 break
         return influence_amount
 
+    # Function to conduct operations
+    def conduct_operations(self, side, ops):
+        conduct_operations_complete = False
+
+        while not self.conduct_operations_complete:
+            selected_action = self.select_operations()
+            adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
+            if selected_action == 'c':
+                self.action_coup_attempt(selected_card, adjusted_card_ops, side)
+                conduct_operations_complete = True
+            elif selected_action == 'i':
+                self.action_place_influence(selected_card, adjusted_card_ops, side)
+                conduct_operations_complete = True
+            elif selected_action == 'r':
+                self.action_realignment_roll(selected_card, adjusted_card_ops, side)
+                conduct_operations_complete = True
+
     # Functions for the headline phase
     def headline_phase(self):
         self.phase = 'headline'
@@ -2565,6 +2582,19 @@ class TwilightStruggleGame(CardGame):
         while True:
             selected_action = input("Selection: ").lower()
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
+                return selected_action
+
+    def select_operation(self):
+        operation_options = " c| Coup attempt\n" \
+                            " i| Place influence\n" \
+                            " r| Realignment roll\n"
+
+        print(self.line)
+        print("Select operation:")
+        print(operation_options)
+        while True:
+            selected_action = input("Selection: ").lower()
+            if selected_action in ['c', 'i', 'r']:
                 return selected_action
 
     def confirm_action(self, text):
