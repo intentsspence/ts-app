@@ -1459,9 +1459,56 @@ class TwilightStruggleGame(CardGame):
 
     def event_067(self):
         """Grain Sales to Soviets"""
-        card = self.piles['USSR hand'].random_card()
-        log_string = "USSR randomly discards {c}.".format(c=card.name)
-        print(log_string)
+        if len(self.get_available_cards('ussr', False)) > 0:
+            card = self.piles['USSR hand'].random_card()
+            log_string = "USSR randomly discards {c}.".format(c=card.name)
+            print(log_string)
+
+            options = [['a', "Play card"],
+                       ['b', "Return card"]]
+            response = self.select_option(options)
+            if response == 'a':
+                self.move_card(card, 'USA hand')
+                self.conduct_operations_complete = False
+
+                while not self.conduct_operations_complete:
+                    action_options = " e| Play event\n" \
+                                     " c| Coup attempt\n" \
+                                     " i| Place influence\n" \
+                                     " r| Realignment roll\n" \
+                                     " s| Space race\n"
+                    print(self.line)
+                    print("Select use for " + card.name + ':')
+                    print(action_options)
+                    while True:
+                        selected_action = input("Selection: ").lower()
+                        if selected_action in ['e', 'c', 'i', 'r', 's']:
+                            break
+
+                    adjusted_card_ops = self.adjust_ops(card.ops, 'usa', 1, 4)
+                    if selected_action == 'e':
+                        self.trigger_event(card)
+                        self.conduct_operations_complete = True
+                    elif selected_action == 'c':
+                        self.action_coup_attempt(adjusted_card_ops, 'usa')
+                    elif selected_action == 'i':
+                        self.action_place_influence(adjusted_card_ops, 'usa')
+                    elif selected_action == 'r':
+                        self.action_realignment_roll(adjusted_card_ops, 'usa')
+                    elif selected_action == 's':
+                        self.action_space_race(card, adjusted_card_ops, 'usa')
+
+                if selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
+                    if card.event_type == 'ussr':
+                        self.trigger_event(card)
+                    else:
+                        self.trigger_effect(self.cards['Flower Power'])
+                        self.move_card(card, 'discard')
+
+            elif response == 'b':
+                self.conduct_operations('usa', self.cards['Grain Sales to Soviets'].ops)
+        else:
+            self.conduct_operations('usa', self.cards['Grain Sales to Soviets'].ops)
 
     def event_068(self):
         """John Paul II Elected Pope"""
@@ -1846,6 +1893,7 @@ class TwilightStruggleGame(CardGame):
               'Panama Canal Returned':          event_064,
               'Camp David Accords':             event_065,
               'Puppet Governments':             event_066,
+              'Grain Sales to Soviets':         event_067,
               'John Paul II Elected Pope':      event_068,
               'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
@@ -2684,10 +2732,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'ussr'
-# g.action_round('ussr')
-# g.change_defcon(-2)
-g.move_all_cards('discard', 'USSR hand')
-g.trigger_event(g.cards['Five Year Plan'])
-# g.conduct_operations('ussr', 4)
-
+g.phasing = 'usa'
+g.trigger_event(g.cards['Grain Sales to Soviets'])
