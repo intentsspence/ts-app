@@ -2359,9 +2359,9 @@ class TwilightStruggleGame(CardGame):
     def conduct_operations(self, side, ops):
         conduct_operations_complete = False
 
-        while not self.conduct_operations_complete:
+        while not conduct_operations_complete:
             selected_action = self.select_operations()
-            adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
+            adjusted_card_ops = self.adjust_ops(ops, side, 1, 4)
             if selected_action == 'c':
                 self.action_coup_attempt(selected_card, adjusted_card_ops, side)
                 conduct_operations_complete = True
@@ -2431,7 +2431,7 @@ class TwilightStruggleGame(CardGame):
             selected_card = self.select_a_card(eligible_cards, side)
             self.active_card = selected_card
             selected_action = self.select_action(selected_card)
-            adjusted_card_ops = self.adjust_ops(selected_card, side, 1, 4)
+            adjusted_card_ops = self.adjust_ops(selected_card.ops, side, 1, 4)
             if selected_action == 'e':
                 self.trigger_event(selected_card)
                 break
@@ -2605,9 +2605,9 @@ class TwilightStruggleGame(CardGame):
             elif confirmation == 'n':
                 return False
 
-    def adjust_ops(self, card, side, low, high):
-        adjusted_ops = card.ops + self.sides[side].ops_adjustment
-        if card.ops == 0:
+    def adjust_ops(self, card_ops, side, low, high):
+        adjusted_ops = card_ops + self.sides[side].ops_adjustment
+        if card_ops == 0:
             adjusted_ops = 0
         elif adjusted_ops < low:
             adjusted_ops = low
