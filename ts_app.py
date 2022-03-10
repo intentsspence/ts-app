@@ -1357,6 +1357,11 @@ class TwilightStruggleGame(CardGame):
 
         self.ask_to_remove_all_influence(eligible_countries, 2, 'ussr')
 
+    def event_057(self):
+        """ABM Treaty"""
+        self.change_defcon(1)
+        self.conduct_operations(self.phasing, self.cards['ABM Treaty'].ops)
+
     def event_058(self):
         """Cultural Revolution"""
         if self.cards['China'] in self.piles['USA China'].get_cards_in_pile().values():
@@ -1786,6 +1791,7 @@ class TwilightStruggleGame(CardGame):
               'Allende':                        event_054,
               'Willy Brandt':                   event_055,
               'Muslim Revolution':              event_056,
+              'ABM Treaty':                     event_057,
               'Cultural Revolution':            event_058,
               'Flower Power':                   event_059,
               'OPEC':                           event_061,
@@ -2631,6 +2637,8 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
-# g.trigger_event(g.cards['CIA Created'])
+g.phasing = 'ussr'
+# g.action_round('ussr')
+g.change_defcon(-2)
+g.trigger_event(g.cards['ABM Treaty'])
 # g.conduct_operations('ussr', 4)
