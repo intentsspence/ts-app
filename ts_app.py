@@ -275,6 +275,7 @@ class TwilightStruggleGame(CardGame):
         self.active_player = None
         self.active_card = None
         self.action_round_complete = False
+        self.conduct_operations_complete = False
 
         self.cards = {}
         self.countries = {}
@@ -1905,6 +1906,7 @@ class TwilightStruggleGame(CardGame):
                     self.coup_attempt(target, ops, side)
                     attempt_completed = True
                     self.action_round_complete = True
+                    self.conduct_operations_complete = True
 
     def checked_coup_targets(self, country_list, side):
         eligible_targets = []
@@ -2037,6 +2039,7 @@ class TwilightStruggleGame(CardGame):
         attempts_made = self.ask_to_realignment_roll(possible_targets, ops, side)
         if attempts_made < ops:
             self.action_round_complete = True
+            self.conduct_operations_complete = True
 
     def ask_to_realignment_roll(self, country_list, ops, side):
         realignments_completed = False
@@ -2150,6 +2153,7 @@ class TwilightStruggleGame(CardGame):
                         self.place_influence_from_list(target_list, side)
                         placement_completed = True
                         self.action_round_complete = True
+                        self.conduct_operations_complete = True
             else:
                 user_input = input('Invalid influence placement. Restart influence placement? (y/n): ').lower()
                 if user_input == 'n':
@@ -2356,20 +2360,17 @@ class TwilightStruggleGame(CardGame):
 
     # Function to conduct operations
     def conduct_operations(self, side, ops):
-        conduct_operations_complete = False
+        self.conduct_operations_complete = False
 
-        while not conduct_operations_complete:
-            selected_action = self.select_operations()
+        while not self.conduct_operations_complete:
+            selected_action = self.select_operation()
             adjusted_card_ops = self.adjust_ops(ops, side, 1, 4)
             if selected_action == 'c':
                 self.action_coup_attempt(adjusted_card_ops, side)
-                conduct_operations_complete = True
             elif selected_action == 'i':
                 self.action_place_influence(adjusted_card_ops, side)
-                conduct_operations_complete = True
             elif selected_action == 'r':
                 self.action_realignment_roll(adjusted_card_ops, side)
-                conduct_operations_complete = True
 
     # Functions for the headline phase
     def headline_phase(self):
@@ -2622,5 +2623,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Containment'])
-# g.action_round('ussr')
+g.phasing = 'usa'
+g.trigger_event(g.cards['Red Scare/Purge'])
+g.conduct_operations('ussr', 4)
