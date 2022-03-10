@@ -1386,6 +1386,13 @@ class TwilightStruggleGame(CardGame):
 
         self.change_score_by_side('ussr', points)
 
+    def event_062(self):
+        """Lone Gunman"""
+        visible_cards = self.get_available_cards('usa', False)
+        print(visible_cards)
+
+        self.conduct_operations('ussr', self.cards['"Lone Gunman"'].ops)
+
     def event_063(self):
         """Colonial Rear Guards"""
         eligible_countries = self.countries_in_region('Africa') + self.countries_in_subregion('Southeast Asia')
@@ -1795,6 +1802,7 @@ class TwilightStruggleGame(CardGame):
               'Cultural Revolution':            event_058,
               'Flower Power':                   event_059,
               'OPEC':                           event_061,
+              '"Lone Gunman"':                  event_062,
               'Colonial Rear Guards':           event_063,
               'Panama Canal Returned':          event_064,
               'Camp David Accords':             event_065,
@@ -2637,8 +2645,8 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'ussr'
+# g.phasing = 'ussr'
 # g.action_round('ussr')
-g.change_defcon(-2)
-g.trigger_event(g.cards['ABM Treaty'])
+# g.change_defcon(-2)
+g.trigger_event(g.cards['"Lone Gunman"'])
 # g.conduct_operations('ussr', 4)
