@@ -1696,6 +1696,13 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.countries_with_influence('usa')
                 self.ask_to_realignment_roll(eligible_countries, card_value, 'ussr')
 
+    def event_091(self):
+        """Ortega Elected in Nicaragua"""
+        self.remove_all_influence('Nicaragua', 'usa')
+        adjacent_countries = self.adjacent_country_objects(self.countries['Nicaragua'])
+        card_value = self.adjust_ops(self.cards['Ortega Elected in Nicaragua'].ops, 'ussr', 1, 4)
+        self.ask_to_coup_attempt(adjacent_countries, card_value, 'ussr', False)
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -1960,6 +1967,7 @@ class TwilightStruggleGame(CardGame):
               'Marine Barracks Bombing':        event_088,
               'Soviets Shoot Down KAL-007':     event_089,
               'Glasnost':                       event_090,
+              'Ortega Elected in Nicaragua':    event_091,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
               'Latin American Debt Crisis':     event_095,
@@ -2074,14 +2082,15 @@ class TwilightStruggleGame(CardGame):
         attempt_completed = False
         eligible_targets = self.checked_coup_targets(country_list, side, defcon_restrictions)
 
-        while not attempt_completed:
-            print("Coup Attempt")
-            target = self.select_a_country(eligible_targets, False)
+        if len(eligible_targets) > 0:
+            while not attempt_completed:
+                print("Coup Attempt")
+                target = self.select_a_country(eligible_targets, False)
 
-            confirmation = self.confirm_action("Attempt coup in {t}".format(t=target.name))
-            if confirmation:
-                self.coup_attempt(target, ops, side, False)
-                attempt_completed = True
+                confirmation = self.confirm_action("Attempt coup in {t}".format(t=target.name))
+                if confirmation:
+                    self.coup_attempt(target, ops, side, False)
+                    attempt_completed = True
 
     def checked_coup_targets(self, country_list, side, defcon_restrictions):
         eligible_targets = []
@@ -2835,5 +2844,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+# g.add_influence('Cuba', 'usa', 1)
 g.phasing = 'ussr'
-g.trigger_event(g.cards['Junta'])
+g.trigger_event(g.cards['Ortega Elected in Nicaragua'])
