@@ -635,6 +635,14 @@ class TwilightStruggleGame(CardGame):
 
         return bg_countries_in_region
 
+    def nonbattleground_countries_in_region(self, region):
+        nonbg_countries_in_region = []
+        for country in self.countries.values():
+            if country.region == region and not country.battleground:
+                nonbg_countries_in_region.append(country)
+
+        return nonbg_countries_in_region
+
     def controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
         controlled_list = []
@@ -1869,6 +1877,19 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.adjacent_country_objects(self.countries['UK'])
                 self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
 
+    def event_107(self):
+        """Che"""
+        possible_countries = (self.nonbattleground_countries_in_region('Central America') +
+                              self.nonbattleground_countries_in_region('South America') +
+                              self.nonbattleground_countries_in_region('Africa'))
+        card_value = self.adjust_ops(self.cards['Che'].ops, 'ussr', 1, 4)
+
+        coup_result = self.ask_to_coup_attempt(possible_countries, card_value, 'ussr', False)
+
+        if coup_result[1]:
+            possible_countries.remove(coup_result[0])
+            self.ask_to_coup_attempt(possible_countries, card_value, 'ussr', False)
+
     def event_108(self):
         """Our Man In Tehran"""
         drawn_cards = []
@@ -1995,6 +2016,7 @@ class TwilightStruggleGame(CardGame):
               'Defectors':                      event_103,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
+              'Che':                            event_107,
               'Our Man in Tehran':              event_108,
               'AWACS Sale to Saudis':           event_110}
 
@@ -2095,6 +2117,8 @@ class TwilightStruggleGame(CardGame):
 
     def ask_to_coup_attempt(self, country_list, ops, side, defcon_restrictions):
         attempt_completed = False
+        coup_successful = False
+        target = None
         eligible_targets = self.checked_coup_targets(country_list, side, defcon_restrictions)
 
         if len(eligible_targets) > 0:
@@ -2104,8 +2128,10 @@ class TwilightStruggleGame(CardGame):
 
                 confirmation = self.confirm_action("Attempt coup in {t}".format(t=target.name))
                 if confirmation:
-                    self.coup_attempt(target, ops, side, False)
+                    coup_successful = self.coup_attempt(target, ops, side, False)
                     attempt_completed = True
+
+        return [target, coup_successful]
 
     def checked_coup_targets(self, country_list, side, defcon_restrictions):
         eligible_targets = []
@@ -2859,6 +2885,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.add_influence('Cuba', 'usa', 1)
-g.phasing = 'usa'
-g.trigger_event(g.cards['Tear Down this Wall'])
+g.phasing = 'ussr'
+g.trigger_event(g.cards['Che'])
