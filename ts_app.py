@@ -1992,7 +1992,7 @@ class TwilightStruggleGame(CardGame):
             self.effects[effect_card.name](self)
 
     # Functions to attempt coups
-    def coup_attempt(self, country, ops, side):
+    def coup_attempt(self, country, ops, side, mil_ops=True):
         doubled_stability = int(country.stability) * 2
         roll = self.die_roll()
         modified_roll = roll + ops
@@ -2028,7 +2028,8 @@ class TwilightStruggleGame(CardGame):
             log_string = 'Coup result: Failure'
             print(log_string)
 
-        self.add_military_ops(side, ops)
+        if mil_ops:
+            self.add_military_ops(side, ops)
 
         if country.battleground:
             self.change_defcon(-1)
@@ -2050,6 +2051,17 @@ class TwilightStruggleGame(CardGame):
                     attempt_completed = True
                     self.action_round_complete = True
                     self.conduct_operations_complete = True
+
+    def ask_to_coup_attempt(self, country_list, ops, side):
+        attempt_completed = False
+        while not attempt_completed:
+            print("Coup Attempt")
+            target = self.select_a_country(country_list)
+
+            confirmation = self.confirm_action("Attempt coup in {t}".format(t=target.name))
+            if confirmation:
+                self.coup_attempt(target, ops, side, False)
+                attempt_completed = True
 
     def checked_coup_targets(self, country_list, side):
         eligible_targets = []
