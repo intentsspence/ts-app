@@ -1337,6 +1337,19 @@ class TwilightStruggleGame(CardGame):
         response = int(self.select_option(options))
         self.change_defcon_to_value(response)
 
+    def event_047(self):
+        """Junta"""
+        eligible_countries = self.countries_in_region('Central America') + self.countries_in_region('South America')
+        self.ask_to_place_influence(eligible_countries, 2, self.phasing, 2, 2)
+
+        adjusted_card_ops = self.adjust_ops(self.cards['Junta'].ops, self.phasing, 1, 4)
+        selected_action = self.select_action_limited(False, True, False, True, False)
+
+        if selected_action == 'c':
+            self.ask_to_coup_attempt(eligible_countries, adjusted_card_ops, self.phasing)
+        elif selected_action == 'r':
+            self.ask_to_realignment_roll(eligible_countries, adjusted_card_ops, self.phasing)
+
     def event_048(self):
         """Kitchen Debates"""
         usa_battlegrounds = self.total_battlegrounds_controlled('usa')
@@ -1909,6 +1922,7 @@ class TwilightStruggleGame(CardGame):
               'Arms Race':                      event_039,
               'SALT Negotiations':              event_043,
               'How I Learned to Stop Worrying': event_046,
+              'Junta':                          event_047,
               'Kitchen Debates':                event_048,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
@@ -2815,8 +2829,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'usa'
-g.trigger_event(g.cards['Red Scare/Purge'])
 g.phasing = 'ussr'
-g.trigger_event(g.cards['The Reformer'])
-g.trigger_event(g.cards['Glasnost'])
+g.trigger_event(g.cards['Junta'])
