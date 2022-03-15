@@ -1667,6 +1667,22 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.countries_with_influence('ussr')
                 self.ask_to_realignment_roll(eligible_countries, card_value, 'usa')
 
+    def event_090(self):
+        """Glasnost"""
+        self.change_defcon(1)
+        self.change_score_by_side('ussr', 2)
+
+        if self.cards['The Reformer'].effect_active:
+            card_value = self.adjust_ops(self.cards['Glasnost'].ops, 'ussr', 1, 4)
+            selected_action = self.select_action_limited(False, False, True, True, False)
+
+            if selected_action == 'i':
+                eligible_countries = self.accessible_countries('ussr')
+                self.ask_to_place_influence(eligible_countries, card_value, 'ussr')
+            elif selected_action == 'r':
+                eligible_countries = self.countries_with_influence('usa')
+                self.ask_to_realignment_roll(eligible_countries, card_value, 'ussr')
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -1929,6 +1945,7 @@ class TwilightStruggleGame(CardGame):
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
               'Soviets Shoot Down KAL-007':     event_089,
+              'Glasnost':                       event_090,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
               'Latin American Debt Crisis':     event_095,
@@ -2185,6 +2202,7 @@ class TwilightStruggleGame(CardGame):
 
                 if realignments_to_attempt == 0:
                     realignments_completed = True
+                    break
                 elif realignments_to_attempt < ops:
                     continue_confirmation = self.confirm_action("Continue realignment attempts")
                     if not continue_confirmation:
@@ -2782,5 +2800,7 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.phasing = 'usa'
-g.add_influence_to_control('S. Korea', 'usa')
-g.trigger_event(g.cards['Soviets Shoot Down KAL-007'])
+g.trigger_event(g.cards['Red Scare/Purge'])
+g.phasing = 'ussr'
+g.trigger_event(g.cards['The Reformer'])
+g.trigger_event(g.cards['Glasnost'])
