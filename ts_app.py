@@ -635,6 +635,14 @@ class TwilightStruggleGame(CardGame):
 
         return bg_countries_in_region
 
+    def nonbattleground_countries_in_region(self, region):
+        nonbg_countries_in_region = []
+        for country in self.countries.values():
+            if country.region == region and not country.battleground:
+                nonbg_countries_in_region.append(country)
+
+        return nonbg_countries_in_region
+
     def controlled_in_region(self, region, side):
         country_list = self.countries_in_region(region)
         controlled_list = []
@@ -1337,6 +1345,19 @@ class TwilightStruggleGame(CardGame):
         response = int(self.select_option(options))
         self.change_defcon_to_value(response)
 
+    def event_047(self):
+        """Junta"""
+        eligible_countries = self.countries_in_region('Central America') + self.countries_in_region('South America')
+        self.ask_to_place_influence(eligible_countries, 2, self.phasing, 2, 2)
+
+        adjusted_card_ops = self.adjust_ops(self.cards['Junta'].ops, self.phasing, 1, 4)
+        selected_action = self.select_action_limited(False, True, False, True, False)
+
+        if selected_action == 'c':
+            self.ask_to_coup_attempt(eligible_countries, adjusted_card_ops, self.phasing, False)
+        elif selected_action == 'r':
+            self.ask_to_realignment_roll(eligible_countries, adjusted_card_ops, self.phasing)
+
     def event_048(self):
         """Kitchen Debates"""
         usa_battlegrounds = self.total_battlegrounds_controlled('usa')
@@ -1651,6 +1672,45 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('Lebanon', 'usa')
         self.ask_to_remove_influence(eligible_countries, 2, 'ussr', 1, 2)
 
+    def event_089(self):
+        """Soviets Shoot Down KAL-007"""
+        self.change_defcon(-1)
+        self.change_score_by_side('usa', 2)
+
+        if self.countries['S. Korea'].controlled == 'usa':
+            card_value = self.adjust_ops(self.cards['Soviets Shoot Down KAL-007'].ops, 'usa', 1, 4)
+            selected_action = self.select_action_limited(False, False, True, True, False)
+
+            if selected_action == 'i':
+                eligible_countries = self.accessible_countries('usa')
+                self.ask_to_place_influence(eligible_countries, card_value, 'usa')
+            elif selected_action == 'r':
+                eligible_countries = self.countries_with_influence('ussr')
+                self.ask_to_realignment_roll(eligible_countries, card_value, 'usa')
+
+    def event_090(self):
+        """Glasnost"""
+        self.change_defcon(1)
+        self.change_score_by_side('ussr', 2)
+
+        if self.cards['The Reformer'].effect_active:
+            card_value = self.adjust_ops(self.cards['Glasnost'].ops, 'ussr', 1, 4)
+            selected_action = self.select_action_limited(False, False, True, True, False)
+
+            if selected_action == 'i':
+                eligible_countries = self.accessible_countries('ussr')
+                self.ask_to_place_influence(eligible_countries, card_value, 'ussr')
+            elif selected_action == 'r':
+                eligible_countries = self.countries_with_influence('usa')
+                self.ask_to_realignment_roll(eligible_countries, card_value, 'ussr')
+
+    def event_091(self):
+        """Ortega Elected in Nicaragua"""
+        self.remove_all_influence('Nicaragua', 'usa')
+        adjacent_countries = self.adjacent_country_objects(self.countries['Nicaragua'])
+        card_value = self.adjust_ops(self.cards['Ortega Elected in Nicaragua'].ops, 'ussr', 1, 4)
+        self.ask_to_coup_attempt(adjacent_countries, card_value, 'ussr', False)
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -1710,6 +1770,20 @@ class TwilightStruggleGame(CardGame):
                         current_inf = self.get_influence(country.name, 'ussr')
                         self.add_influence(country.name, 'ussr', current_inf)
                     break
+
+    def event_096(self):
+        """Tear Down this Wall"""
+        self.add_influence('E. Germany', 'usa', 3)
+        self.cards['Willy Brandt'].effect_active = False
+
+        european_countries = self.countries_in_region('Europe')
+        card_value = self.adjust_ops(self.cards['Tear Down this Wall'].ops, 'usa', 1, 4)
+        selected_action = self.select_action_limited(False, True, False, True, False)
+
+        if selected_action == 'c':
+            self.ask_to_coup_attempt(european_countries, card_value, 'usa', False)
+        elif selected_action == 'r':
+            self.ask_to_realignment_roll(european_countries, card_value, 'usa')
 
     def event_097(self):
         """An Evil Empire"""
@@ -1803,6 +1877,19 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.adjacent_country_objects(self.countries['UK'])
                 self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
 
+    def event_107(self):
+        """Che"""
+        possible_countries = (self.nonbattleground_countries_in_region('Central America') +
+                              self.nonbattleground_countries_in_region('South America') +
+                              self.nonbattleground_countries_in_region('Africa'))
+        card_value = self.adjust_ops(self.cards['Che'].ops, 'ussr', 1, 4)
+
+        coup_result = self.ask_to_coup_attempt(possible_countries, card_value, 'ussr', False)
+
+        if coup_result[1]:
+            possible_countries.remove(coup_result[0])
+            self.ask_to_coup_attempt(possible_countries, card_value, 'ussr', False)
+
     def event_108(self):
         """Our Man In Tehran"""
         drawn_cards = []
@@ -1877,6 +1964,7 @@ class TwilightStruggleGame(CardGame):
               'Arms Race':                      event_039,
               'SALT Negotiations':              event_043,
               'How I Learned to Stop Worrying': event_046,
+              'Junta':                          event_047,
               'Kitchen Debates':                event_048,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
@@ -1912,9 +2000,13 @@ class TwilightStruggleGame(CardGame):
               'Star Wars':                      event_085,
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
+              'Soviets Shoot Down KAL-007':     event_089,
+              'Glasnost':                       event_090,
+              'Ortega Elected in Nicaragua':    event_091,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
               'Latin American Debt Crisis':     event_095,
+              'Tear Down this Wall':            event_096,
               '"An Evil Empire"':               event_097,
               'Aldrich Ames Remix':             event_098,
               'Pershing II Deployed':           event_099,
@@ -1924,6 +2016,7 @@ class TwilightStruggleGame(CardGame):
               'Defectors':                      event_103,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
+              'Che':                            event_107,
               'Our Man in Tehran':              event_108,
               'AWACS Sale to Saudis':           event_110}
 
@@ -1958,10 +2051,11 @@ class TwilightStruggleGame(CardGame):
             self.effects[effect_card.name](self)
 
     # Functions to attempt coups
-    def coup_attempt(self, country, ops, side):
+    def coup_attempt(self, country, ops, side, mil_ops=True):
         doubled_stability = int(country.stability) * 2
         roll = self.die_roll()
         modified_roll = roll + ops
+        coup_successful = False
 
         # Event 43 - SALT Negotiations
         log_string_salt = ""
@@ -1980,6 +2074,7 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
 
         if modified_roll > doubled_stability:
+            coup_successful = True
             log_string = 'Coup result: Success!'
             print(log_string)
             influence_to_remove = modified_roll - doubled_stability
@@ -1994,17 +2089,20 @@ class TwilightStruggleGame(CardGame):
             log_string = 'Coup result: Failure'
             print(log_string)
 
-        self.add_military_ops(side, ops)
+        if mil_ops:
+            self.add_military_ops(side, ops)
 
         if country.battleground:
             self.change_defcon(-1)
+
+        return coup_successful
 
     def action_coup_attempt(self, ops, side):
         attempt_completed = False
         while not attempt_completed:
             print("Coup Attempt")
             target_list = self.countries_with_influence(self.opponent[side])
-            eligible_targets = self.checked_coup_targets(target_list, side)
+            eligible_targets = self.checked_coup_targets(target_list, side, True)
             target = self.select_a_country(eligible_targets)
 
             if target is None:
@@ -2017,33 +2115,52 @@ class TwilightStruggleGame(CardGame):
                     self.action_round_complete = True
                     self.conduct_operations_complete = True
 
-    def checked_coup_targets(self, country_list, side):
+    def ask_to_coup_attempt(self, country_list, ops, side, defcon_restrictions):
+        attempt_completed = False
+        coup_successful = False
+        target = None
+        eligible_targets = self.checked_coup_targets(country_list, side, defcon_restrictions)
+
+        if len(eligible_targets) > 0:
+            while not attempt_completed:
+                print("Coup Attempt")
+                target = self.select_a_country(eligible_targets, False)
+
+                confirmation = self.confirm_action("Attempt coup in {t}".format(t=target.name))
+                if confirmation:
+                    coup_successful = self.coup_attempt(target, ops, side, False)
+                    attempt_completed = True
+
+        return [target, coup_successful]
+
+    def checked_coup_targets(self, country_list, side, defcon_restrictions):
         eligible_targets = []
 
         for country in country_list:
-            if self.check_coup_attempt(country, side):
+            if self.check_coup_attempt(country, side, defcon_restrictions):
                 eligible_targets.append(country)
 
         return eligible_targets
 
-    def check_coup_attempt(self, country, side):
+    def check_coup_attempt(self, country, side, defcon_restrictions):
         opponent_influence = self.get_opponent_influence(country.name, side)
         eligible = True
 
         if opponent_influence == 0:
             eligible = False
 
-        if self.defcon < 5:
-            if country.region == 'Europe':
-                eligible = False
-            else:
-                if self.defcon < 4:
-                    if country.region == 'Asia':
-                        eligible = False
-                    else:
-                        if self.defcon < 3:
-                            if country.region == 'Middle East':
-                                eligible = False
+        if defcon_restrictions:
+            if self.defcon < 5:
+                if country.region == 'Europe':
+                    eligible = False
+                else:
+                    if self.defcon < 4:
+                        if country.region == 'Asia':
+                            eligible = False
+                        else:
+                            if self.defcon < 3:
+                                if country.region == 'Middle East':
+                                    eligible = False
 
         # Effect 021 - NATO
         if country.nato and country.controlled == 'usa':
@@ -2168,6 +2285,7 @@ class TwilightStruggleGame(CardGame):
 
                 if realignments_to_attempt == 0:
                     realignments_completed = True
+                    break
                 elif realignments_to_attempt < ops:
                     continue_confirmation = self.confirm_action("Continue realignment attempts")
                     if not continue_confirmation:
@@ -2595,7 +2713,7 @@ class TwilightStruggleGame(CardGame):
 
         return selected_card
 
-    def select_a_country(self, country_list):
+    def select_a_country(self, country_list, allow_cancelling=True):
         sorted_country_list = sorted(country_list, key=lambda x: x.name)
         available_country_numbers = []
         selected_country = None
@@ -2610,7 +2728,8 @@ class TwilightStruggleGame(CardGame):
             available_country_numbers.append(countries_printed + 1)
             countries_printed += 1
 
-        print(" x| --Cancel--")
+        if allow_cancelling:
+            print(" x| --Cancel--")
         while True:
             user_input = input("Selection: ")
             if user_input.isdigit():
@@ -2618,8 +2737,10 @@ class TwilightStruggleGame(CardGame):
                 if selected_number in available_country_numbers:
                     selected_country = sorted_country_list[selected_number - 1]
                     break
-            elif user_input.lower() == 'x':
-                break
+            else:
+                if allow_cancelling:
+                    if user_input.lower() == 'x':
+                        break
 
         return selected_country
 
@@ -2693,6 +2814,38 @@ class TwilightStruggleGame(CardGame):
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
                 return selected_action
 
+    def select_action_limited(self, event, coup, influence, realignment, space):
+        action_options = ""
+        selectable_actions = []
+
+        if event:
+            action_options = action_options + " e| Play event\n"
+            selectable_actions.append('e')
+
+        if coup:
+            action_options = action_options + " c| Coup attempt\n"
+            selectable_actions.append('c')
+
+        if influence:
+            action_options = action_options + " i| Place influence\n"
+            selectable_actions.append('i')
+
+        if realignment:
+            action_options = action_options + " r| Realignment roll\n"
+            selectable_actions.append('r')
+
+        if space:
+            action_options = action_options + " s| Space race\n"
+            selectable_actions.append('s')
+
+        print(self.line)
+        print("Select action:")
+        print(action_options)
+        while True:
+            selected_action = input("Selection: ").lower()
+            if selected_action in selectable_actions:
+                return selected_action
+
     def select_operation(self):
         operation_options = " c| Coup attempt\n" \
                             " i| Place influence\n" \
@@ -2732,5 +2885,5 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'usa'
-g.trigger_event(g.cards['Grain Sales to Soviets'])
+g.phasing = 'ussr'
+g.trigger_event(g.cards['Che'])
