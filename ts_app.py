@@ -1763,6 +1763,20 @@ class TwilightStruggleGame(CardGame):
                         self.add_influence(country.name, 'ussr', current_inf)
                     break
 
+    def event_096(self):
+        """Tear Down this Wall"""
+        self.add_influence('E. Germany', 'usa', 3)
+        self.cards['Willy Brandt'].effect_active = False
+
+        european_countries = self.countries_in_region('Europe')
+        card_value = self.adjust_ops(self.cards['Tear Down this Wall'].ops, 'usa', 1, 4)
+        selected_action = self.select_action_limited(False, True, False, True, False)
+
+        if selected_action == 'c':
+            self.ask_to_coup_attempt(european_countries, card_value, 'usa', False)
+        elif selected_action == 'r':
+            self.ask_to_realignment_roll(european_countries, card_value, 'usa')
+
     def event_097(self):
         """An Evil Empire"""
         self.change_score_by_side('usa', 1)
@@ -1971,6 +1985,7 @@ class TwilightStruggleGame(CardGame):
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
               'Latin American Debt Crisis':     event_095,
+              'Tear Down this Wall':            event_096,
               '"An Evil Empire"':               event_097,
               'Aldrich Ames Remix':             event_098,
               'Pershing II Deployed':           event_099,
@@ -2845,5 +2860,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.add_influence('Cuba', 'usa', 1)
-g.phasing = 'ussr'
-g.trigger_event(g.cards['Ortega Elected in Nicaragua'])
+g.phasing = 'usa'
+g.trigger_event(g.cards['Tear Down this Wall'])
