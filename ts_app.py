@@ -1657,7 +1657,15 @@ class TwilightStruggleGame(CardGame):
         self.change_score_by_side('usa', 2)
 
         if self.countries['S. Korea'].controlled == 'usa':
+            card_value = self.adjust_ops(self.cards['Soviets Shoot Down KAL-007'].ops, 'usa', 1, 4)
+            selected_action = self.select_action_limited(False, False, True, True, False)
 
+            if selected_action == 'i':
+                eligible_countries = self.accessible_countries('usa')
+                self.ask_to_place_influence(eligible_countries, card_value, 'usa')
+            elif selected_action == 'r':
+                eligible_countries = self.countries_with_influence('ussr')
+                self.ask_to_realignment_roll(eligible_countries, card_value, 'usa')
 
     def event_092(self):
         """Terrorism"""
@@ -1920,6 +1928,7 @@ class TwilightStruggleGame(CardGame):
               'Star Wars':                      event_085,
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
+              'Soviets Shoot Down KAL-007':     event_089,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
               'Latin American Debt Crisis':     event_095,
@@ -2773,4 +2782,5 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.phasing = 'usa'
-g.trigger_event(g.cards['Grain Sales to Soviets'])
+g.add_influence_to_control('S. Korea', 'usa')
+g.trigger_event(g.cards['Soviets Shoot Down KAL-007'])
