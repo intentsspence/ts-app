@@ -1346,7 +1346,7 @@ class TwilightStruggleGame(CardGame):
         selected_action = self.select_action_limited(False, True, False, True, False)
 
         if selected_action == 'c':
-            self.ask_to_coup_attempt(eligible_countries, adjusted_card_ops, self.phasing)
+            self.ask_to_coup_attempt(eligible_countries, adjusted_card_ops, self.phasing, False)
         elif selected_action == 'r':
             self.ask_to_realignment_roll(eligible_countries, adjusted_card_ops, self.phasing)
 
@@ -2057,7 +2057,7 @@ class TwilightStruggleGame(CardGame):
         while not attempt_completed:
             print("Coup Attempt")
             target_list = self.countries_with_influence(self.opponent[side])
-            eligible_targets = self.checked_coup_targets(target_list, side)
+            eligible_targets = self.checked_coup_targets(target_list, side, True)
             target = self.select_a_country(eligible_targets)
 
             if target is None:
@@ -2070,44 +2070,47 @@ class TwilightStruggleGame(CardGame):
                     self.action_round_complete = True
                     self.conduct_operations_complete = True
 
-    def ask_to_coup_attempt(self, country_list, ops, side):
+    def ask_to_coup_attempt(self, country_list, ops, side, defcon_restrictions):
         attempt_completed = False
+        eligible_targets = self.checked_coup_targets(country_list, side, defcon_restrictions)
+
         while not attempt_completed:
             print("Coup Attempt")
-            target = self.select_a_country(country_list)
+            target = self.select_a_country(eligible_targets, False)
 
             confirmation = self.confirm_action("Attempt coup in {t}".format(t=target.name))
             if confirmation:
                 self.coup_attempt(target, ops, side, False)
                 attempt_completed = True
 
-    def checked_coup_targets(self, country_list, side):
+    def checked_coup_targets(self, country_list, side, defcon_restrictions):
         eligible_targets = []
 
         for country in country_list:
-            if self.check_coup_attempt(country, side):
+            if self.check_coup_attempt(country, side, defcon_restrictions):
                 eligible_targets.append(country)
 
         return eligible_targets
 
-    def check_coup_attempt(self, country, side):
+    def check_coup_attempt(self, country, side, defcon_restrictions):
         opponent_influence = self.get_opponent_influence(country.name, side)
         eligible = True
 
         if opponent_influence == 0:
             eligible = False
 
-        if self.defcon < 5:
-            if country.region == 'Europe':
-                eligible = False
-            else:
-                if self.defcon < 4:
-                    if country.region == 'Asia':
-                        eligible = False
-                    else:
-                        if self.defcon < 3:
-                            if country.region == 'Middle East':
-                                eligible = False
+        if defcon_restrictions:
+            if self.defcon < 5:
+                if country.region == 'Europe':
+                    eligible = False
+                else:
+                    if self.defcon < 4:
+                        if country.region == 'Asia':
+                            eligible = False
+                        else:
+                            if self.defcon < 3:
+                                if country.region == 'Middle East':
+                                    eligible = False
 
         # Effect 021 - NATO
         if country.nato and country.controlled == 'usa':
@@ -2660,7 +2663,7 @@ class TwilightStruggleGame(CardGame):
 
         return selected_card
 
-    def select_a_country(self, country_list):
+    def select_a_country(self, country_list, allow_cancelling=True):
         sorted_country_list = sorted(country_list, key=lambda x: x.name)
         available_country_numbers = []
         selected_country = None
@@ -2675,7 +2678,8 @@ class TwilightStruggleGame(CardGame):
             available_country_numbers.append(countries_printed + 1)
             countries_printed += 1
 
-        print(" x| --Cancel--")
+        if allow_cancelling:
+            print(" x| --Cancel--")
         while True:
             user_input = input("Selection: ")
             if user_input.isdigit():
@@ -2683,8 +2687,10 @@ class TwilightStruggleGame(CardGame):
                 if selected_number in available_country_numbers:
                     selected_country = sorted_country_list[selected_number - 1]
                     break
-            elif user_input.lower() == 'x':
-                break
+            else:
+                if allow_cancelling:
+                    if user_input.lower() == 'x':
+                        break
 
         return selected_country
 
