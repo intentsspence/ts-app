@@ -1651,6 +1651,14 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('Lebanon', 'usa')
         self.ask_to_remove_influence(eligible_countries, 2, 'ussr', 1, 2)
 
+    def event_089(self):
+        """Soviets Shoot Down KAL-007"""
+        self.change_defcon(-1)
+        self.change_score_by_side('usa', 2)
+
+        if self.countries['S. Korea'].controlled == 'usa':
+
+
     def event_092(self):
         """Terrorism"""
         if self.piles['USA hand'].get_pile_size() > 0:
@@ -2691,6 +2699,38 @@ class TwilightStruggleGame(CardGame):
         while True:
             selected_action = input("Selection: ").lower()
             if selected_action in ['e', 'c', 'i', 'r', 's', 'x']:
+                return selected_action
+
+    def select_action_limited(self, event, coup, influence, realignment, space):
+        action_options = ""
+        selectable_actions = []
+
+        if event:
+            action_options = action_options + " e| Play event\n"
+            selectable_actions.append('e')
+
+        if coup:
+            action_options = action_options + " c| Coup attempt\n"
+            selectable_actions.append('c')
+
+        if influence:
+            action_options = action_options + " i| Place influence\n"
+            selectable_actions.append('i')
+
+        if realignment:
+            action_options = action_options + " r| Realignment roll\n"
+            selectable_actions.append('r')
+
+        if space:
+            action_options = action_options + " s| Space race\n"
+            selectable_actions.append('s')
+
+        print(self.line)
+        print("Select action:")
+        print(action_options)
+        while True:
+            selected_action = input("Selection: ").lower()
+            if selected_action in selectable_actions:
                 return selected_action
 
     def select_operation(self):
