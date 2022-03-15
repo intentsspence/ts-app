@@ -1996,6 +1996,7 @@ class TwilightStruggleGame(CardGame):
         doubled_stability = int(country.stability) * 2
         roll = self.die_roll()
         modified_roll = roll + ops
+        coup_successful = False
 
         # Event 43 - SALT Negotiations
         log_string_salt = ""
@@ -2014,6 +2015,7 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
 
         if modified_roll > doubled_stability:
+            coup_successful = True
             log_string = 'Coup result: Success!'
             print(log_string)
             influence_to_remove = modified_roll - doubled_stability
@@ -2033,6 +2035,8 @@ class TwilightStruggleGame(CardGame):
 
         if country.battleground:
             self.change_defcon(-1)
+
+        return coup_successful
 
     def action_coup_attempt(self, ops, side):
         attempt_completed = False
