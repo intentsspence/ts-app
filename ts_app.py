@@ -764,6 +764,12 @@ class TwilightStruggleGame(CardGame):
             log_string_2 = 'China card is face down.'
             print(log_string_2)
 
+    def give_opponent_china_card(self, side):
+        if side == 'usa':
+            self.move_china_card('USSR China')
+        elif side == 'ussr':
+            self.move_china_card('USA China')
+
     def reshuffle(self):
         self.move_all_cards('deck', 'discard')
 
@@ -2668,28 +2674,73 @@ class TwilightStruggleGame(CardGame):
                 else:
                     selected_action = 'x'
             else:
-                selected_action = self.select_action(selected_card)
+                if selected_card.event_type == self.opponent[side]:
+                    options = [['a', "Trigger {s} event first".format(s=selected_card.event_type.upper())],
+                               ['b', "Use card for operations first"],
+                               ['x', "--Choose another card--"]]
+                    response = self.select_option(options)
+                    if response == 'a':
+                        self.trigger_event(selected_card)
+                        while not self.action_round_complete:
+                            selected_action = self.select_action_limited(False, True, True, True, True)
+                            if selected_action == 'c':
+                                self.action_coup_attempt(adjusted_card_ops, side)
+                            elif selected_action == 'i':
+                                self.action_place_influence(adjusted_card_ops, side)
+                            elif selected_action == 'r':
+                                self.action_realignment_roll(adjusted_card_ops, side)
+                            elif selected_action == 's':
+                                self.action_space_race(selected_card, adjusted_card_ops, side)
+                    elif response == 'b':
+                        while not self.action_round_complete:
+                            selected_action = self.select_action_limited(False, True, True, True, True)
+                            if selected_action == 'c':
+                                self.action_coup_attempt(adjusted_card_ops, side)
+                            elif selected_action == 'i':
+                                self.action_place_influence(adjusted_card_ops, side)
+                            elif selected_action == 'r':
+                                self.action_realignment_roll(adjusted_card_ops, side)
+                            elif selected_action == 's':
+                                self.action_space_race(selected_card, adjusted_card_ops, side)
+                        self.trigger_event(selected_card)
 
-            if selected_action == 'e':
-                self.trigger_event(selected_card)
-                break
-            elif selected_action == 'c':
-                self.action_coup_attempt(adjusted_card_ops, side)
-            elif selected_action == 'i':
-                self.action_place_influence(adjusted_card_ops, side)
-            elif selected_action == 'r':
-                self.action_realignment_roll(adjusted_card_ops, side)
-            elif selected_action == 's':
-                self.action_space_race(selected_card, adjusted_card_ops, side)
-            elif selected_action == 'x':
-                pass
+                elif selected_card.name == 'China':
+                    selected_action = self.select_action_limited(False, True, True, True, True)
+                    print(selected_action)
+                    if selected_action == 'c':
+                        self.action_coup_attempt(adjusted_card_ops, side)
+                    elif selected_action == 'i':
+                        self.action_place_influence(adjusted_card_ops, side)
+                    elif selected_action == 'r':
+                        self.action_realignment_roll(adjusted_card_ops, side)
+                    elif selected_action == 's':
+                        self.action_space_race(selected_card, adjusted_card_ops, side)
+                    elif selected_action == 'x':
+                        pass
 
-        if selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
-            if selected_card.event_type == self.opponent[side]:
-                self.trigger_event(selected_card)
-            else:
-                self.trigger_effect(self.cards['Flower Power'])
-                self.move_card(selected_card, 'discard')
+                else:
+                    selected_action = self.select_action(selected_card)
+                    if selected_action == 'e':
+                        self.trigger_event(selected_card)
+                        break
+                    elif selected_action == 'c':
+                        self.action_coup_attempt(adjusted_card_ops, side)
+                    elif selected_action == 'i':
+                        self.action_place_influence(adjusted_card_ops, side)
+                    elif selected_action == 'r':
+                        self.action_realignment_roll(adjusted_card_ops, side)
+                    elif selected_action == 's':
+                        self.action_space_race(selected_card, adjusted_card_ops, side)
+                    elif selected_action == 'x':
+                        pass
+
+                    self.move_card(selected_card, 'discard')
+
+        if selected_action == 'e' or selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
+            self.trigger_effect(self.cards['Flower Power'])
+
+        if selected_card.name == 'China':
+            self.give_opponent_china_card(side)
 
         log_string = "Action round complete."
         print(log_string)
@@ -2897,3 +2948,4 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.action_round('ussr')
+print(g.get_available_cards('ussr', True))
