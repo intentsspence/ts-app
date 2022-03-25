@@ -2657,8 +2657,19 @@ class TwilightStruggleGame(CardGame):
             eligible_cards = self.get_available_cards(side, True)
             selected_card = self.select_a_card(eligible_cards, side)
             self.active_card = selected_card
-            selected_action = self.select_action(selected_card)
             adjusted_card_ops = self.adjust_ops(selected_card.ops, side, 1, 4)
+
+            if selected_card.event_type == 'scoring':
+                confirmation = self.confirm_action('Play {c}'.format(c=selected_card.name))
+                if confirmation:
+                    self.trigger_event(selected_card)
+                    selected_action = 'e'
+                    break
+                else:
+                    selected_action = 'x'
+            else:
+                selected_action = self.select_action(selected_card)
+
             if selected_action == 'e':
                 self.trigger_event(selected_card)
                 break
@@ -2885,5 +2896,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phasing = 'ussr'
-g.trigger_event(g.cards['Che'])
+g.action_round('ussr')
