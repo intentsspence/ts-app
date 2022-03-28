@@ -2072,9 +2072,15 @@ class TwilightStruggleGame(CardGame):
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side, mil_ops=True):
         doubled_stability = int(country.stability) * 2
+        coup_successful = False
+        adjusted_ops = ops
+
+        # Event 6 - China Card
+        if self.active_card == self.cards['China'] and country.region == 'Asia':
+            adjusted_ops = ops + 1
+
         roll = self.die_roll()
         modified_roll = roll + ops
-        coup_successful = False
 
         # Event 43 - SALT Negotiations
         log_string_salt = ""
@@ -2087,7 +2093,7 @@ class TwilightStruggleGame(CardGame):
                      "{s} rolled {r} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
                                                                             s=side.upper(),
                                                                             r=roll,
-                                                                            o=ops,
+                                                                            o=adjusted_ops,
                                                                             salt=log_string_salt,
                                                                             t=modified_roll)
         print(log_string)
@@ -2716,6 +2722,7 @@ class TwilightStruggleGame(CardGame):
                     response = self.select_option(options)
                     if response == 'a':
                         self.trigger_event(selected_card)
+                        self.action_round_complete = False
                         while not self.action_round_complete:
                             selected_action = self.select_action_limited(False, True, True, True, True)
                             if selected_action == 'c':
@@ -2983,4 +2990,3 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.action_round('ussr')
-print(g.get_available_cards('ussr', True))
