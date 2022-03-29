@@ -731,6 +731,19 @@ class TwilightStruggleGame(CardGame):
 
         return adjacent_country_objects
 
+    def are_all_targets_in_region(self, target_list, region):
+        """Given a list of countries, checks to see if they are all in the specified region"""
+        target_check = True
+
+        if len(target_list) == 0:
+            target_check = False
+
+        for country in target_list:
+            if country.region != region:
+                target_check = False
+
+        return target_check
+
     # Functions for moving cards around
     def which_pile(self, c):
         for pile in self.piles:
@@ -2059,9 +2072,15 @@ class TwilightStruggleGame(CardGame):
     # Functions to attempt coups
     def coup_attempt(self, country, ops, side, mil_ops=True):
         doubled_stability = int(country.stability) * 2
+        coup_successful = False
+        adjusted_ops = ops
+
+        # Event 6 - China Card
+        if self.active_card == self.cards['China'] and country.region == 'Asia':
+            adjusted_ops = ops + 1
+
         roll = self.die_roll()
         modified_roll = roll + ops
-        coup_successful = False
 
         # Event 43 - SALT Negotiations
         log_string_salt = ""
@@ -2074,7 +2093,7 @@ class TwilightStruggleGame(CardGame):
                      "{s} rolled {r} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
                                                                             s=side.upper(),
                                                                             r=roll,
-                                                                            o=ops,
+                                                                            o=adjusted_ops,
                                                                             salt=log_string_salt,
                                                                             t=modified_roll)
         print(log_string)
@@ -2277,9 +2296,12 @@ class TwilightStruggleGame(CardGame):
         realignments_completed = False
         realignments_to_attempt = ops
         cancellation = False
+        china_bonus_given = False
+        china_bonus_taken = False
 
         while not realignments_completed:
             possible_targets = []
+            targeted_countries = []
             for country in country_list:
                 possible_targets.append(country)
 
@@ -2290,8 +2312,18 @@ class TwilightStruggleGame(CardGame):
                     break
 
                 if realignments_to_attempt == 0:
-                    realignments_completed = True
-                    break
+                    if self.active_card == self.cards['China'] and not china_bonus_taken:
+                        check_for_china_bonus = self.are_all_targets_in_region(targeted_countries, 'Asia')
+                        if check_for_china_bonus:
+                            print('China bonus')
+                            realignments_to_attempt = 1
+                            china_bonus_given = True
+                        else:
+                            realignments_completed = True
+                            break
+                    else:
+                        realignments_completed = True
+                        break
                 elif realignments_to_attempt < ops:
                     continue_confirmation = self.confirm_action("Continue realignment attempts")
                     if not continue_confirmation:
@@ -2299,6 +2331,10 @@ class TwilightStruggleGame(CardGame):
                         break
 
                 print("Attempt a realignment roll ({r} remaining)".format(r=realignments_to_attempt))
+
+                if china_bonus_given:
+                    eligible_targets = self.checked_realignment_targets(self.countries_in_region('Asia'), side)
+
                 target = self.select_a_country(eligible_targets)
                 print(target)
                 if target is None:
@@ -2309,6 +2345,11 @@ class TwilightStruggleGame(CardGame):
                 if target_confirmation:
                     self.realignment_roll(target, side)
                     realignments_to_attempt = realignments_to_attempt - 1
+
+                    if target not in targeted_countries:
+                        targeted_countries.append(target)
+                    if china_bonus_given:
+                        china_bonus_taken = True
 
             if cancellation:
                 continue_confirmation = self.confirm_action("Continue realignment attempts")
@@ -2361,8 +2402,10 @@ class TwilightStruggleGame(CardGame):
         while not placement_completed:
             influence_to_place = ops
             target_list = []
+            targeted_countries = []
             possible_targets = self.accessible_countries(side)
             cancelled = False
+            china_bonus_given = False
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
@@ -2374,8 +2417,19 @@ class TwilightStruggleGame(CardGame):
                 if amount is None:
                     break
                 target_list.append([target, amount])
+                targeted_countries.append(target)
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
+
+                if influence_to_place == 0:
+                    check_for_china_bonus = self.are_all_targets_in_region(targeted_countries, 'Asia')
+                    if self.active_card == self.cards['China'] and check_for_china_bonus and not china_bonus_given:
+                        influence_to_place = 1
+                        china_bonus_given = True
+                        possible_targets = []
+                        for country in self.accessible_countries(side):
+                            if country.region == 'Asia':
+                                possible_targets.append(country)
 
             if cancelled:
                 break
@@ -2681,6 +2735,7 @@ class TwilightStruggleGame(CardGame):
                     response = self.select_option(options)
                     if response == 'a':
                         self.trigger_event(selected_card)
+                        self.action_round_complete = False
                         while not self.action_round_complete:
                             selected_action = self.select_action_limited(False, True, True, True, True)
                             if selected_action == 'c':
@@ -2725,16 +2780,17 @@ class TwilightStruggleGame(CardGame):
                         break
                     elif selected_action == 'c':
                         self.action_coup_attempt(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 'i':
                         self.action_place_influence(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 'r':
                         self.action_realignment_roll(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 's':
                         self.action_space_race(selected_card, adjusted_card_ops, side)
                     elif selected_action == 'x':
                         pass
-
-                    self.move_card(selected_card, 'discard')
 
         if selected_action == 'e' or selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             self.trigger_effect(self.cards['Flower Power'])
@@ -2948,4 +3004,3 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 g.action_round('ussr')
-print(g.get_available_cards('ussr', True))
