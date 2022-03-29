@@ -2789,7 +2789,6 @@ class TwilightStruggleGame(CardGame):
                         self.move_card(selected_card, 'discard')
                     elif selected_action == 's':
                         self.action_space_race(selected_card, adjusted_card_ops, side)
-                        self.move_card(selected_card, 'discard')
                     elif selected_action == 'x':
                         pass
 
