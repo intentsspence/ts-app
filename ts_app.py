@@ -1325,8 +1325,18 @@ class TwilightStruggleGame(CardGame):
 
     def event_032(self):
         """UN Intervention"""
+        hand = self.get_available_cards(self.phasing, False)
+        eligible_cards = []
+        for card in hand:
+            if card.event_type == self.opponent[self.phasing]:
+                eligible_cards.append(card)
+        selected_card = self.select_a_card(eligible_cards, self.phasing)
 
+        adjusted_ops = self.adjust_ops(selected_card.ops, self.phasing, 1, 4)
 
+        self.conduct_operations(self.phasing, adjusted_ops)
+
+        self.move_card(selected_card, 'discard')
 
     def event_034(self):
         """Nuclear Test Ban"""
@@ -1994,6 +2004,7 @@ class TwilightStruggleGame(CardGame):
               'East European Unrest':           event_029,
               'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
+              'UN Intervention':                event_032,
               'Nuclear Test Ban':               event_034,
               'Brush War':                      event_036,
               'Central America Scoring':        event_037,
@@ -3031,3 +3042,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+g.action_round('ussr')
