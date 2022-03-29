@@ -1532,25 +1532,40 @@ class TwilightStruggleGame(CardGame):
             log_string = "USSR randomly discards {c}.".format(c=card.name)
             print(log_string)
 
-            options = [['a', "Play card"],
-                       ['b', "Return card"]]
-            response = self.select_option(options)
+            # In the headline phase you must return UN intervention (in FAQs)
+            if self.phase == 'headline' and card.name == 'UN Intervention':
+                print('UN intervention may not be played in headline phase, automatically returned.')
+                response = 'b'
+            else:
+                options = [['a', "Play card"],
+                           ['b', "Return card"]]
+                response = self.select_option(options)
+
             if response == 'a':
                 self.move_card(card, 'USA hand')
                 self.conduct_operations_complete = False
 
                 while not self.conduct_operations_complete:
-                    action_options = " e| Play event\n" \
-                                     " c| Coup attempt\n" \
-                                     " i| Place influence\n" \
-                                     " r| Realignment roll\n" \
-                                     " s| Space race\n"
+                    un_eligible = self.check_UN_intervention_eligible('usa')
+                    if card.name == 'UN Intervention' and not un_eligible:
+                        action_options = " c| Coup attempt\n" \
+                                         " i| Place influence\n" \
+                                         " r| Realignment roll\n" \
+                                         " s| Space race\n"
+                        eligible_actions = ['c', 'i', 'r', 's']
+                    else:
+                        action_options = " e| Play event\n" \
+                                         " c| Coup attempt\n" \
+                                         " i| Place influence\n" \
+                                         " r| Realignment roll\n" \
+                                         " s| Space race\n"
+                        eligible_actions = ['e', 'c', 'i', 'r', 's']
                     print(self.line)
                     print("Select use for " + card.name + ':')
                     print(action_options)
                     while True:
                         selected_action = input("Selection: ").lower()
-                        if selected_action in ['e', 'c', 'i', 'r', 's']:
+                        if selected_action in eligible_actions:
                             break
 
                     adjusted_card_ops = self.adjust_ops(card.ops, 'usa', 1, 4)
@@ -3042,4 +3057,9 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
+g.phase = 'headline'
+g.move_all_cards('discard', 'USSR hand')
+g.move_all_cards('discard', 'USA hand')
+g.move_card(g.cards['UN Intervention'], 'USSR hand')
+g.phasing = 'usa'
+g.trigger_event(g.cards['Grain Sales to Soviets'])
