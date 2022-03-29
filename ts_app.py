@@ -894,7 +894,6 @@ class TwilightStruggleGame(CardGame):
             if card.event_type == self.opponent[side]:
                 opponent_cards = opponent_cards + 1
 
-        print(opponent_cards)
         if opponent_cards > 0:
             eligible = True
 
@@ -2736,6 +2735,14 @@ class TwilightStruggleGame(CardGame):
 
         while not self.action_round_complete:
             eligible_cards = self.get_available_cards(side, True)
+
+            # Check to see if UN intervention is in hand, if it is, make sure you can play it
+            for card in eligible_cards:
+                if card.name == 'UN Intervention':
+                    un_eligible = self.check_UN_intervention_eligible(self.phasing)
+                    if not un_eligible:
+                        eligible_cards.remove(card)
+
             selected_card = self.select_a_card(eligible_cards, side)
             self.active_card = selected_card
             adjusted_card_ops = self.adjust_ops(selected_card.ops, side, 1, 4)
@@ -3024,4 +3031,3 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
