@@ -2780,16 +2780,18 @@ class TwilightStruggleGame(CardGame):
                         break
                     elif selected_action == 'c':
                         self.action_coup_attempt(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 'i':
                         self.action_place_influence(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 'r':
                         self.action_realignment_roll(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 's':
                         self.action_space_race(selected_card, adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
                     elif selected_action == 'x':
                         pass
-
-                    self.move_card(selected_card, 'discard')
 
         if selected_action == 'e' or selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             self.trigger_effect(self.cards['Flower Power'])
