@@ -886,6 +886,20 @@ class TwilightStruggleGame(CardGame):
         self.sides['ussr'].military_ops = 0
 
     # Functions to manipulate events
+    def check_UN_intervention_eligible(self, side):
+        hand = self.get_available_cards(side, False)
+        eligible = False
+        opponent_cards = 0
+        for card in hand:
+            if card.event_type == self.opponent[side]:
+                opponent_cards = opponent_cards + 1
+
+        print(opponent_cards)
+        if opponent_cards > 0:
+            eligible = True
+
+        return eligible
+
     def check_event_eligibility(self, card):
         eligible = False
         if card.name in self.pre_reqs.keys():
@@ -1312,6 +1326,7 @@ class TwilightStruggleGame(CardGame):
 
     def event_032(self):
         """UN Intervention"""
+
 
 
     def event_034(self):
