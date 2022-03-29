@@ -2402,8 +2402,10 @@ class TwilightStruggleGame(CardGame):
         while not placement_completed:
             influence_to_place = ops
             target_list = []
+            targeted_countries = []
             possible_targets = self.accessible_countries(side)
             cancelled = False
+            china_bonus_given = False
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
@@ -2415,8 +2417,19 @@ class TwilightStruggleGame(CardGame):
                 if amount is None:
                     break
                 target_list.append([target, amount])
+                targeted_countries.append(target)
                 possible_targets.remove(target)
                 influence_to_place = influence_to_place - amount
+
+                if influence_to_place == 0:
+                    check_for_china_bonus = self.are_all_targets_in_region(targeted_countries, 'Asia')
+                    if self.active_card == self.cards['China'] and check_for_china_bonus and not china_bonus_given:
+                        influence_to_place = 1
+                        china_bonus_given = True
+                        possible_targets = []
+                        for country in self.accessible_countries(side):
+                            if country.region == 'Asia':
+                                possible_targets.append(country)
 
             if cancelled:
                 break
