@@ -3057,4 +3057,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round ('ussr')
+g.action_round('ussr')
