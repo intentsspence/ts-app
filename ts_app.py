@@ -3057,9 +3057,4 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.phase = 'headline'
-g.move_all_cards('discard', 'USSR hand')
-g.move_all_cards('discard', 'USA hand')
-g.move_card(g.cards['UN Intervention'], 'USSR hand')
-g.phasing = 'usa'
-g.trigger_event(g.cards['Grain Sales to Soviets'])
+g.action_round ('ussr')
