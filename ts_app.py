@@ -886,6 +886,19 @@ class TwilightStruggleGame(CardGame):
         self.sides['ussr'].military_ops = 0
 
     # Functions to manipulate events
+    def check_UN_intervention_eligible(self, side):
+        hand = self.get_available_cards(side, False)
+        eligible = False
+        opponent_cards = 0
+        for card in hand:
+            if card.event_type == self.opponent[side]:
+                opponent_cards = opponent_cards + 1
+
+        if opponent_cards > 0:
+            eligible = True
+
+        return eligible
+
     def check_event_eligibility(self, card):
         eligible = False
         if card.name in self.pre_reqs.keys():
@@ -1310,6 +1323,21 @@ class TwilightStruggleGame(CardGame):
         """Red Scare/Purge"""
         self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
 
+    def event_032(self):
+        """UN Intervention"""
+        hand = self.get_available_cards(self.phasing, False)
+        eligible_cards = []
+        for card in hand:
+            if card.event_type == self.opponent[self.phasing]:
+                eligible_cards.append(card)
+        selected_card = self.select_a_card(eligible_cards, self.phasing)
+
+        adjusted_ops = self.adjust_ops(selected_card.ops, self.phasing, 1, 4)
+
+        self.conduct_operations(self.phasing, adjusted_ops)
+
+        self.move_card(selected_card, 'discard')
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -1504,25 +1532,40 @@ class TwilightStruggleGame(CardGame):
             log_string = "USSR randomly discards {c}.".format(c=card.name)
             print(log_string)
 
-            options = [['a', "Play card"],
-                       ['b', "Return card"]]
-            response = self.select_option(options)
+            # In the headline phase you must return UN intervention (in FAQs)
+            if self.phase == 'headline' and card.name == 'UN Intervention':
+                print('UN intervention may not be played in headline phase, automatically returned.')
+                response = 'b'
+            else:
+                options = [['a', "Play card"],
+                           ['b', "Return card"]]
+                response = self.select_option(options)
+
             if response == 'a':
                 self.move_card(card, 'USA hand')
                 self.conduct_operations_complete = False
 
                 while not self.conduct_operations_complete:
-                    action_options = " e| Play event\n" \
-                                     " c| Coup attempt\n" \
-                                     " i| Place influence\n" \
-                                     " r| Realignment roll\n" \
-                                     " s| Space race\n"
+                    un_eligible = self.check_UN_intervention_eligible('usa')
+                    if card.name == 'UN Intervention' and not un_eligible:
+                        action_options = " c| Coup attempt\n" \
+                                         " i| Place influence\n" \
+                                         " r| Realignment roll\n" \
+                                         " s| Space race\n"
+                        eligible_actions = ['c', 'i', 'r', 's']
+                    else:
+                        action_options = " e| Play event\n" \
+                                         " c| Coup attempt\n" \
+                                         " i| Place influence\n" \
+                                         " r| Realignment roll\n" \
+                                         " s| Space race\n"
+                        eligible_actions = ['e', 'c', 'i', 'r', 's']
                     print(self.line)
                     print("Select use for " + card.name + ':')
                     print(action_options)
                     while True:
                         selected_action = input("Selection: ").lower()
-                        if selected_action in ['e', 'c', 'i', 'r', 's']:
+                        if selected_action in eligible_actions:
                             break
 
                     adjusted_card_ops = self.adjust_ops(card.ops, 'usa', 1, 4)
@@ -1976,6 +2019,7 @@ class TwilightStruggleGame(CardGame):
               'East European Unrest':           event_029,
               'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
+              'UN Intervention':                event_032,
               'Nuclear Test Ban':               event_034,
               'Brush War':                      event_036,
               'Central America Scoring':        event_037,
@@ -2686,6 +2730,8 @@ class TwilightStruggleGame(CardGame):
 
     def select_a_headline(self, side):
         eligible_cards = self.get_available_cards(side, False)
+        if self.cards['UN Intervention'] in eligible_cards:
+            eligible_cards.remove(self.cards['UN Intervention'])
 
         headline = self.select_a_card(eligible_cards, side)
         return headline
@@ -2715,6 +2761,14 @@ class TwilightStruggleGame(CardGame):
 
         while not self.action_round_complete:
             eligible_cards = self.get_available_cards(side, True)
+
+            # Check to see if UN intervention is in hand, if it is, make sure you can play it
+            for card in eligible_cards:
+                if card.name == 'UN Intervention':
+                    un_eligible = self.check_UN_intervention_eligible(self.phasing)
+                    if not un_eligible:
+                        eligible_cards.remove(card)
+
             selected_card = self.select_a_card(eligible_cards, side)
             self.active_card = selected_card
             adjusted_card_ops = self.adjust_ops(selected_card.ops, side, 1, 4)
