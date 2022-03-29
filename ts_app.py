@@ -1310,6 +1310,10 @@ class TwilightStruggleGame(CardGame):
         """Red Scare/Purge"""
         self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
 
+    def event_032(self):
+        """UN Intervention"""
+
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -2686,6 +2690,8 @@ class TwilightStruggleGame(CardGame):
 
     def select_a_headline(self, side):
         eligible_cards = self.get_available_cards(side, False)
+        if self.cards['UN Intervention'] in eligible_cards:
+            eligible_cards.remove(self.cards['UN Intervention'])
 
         headline = self.select_a_card(eligible_cards, side)
         return headline
