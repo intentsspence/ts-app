@@ -2783,39 +2783,34 @@ class TwilightStruggleGame(CardGame):
                     selected_action = 'x'
             else:
                 if selected_card.event_type == self.opponent[side]:
-                    options = [['a', "Trigger {s} event first".format(s=selected_card.event_type.upper())],
-                               ['b', "Use card for operations first"],
-                               ['x', "--Choose another card--"]]
-                    response = self.select_option(options)
-                    if response == 'a':
+                    selected_action = self.select_action(selected_card, True)
+                    if selected_action == 'e':
                         self.trigger_event(selected_card)
                         self.action_round_complete = False
                         while not self.action_round_complete:
-                            selected_action = self.select_action_limited(False, True, True, True, True)
+                            selected_action = self.select_action_limited(False, True, True, True, False)
                             if selected_action == 'c':
                                 self.action_coup_attempt(adjusted_card_ops, side)
                             elif selected_action == 'i':
                                 self.action_place_influence(adjusted_card_ops, side)
                             elif selected_action == 'r':
                                 self.action_realignment_roll(adjusted_card_ops, side)
-                            elif selected_action == 's':
-                                self.action_space_race(selected_card, adjusted_card_ops, side)
-                    elif response == 'b':
-                        while not self.action_round_complete:
-                            selected_action = self.select_action_limited(False, True, True, True, True)
-                            if selected_action == 'c':
-                                self.action_coup_attempt(adjusted_card_ops, side)
-                            elif selected_action == 'i':
-                                self.action_place_influence(adjusted_card_ops, side)
-                            elif selected_action == 'r':
-                                self.action_realignment_roll(adjusted_card_ops, side)
-                            elif selected_action == 's':
-                                self.action_space_race(selected_card, adjusted_card_ops, side)
+                    elif selected_action == 'c':
+                        self.action_coup_attempt(adjusted_card_ops, side)
                         self.trigger_event(selected_card)
+                    elif selected_action == 'i':
+                        self.action_place_influence(adjusted_card_ops, side)
+                        self.trigger_event(selected_card)
+                    elif selected_action == 'r':
+                        self.action_realignment_roll(adjusted_card_ops, side)
+                        self.trigger_event(selected_card)
+                    elif selected_action == 's':
+                        self.action_space_race(selected_card, adjusted_card_ops, side)
+                    elif selected_action == 'x':
+                        pass
 
                 elif selected_card.name == 'China':
                     selected_action = self.select_action_limited(False, True, True, True, True)
-                    print(selected_action)
                     if selected_action == 'c':
                         self.action_coup_attempt(adjusted_card_ops, side)
                     elif selected_action == 'i':
@@ -2971,13 +2966,21 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
         self.sides[side].space_attempts += 1
 
-    def select_action(self, card):
-        action_options = " e| Play event\n" \
-                         " c| Coup attempt\n" \
-                         " i| Place influence\n" \
-                         " r| Realignment roll\n" \
-                         " s| Space race\n" \
-                         " x| --Choose another card--"
+    def select_action(self, card, opponent=False):
+        if opponent:
+            action_options = " e| Trigger opponent event first\n" \
+                             " c| Coup attempt\n" \
+                             " i| Place influence\n" \
+                             " r| Realignment roll\n" \
+                             " s| Space race\n" \
+                             " x| --Choose another card--"
+        else:
+            action_options = " e| Play event\n" \
+                             " c| Coup attempt\n" \
+                             " i| Place influence\n" \
+                             " r| Realignment roll\n" \
+                             " s| Space race\n" \
+                             " x| --Choose another card--"
         print(self.line)
         print("Select use for " + card.name + ':')
         print(action_options)
