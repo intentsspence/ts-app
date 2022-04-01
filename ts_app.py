@@ -1997,6 +1997,10 @@ class TwilightStruggleGame(CardGame):
                     self.move_card(card, 'discard')
                 break
 
+    def event_109(self):
+        """Yuri and Samantha"""
+        pass
+
     def event_110(self):
         """AWACS Sale to Saudis"""
         self.add_influence('Saudi Arabia', 'usa', 2)
@@ -2094,6 +2098,7 @@ class TwilightStruggleGame(CardGame):
               'Special Relationship':           event_105,
               'Che':                            event_107,
               'Our Man in Tehran':              event_108,
+              'Yuri and Samantha':              event_109,
               'AWACS Sale to Saudis':           event_110}
 
     # Effects
@@ -2189,6 +2194,13 @@ class TwilightStruggleGame(CardGame):
 
         if country.battleground:
             self.change_defcon(-1)
+
+        # Event 109 - Yuri and Samantha
+        if self.cards['Yuri and Samantha'].effect_active:
+            if side == 'usa':
+                log_string = "Yuri and Samantha activated due to USA coup:"
+                print(log_string)
+                self.change_score_by_side('ussr', 1)
 
         return coup_successful
 
@@ -3096,10 +3108,7 @@ class TwilightStruggleGame(CardGame):
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-g.add_influence_to_control('Cuba', 'ussr')
-print(g.cards['Latin American Death Squads'].effect_active)
-print(g.cards['Latin American Death Squads'].effect_side)
-g.phasing = 'usa'
-g.trigger_event(g.cards['Latin American Death Squads'])
+
+g.trigger_event(g.cards['Yuri and Samantha'])
 g.action_round('usa')
 g.turn_cleanup()
