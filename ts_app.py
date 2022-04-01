@@ -129,7 +129,7 @@ class Player:
 class TwilightStruggleCard(Card):
     """Class of cards specific to the game Twilight Struggle"""
 
-    def __init__(self, n, no, p, e, o, r, opt):
+    def __init__(self, n, no, p, e, o, r, opt, e_turn, e_side):
         Card.__init__(self, n)
 
         if not no.isdigit():
@@ -155,6 +155,14 @@ class TwilightStruggleCard(Card):
         if not opt.isdigit() and int(opt) != 1 and int(opt) != 0:
             raise ValueError("Error creating Twilight Struggle Card. Optional parameter must be a 1 or 0")
         self.optional = True if int(opt) == 1 else False
+
+        if e_turn not in ['TRUE', '']:
+            raise ValueError("Error creating Twilight Struggle country. Battleground must be True or False.")
+        self.effect_turn = True if e_turn == 'TRUE' else False
+
+        if e_side not in ['usa', 'ussr', 'both', 'choose', '']:
+            raise ValueError("Error creating Twilight Struggle Card. Event type must be scoring, usa, ussr, or neutral")
+        self.effect_side = e_side
 
         self.played = False
         self.effect_active = False
@@ -3060,4 +3068,8 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.action_round('ussr')
+# g.action_round('ussr')
+print(g.cards['Nuclear Subs'].effect_turn)
+print(g.cards['Nuclear Subs'].effect_side)
+print(g.cards['Red Scare/Purge'].effect_turn)
+print(g.cards['Red Scare/Purge'].effect_side)
