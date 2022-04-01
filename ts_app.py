@@ -950,6 +950,12 @@ class TwilightStruggleGame(CardGame):
             # Check for active effects
             self.trigger_effect(self.cards['Flower Power'])
 
+            # Event 60 - U2 Incident
+            if card.name == 'UN Intervention' and self.cards['U2 Incident'].effect_active:
+                log_string = 'Event 60 - U2 Incident activated due to UN Intervention:'
+                print(log_string)
+                self.change_score_by_side('ussr', 1)
+
             if card.removed:
                 self.move_card(card, 'removed')
             else:
@@ -1487,6 +1493,10 @@ class TwilightStruggleGame(CardGame):
     def event_059(self):
         """Flower Power"""
         pass
+
+    def event_060(self):
+        """U2 Incident"""
+        self.change_score_by_side('ussr', 1)
 
     def event_061(self):
         """OPEC"""
@@ -2060,6 +2070,7 @@ class TwilightStruggleGame(CardGame):
               'ABM Treaty':                     event_057,
               'Cultural Revolution':            event_058,
               'Flower Power':                   event_059,
+              'U2 Incident':                    event_060,
               'OPEC':                           event_061,
               '"Lone Gunman"':                  event_062,
               'Colonial Rear Guards':           event_063,
@@ -3121,6 +3132,6 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 
-g.trigger_event(g.cards['Nuclear Subs'])
+g.trigger_event(g.cards['U2 Incident'])
 g.action_round('ussr')
 g.turn_cleanup()
