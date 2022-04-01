@@ -129,7 +129,7 @@ class Player:
 class TwilightStruggleCard(Card):
     """Class of cards specific to the game Twilight Struggle"""
 
-    def __init__(self, n, no, p, e, o, r, opt):
+    def __init__(self, n, no, p, e, o, r, opt, e_turn, e_side):
         Card.__init__(self, n)
 
         if not no.isdigit():
@@ -155,6 +155,14 @@ class TwilightStruggleCard(Card):
         if not opt.isdigit() and int(opt) != 1 and int(opt) != 0:
             raise ValueError("Error creating Twilight Struggle Card. Optional parameter must be a 1 or 0")
         self.optional = True if int(opt) == 1 else False
+
+        if e_turn not in ['TRUE', '']:
+            raise ValueError("Error creating Twilight Struggle country. Battleground must be True or False.")
+        self.effect_turn = True if e_turn == 'TRUE' else False
+
+        if e_side not in ['usa', 'ussr', 'both', 'choose', '']:
+            raise ValueError("Error creating Twilight Struggle Card. Event type must be scoring, usa, ussr, or neutral")
+        self.effect_side = e_side
 
         self.played = False
         self.effect_active = False
@@ -276,6 +284,7 @@ class TwilightStruggleGame(CardGame):
         self.active_card = None
         self.action_round_complete = False
         self.conduct_operations_complete = False
+        self.chernobyl = ''
 
         self.cards = {}
         self.countries = {}
@@ -744,6 +753,19 @@ class TwilightStruggleGame(CardGame):
 
         return target_check
 
+    def are_all_targets_in_subregion(self, target_list, subregion):
+        """Given a list of countries, checks to see if they are all in the specified subregion"""
+        target_check = True
+
+        if len(target_list) == 0:
+            target_check = False
+
+        for country in target_list:
+            if country.subregion != subregion:
+                target_check = False
+
+        return target_check
+
     # Functions for moving cards around
     def which_pile(self, c):
         for pile in self.piles:
@@ -942,6 +964,12 @@ class TwilightStruggleGame(CardGame):
             # Check for active effects
             self.trigger_effect(self.cards['Flower Power'])
 
+            # Event 60 - U2 Incident
+            if card.name == 'UN Intervention' and self.cards['U2 Incident'].effect_active:
+                log_string = 'Event 60 - U2 Incident activated due to UN Intervention:'
+                print(log_string)
+                self.change_score_by_side('ussr', 1)
+
             if card.removed:
                 self.move_card(card, 'removed')
             else:
@@ -1133,6 +1161,10 @@ class TwilightStruggleGame(CardGame):
         """Fidel"""
         self.remove_all_influence('Cuba', 'usa')
         self.add_influence_to_control('Cuba', 'ussr')
+
+    def event_009(self):
+        """Vietnam Revolts"""
+        self.add_influence('Vietnam', 'ussr', 2)
 
     def event_010(self):
         """Blockade"""
@@ -1375,6 +1407,11 @@ class TwilightStruggleGame(CardGame):
         elif (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops >= self.defcon):
             self.change_score_by_side(self.phasing, 3)
 
+    def event_041(self):
+        """Nuclear Subs"""
+        pass
+
+
     def event_043(self):
         """SALT Negotiations"""
         self.change_defcon(2)
@@ -1474,6 +1511,10 @@ class TwilightStruggleGame(CardGame):
     def event_059(self):
         """Flower Power"""
         pass
+
+    def event_060(self):
+        """U2 Incident"""
+        self.change_score_by_side('ussr', 1)
 
     def event_061(self):
         """OPEC"""
@@ -1597,6 +1638,10 @@ class TwilightStruggleGame(CardGame):
         """John Paul II Elected Pope"""
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
+
+    def event_069(self):
+        """Latin American Death Squads"""
+        self.cards['Latin American Death Squads'].effect_side = self.phasing
 
     def event_070(self):
         """OAS Founded"""
@@ -1786,6 +1831,28 @@ class TwilightStruggleGame(CardGame):
     def event_093(self):
         """Iran-Contral Scandal"""
         pass
+
+    def event_094(self):
+        """Chernobyl"""
+        options = [['1', "USSR cannot add influence in Africa"],
+                   ['2', "USSR cannot add influence in Asia"],
+                   ['3', "USSR cannot add influence in Central America"],
+                   ['4', "USSR cannot add influence in Europe"],
+                   ['5', "USSR cannot add influence in the Middle East"],
+                   ['6', "USSR cannot add influence in South America"]]
+        response = self.select_option(options)
+        if response == '1':
+            self.chernobyl = 'Africa'
+        elif response == '2':
+            self.chernobyl = 'Asia'
+        elif response == '3':
+            self.chernobyl = 'Central America'
+        elif response == '4':
+            self.chernobyl = 'Europe'
+        elif response == '5':
+            self.chernobyl = 'Middle East'
+        elif response == '6':
+            self.chernobyl = 'South America'
 
     def event_095(self):
         """Latin American Debt Crisis"""
@@ -1985,6 +2052,10 @@ class TwilightStruggleGame(CardGame):
                     self.move_card(card, 'discard')
                 break
 
+    def event_109(self):
+        """Yuri and Samantha"""
+        pass
+
     def event_110(self):
         """AWACS Sale to Saudis"""
         self.add_influence('Saudi Arabia', 'usa', 2)
@@ -1997,6 +2068,7 @@ class TwilightStruggleGame(CardGame):
               'Five Year Plan':                 event_005,
               'Socialist Governments':          event_007,
               'Fidel':                          event_008,
+              'Vietnam Revolts':                event_009,
               'Blockade':                       event_010,
               'Korean War':                     event_011,
               'Romanian Abdication':            event_012,
@@ -2025,6 +2097,7 @@ class TwilightStruggleGame(CardGame):
               'Central America Scoring':        event_037,
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
+              'Nuclear Subs':                   event_041,
               'SALT Negotiations':              event_043,
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
@@ -2038,6 +2111,7 @@ class TwilightStruggleGame(CardGame):
               'ABM Treaty':                     event_057,
               'Cultural Revolution':            event_058,
               'Flower Power':                   event_059,
+              'U2 Incident':                    event_060,
               'OPEC':                           event_061,
               '"Lone Gunman"':                  event_062,
               'Colonial Rear Guards':           event_063,
@@ -2046,6 +2120,7 @@ class TwilightStruggleGame(CardGame):
               'Puppet Governments':             event_066,
               'Grain Sales to Soviets':         event_067,
               'John Paul II Elected Pope':      event_068,
+              'Latin American Death Squads':    event_069,
               'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
@@ -2068,6 +2143,7 @@ class TwilightStruggleGame(CardGame):
               'Ortega Elected in Nicaragua':    event_091,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
+              'Chernobyl':                      event_094,
               'Latin American Debt Crisis':     event_095,
               'Tear Down this Wall':            event_096,
               '"An Evil Empire"':               event_097,
@@ -2081,6 +2157,7 @@ class TwilightStruggleGame(CardGame):
               'Special Relationship':           event_105,
               'Che':                            event_107,
               'Our Man in Tehran':              event_108,
+              'Yuri and Samantha':              event_109,
               'AWACS Sale to Saudis':           event_110}
 
     # Effects
@@ -2118,13 +2195,34 @@ class TwilightStruggleGame(CardGame):
         doubled_stability = int(country.stability) * 2
         coup_successful = False
         adjusted_ops = ops
+        latin_adjustment = 0
 
-        # Event 6 - China Card
+        # Event 006 - China Card
         if self.active_card == self.cards['China'] and country.region == 'Asia':
+            log_string = "Event 6 - China card: +1 operation point."
+            print(log_string)
             adjusted_ops = ops + 1
 
+        # Event 009 - Vietnam Revolts
+        if self.cards['Vietnam Revolts'].effect_active and self.cards['Vietnam Revolts'].effect_side == side:
+            if country.subregion == 'Southeast Asia':
+                log_string = "Event 9 - Vietnam Revolts: +1 operation point."
+                print(log_string)
+                adjusted_ops = ops + 1
+
+        # Event 069 - Latin American Death Squads
+        log_string_latin = ""
+        if self.cards['Latin American Death Squads'].effect_active:
+            if country.region == 'Central America' or country.region == 'South America':
+                if self.cards['Latin American Death Squads'].effect_side == side:
+                    latin_adjustment = 1
+                    log_string_latin = " + 1 from Latin American Death Squads"
+                elif self.cards['Latin American Death Squads'].effect_side == self.opponent[side]:
+                    latin_adjustment = -1
+                    log_string_latin = " - 1 from Latin American Death Squads"
+
         roll = self.die_roll()
-        modified_roll = roll + ops
+        modified_roll = roll + adjusted_ops + latin_adjustment
 
         # Event 43 - SALT Negotiations
         log_string_salt = ""
@@ -2134,12 +2232,13 @@ class TwilightStruggleGame(CardGame):
 
         opponent_inf = self.get_opponent_influence(country.name, side)
         log_string = "Modified roll must be more than {d}. " \
-                     "{s} rolled {r} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
-                                                                            s=side.upper(),
-                                                                            r=roll,
-                                                                            o=adjusted_ops,
-                                                                            salt=log_string_salt,
-                                                                            t=modified_roll)
+                     "{s} rolled {r}{latin} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
+                                                                                    s=side.upper(),
+                                                                                    r=roll,
+                                                                                   latin=log_string_latin,
+                                                                                    o=adjusted_ops,
+                                                                                    salt=log_string_salt,
+                                                                                    t=modified_roll)
         print(log_string)
 
         if modified_roll > doubled_stability:
@@ -2159,10 +2258,23 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
 
         if mil_ops:
-            self.add_military_ops(side, ops)
+            self.add_military_ops(side, adjusted_ops)
 
         if country.battleground:
-            self.change_defcon(-1)
+            # Event 41 - Nuclear Subs
+            if self.cards['Nuclear Subs'].effect_active and side == 'usa':
+                log_string = 'DEFCON unchanged due to Event 41 - Nuclear Subs.'
+                print(log_string)
+                pass
+            else:
+                self.change_defcon(-1)
+
+        # Event 109 - Yuri and Samantha
+        if self.cards['Yuri and Samantha'].effect_active:
+            if side == 'usa':
+                log_string = "Event 109 - Yuri and Samantha activated due to USA coup:"
+                print(log_string)
+                self.change_score_by_side('ussr', 1)
 
         return coup_successful
 
@@ -2342,6 +2454,8 @@ class TwilightStruggleGame(CardGame):
         cancellation = False
         china_bonus_given = False
         china_bonus_taken = False
+        vietnam_bonus_given = False
+        vietnam_bonus_taken = False
 
         while not realignments_completed:
             possible_targets = []
@@ -2366,8 +2480,19 @@ class TwilightStruggleGame(CardGame):
                             realignments_completed = True
                             break
                     else:
-                        realignments_completed = True
-                        break
+                        if self.cards['Vietnam Revolts'].effect_active and side == 'ussr' and not vietnam_bonus_taken:
+                            vietnam_bonus = self.are_all_targets_in_subregion(targeted_countries, 'Southeast Asia')
+                            if vietnam_bonus:
+                                print('Vietnam bonus')
+                                realignments_to_attempt = 1
+                                vietnam_bonus_given = True
+                            else:
+                                realignments_completed = True
+                                break
+
+                        else:
+                            realignments_completed = True
+                            break
                 elif realignments_to_attempt < ops:
                     continue_confirmation = self.confirm_action("Continue realignment attempts")
                     if not continue_confirmation:
@@ -2378,6 +2503,9 @@ class TwilightStruggleGame(CardGame):
 
                 if china_bonus_given:
                     eligible_targets = self.checked_realignment_targets(self.countries_in_region('Asia'), side)
+
+                if vietnam_bonus_given:
+                    eligible_targets = self.checked_realignment_targets(self.countries_in_subregion('Southeast Asia'), side)
 
                 target = self.select_a_country(eligible_targets)
                 print(target)
@@ -2394,6 +2522,8 @@ class TwilightStruggleGame(CardGame):
                         targeted_countries.append(target)
                     if china_bonus_given:
                         china_bonus_taken = True
+                    if vietnam_bonus_given:
+                        vietnam_bonus_taken = True
 
             if cancellation:
                 continue_confirmation = self.confirm_action("Continue realignment attempts")
@@ -2447,9 +2577,21 @@ class TwilightStruggleGame(CardGame):
             influence_to_place = ops
             target_list = []
             targeted_countries = []
-            possible_targets = self.accessible_countries(side)
             cancelled = False
             china_bonus_given = False
+            vietnam_bonus_given = False
+
+            if self.cards['Chernobyl'].effect_active and self.cards['Chernobyl'].effect_side == side:
+                log_string = "Event 94 - Chernoble in effect. {s} cannot place influece in {r}.".format(s=side.upper(),
+                                                                                                     r=self.chernobyl)
+                print(log_string)
+                all_countries = self.accessible_countries(side)
+                possible_targets = []
+                for country in all_countries:
+                    if country.region != self.chernobyl:
+                        possible_targets.append(country)
+            else:
+                possible_targets = self.accessible_countries(side)
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
@@ -2467,12 +2609,24 @@ class TwilightStruggleGame(CardGame):
 
                 if influence_to_place == 0:
                     check_for_china_bonus = self.are_all_targets_in_region(targeted_countries, 'Asia')
+                    check_for_vietnam_bonus = self.are_all_targets_in_subregion(targeted_countries, 'Southeast Asia')
                     if self.active_card == self.cards['China'] and check_for_china_bonus and not china_bonus_given:
+                        log_string = "Event 6 - China bonus"
+                        print(log_string)
                         influence_to_place = 1
                         china_bonus_given = True
                         possible_targets = []
                         for country in self.accessible_countries(side):
                             if country.region == 'Asia':
+                                possible_targets.append(country)
+                    elif self.cards['Vietnam Revolts'].effect_active and side == 'ussr' and check_for_vietnam_bonus and not vietnam_bonus_given:
+                        log_string = "Event 9 - Vietnam bonus"
+                        print(log_string)
+                        influence_to_place = 1
+                        vietnam_bonus_given = True
+                        possible_targets = []
+                        for country in self.accessible_countries(side):
+                            if country.subregion == 'Southeast Asia':
                                 possible_targets.append(country)
 
             if cancelled:
@@ -3058,6 +3212,17 @@ class TwilightStruggleGame(CardGame):
             side.space_attempts = 0
             side.ops_adjustment = 0
 
+        # Turn off all turn based effects
+        for card in self.cards.values():
+            if card.name == 'China':
+                pass
+            elif card.effect_turn and card.effect_active:
+                card.effect_active = False
+                log_string = "{c} is no longer active.".format(c=card.name)
+                print(log_string)
+
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+g.trigger_event(g.cards['Vietnam Revolts'])
 g.action_round('ussr')
+g.turn_cleanup()
