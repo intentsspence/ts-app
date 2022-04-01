@@ -284,6 +284,7 @@ class TwilightStruggleGame(CardGame):
         self.active_card = None
         self.action_round_complete = False
         self.conduct_operations_complete = False
+        self.chernobyl = ''
 
         self.cards = {}
         self.countries = {}
@@ -1814,6 +1815,28 @@ class TwilightStruggleGame(CardGame):
         """Iran-Contral Scandal"""
         pass
 
+    def event_094(self):
+        """Chernobyl"""
+        options = [['1', "USSR cannot add influence in Africa"],
+                   ['2', "USSR cannot add influence in Asia"],
+                   ['3', "USSR cannot add influence in Central America"],
+                   ['4', "USSR cannot add influence in Europe"],
+                   ['5', "USSR cannot add influence in the Middle East"],
+                   ['6', "USSR cannot add influence in South America"]]
+        response = self.select_option(options)
+        if response == '1':
+            self.chernobyl = 'Africa'
+        elif response == '2':
+            self.chernobyl = 'Asia'
+        elif response == '3':
+            self.chernobyl = 'Central America'
+        elif response == '4':
+            self.chernobyl = 'Europe'
+        elif response == '5':
+            self.chernobyl = 'Middle East'
+        elif response == '6':
+            self.chernobyl = 'South America'
+
     def event_095(self):
         """Latin American Debt Crisis"""
         eligible_cards = []
@@ -2102,6 +2125,7 @@ class TwilightStruggleGame(CardGame):
               'Ortega Elected in Nicaragua':    event_091,
               'Terrorism':                      event_092,
               'Iran-Contra Scandal':            event_093,
+              'Chernobyl':                      event_094,
               'Latin American Debt Crisis':     event_095,
               'Tear Down this Wall':            event_096,
               '"An Evil Empire"':               event_097,
@@ -2508,9 +2532,20 @@ class TwilightStruggleGame(CardGame):
             influence_to_place = ops
             target_list = []
             targeted_countries = []
-            possible_targets = self.accessible_countries(side)
             cancelled = False
             china_bonus_given = False
+
+            if self.cards['Chernobyl'].effect_active and self.cards['Chernobyl'].effect_side == side:
+                log_string = "Event 94 - Chernoble in effect. {s} cannot place influece in {r}.".format(s=side.upper(),
+                                                                                                     r=self.chernobyl)
+                print(log_string)
+                all_countries = self.accessible_countries(side)
+                possible_targets = []
+                for country in all_countries:
+                    if country.region != self.chernobyl:
+                        possible_targets.append(country)
+            else:
+                possible_targets = self.accessible_countries(side)
 
             while influence_to_place > 0:
                 print("Place {i} influence".format(i=influence_to_place))
@@ -3132,6 +3167,6 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 
-g.trigger_event(g.cards['U2 Incident'])
+g.trigger_event(g.cards['Chernobyl'])
 g.action_round('ussr')
 g.turn_cleanup()
