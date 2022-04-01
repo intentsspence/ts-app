@@ -1606,6 +1606,10 @@ class TwilightStruggleGame(CardGame):
         self.remove_influence('Poland', 'ussr', 2)
         self.add_influence('Poland', 'usa', 1)
 
+    def event_069(self):
+        """Latin American Death Squads"""
+        self.cards['Latin American Death Squads'].effect_side = self.phasing
+
     def event_070(self):
         """OAS Founded"""
         eligible_countries = self.countries_in_region('Central America') + self.countries_in_region('South America')
@@ -2054,6 +2058,7 @@ class TwilightStruggleGame(CardGame):
               'Puppet Governments':             event_066,
               'Grain Sales to Soviets':         event_067,
               'John Paul II Elected Pope':      event_068,
+              'Latin American Death Squads':    event_069,
               'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
@@ -2126,13 +2131,25 @@ class TwilightStruggleGame(CardGame):
         doubled_stability = int(country.stability) * 2
         coup_successful = False
         adjusted_ops = ops
+        latin_adjustment = 0
 
         # Event 6 - China Card
         if self.active_card == self.cards['China'] and country.region == 'Asia':
             adjusted_ops = ops + 1
 
+        # Event 69 - Latin American Death Squads
+        log_string_latin = ""
+        if self.cards['Latin American Death Squads'].effect_active:
+            if country.region == 'Central America' or country.region == 'South America':
+                if self.cards['Latin American Death Squads'].effect_side == side:
+                    latin_adjustment = 1
+                    log_string_latin = " + 1 from Latin American Death Squads"
+                elif self.cards['Latin American Death Squads'].effect_side == self.opponent[side]:
+                    latin_adjustment = -1
+                    log_string_latin = " - 1 from Latin American Death Squads"
+
         roll = self.die_roll()
-        modified_roll = roll + ops
+        modified_roll = roll + adjusted_ops + latin_adjustment
 
         # Event 43 - SALT Negotiations
         log_string_salt = ""
@@ -2142,12 +2159,13 @@ class TwilightStruggleGame(CardGame):
 
         opponent_inf = self.get_opponent_influence(country.name, side)
         log_string = "Modified roll must be more than {d}. " \
-                     "{s} rolled {r} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
-                                                                            s=side.upper(),
-                                                                            r=roll,
-                                                                            o=adjusted_ops,
-                                                                            salt=log_string_salt,
-                                                                            t=modified_roll)
+                     "{s} rolled {r}{latin} + {o} ops{salt}, total of {t}.".format(d=doubled_stability,
+                                                                                    s=side.upper(),
+                                                                                    r=roll,
+                                                                                   latin=log_string_latin,
+                                                                                    o=adjusted_ops,
+                                                                                    salt=log_string_salt,
+                                                                                    t=modified_roll)
         print(log_string)
 
         if modified_roll > doubled_stability:
@@ -2167,7 +2185,7 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
 
         if mil_ops:
-            self.add_military_ops(side, ops)
+            self.add_military_ops(side, adjusted_ops)
 
         if country.battleground:
             self.change_defcon(-1)
@@ -3066,10 +3084,22 @@ class TwilightStruggleGame(CardGame):
             side.space_attempts = 0
             side.ops_adjustment = 0
 
+        # Turn off all turn based effects
+        for card in self.cards.values():
+            if card.name == 'China':
+                pass
+            elif card.effect_turn and card.effect_active:
+                card.effect_active = False
+                log_string = "{c} is no longer active.".format(c=card.name)
+                print(log_string)
+
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
-print(g.cards['Nuclear Subs'].effect_turn)
-print(g.cards['Nuclear Subs'].effect_side)
-print(g.cards['Red Scare/Purge'].effect_turn)
-print(g.cards['Red Scare/Purge'].effect_side)
+g.add_influence_to_control('Cuba', 'ussr')
+print(g.cards['Latin American Death Squads'].effect_active)
+print(g.cards['Latin American Death Squads'].effect_side)
+g.phasing = 'usa'
+g.trigger_event(g.cards['Latin American Death Squads'])
+g.action_round('usa')
+g.turn_cleanup()
