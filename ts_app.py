@@ -1383,6 +1383,11 @@ class TwilightStruggleGame(CardGame):
         elif (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops >= self.defcon):
             self.change_score_by_side(self.phasing, 3)
 
+    def event_041(self):
+        """Nuclear Subs"""
+        pass
+
+
     def event_043(self):
         """SALT Negotiations"""
         self.change_defcon(2)
@@ -2041,6 +2046,7 @@ class TwilightStruggleGame(CardGame):
               'Central America Scoring':        event_037,
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
+              'Nuclear Subs':                   event_041,
               'SALT Negotiations':              event_043,
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
@@ -2193,12 +2199,18 @@ class TwilightStruggleGame(CardGame):
             self.add_military_ops(side, adjusted_ops)
 
         if country.battleground:
-            self.change_defcon(-1)
+            # Event 41 - Nuclear Subs
+            if self.cards['Nuclear Subs'].effect_active and side == 'usa':
+                log_string = 'DEFCON unchanged due to Event 41 - Nuclear Subs.'
+                print(log_string)
+                pass
+            else:
+                self.change_defcon(-1)
 
         # Event 109 - Yuri and Samantha
         if self.cards['Yuri and Samantha'].effect_active:
             if side == 'usa':
-                log_string = "Yuri and Samantha activated due to USA coup:"
+                log_string = "Event 109 - Yuri and Samantha activated due to USA coup:"
                 print(log_string)
                 self.change_score_by_side('ussr', 1)
 
@@ -3109,6 +3121,6 @@ class TwilightStruggleGame(CardGame):
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 # g.action_round('ussr')
 
-g.trigger_event(g.cards['Yuri and Samantha'])
-g.action_round('usa')
+g.trigger_event(g.cards['Nuclear Subs'])
+g.action_round('ussr')
 g.turn_cleanup()
