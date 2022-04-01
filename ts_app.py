@@ -753,6 +753,19 @@ class TwilightStruggleGame(CardGame):
 
         return target_check
 
+    def are_all_targets_in_subregion(self, target_list, subregion):
+        """Given a list of countries, checks to see if they are all in the specified subregion"""
+        target_check = True
+
+        if len(target_list) == 0:
+            target_check = False
+
+        for country in target_list:
+            if country.subregion != subregion:
+                target_check = False
+
+        return target_check
+
     # Functions for moving cards around
     def which_pile(self, c):
         for pile in self.piles:
@@ -1148,6 +1161,10 @@ class TwilightStruggleGame(CardGame):
         """Fidel"""
         self.remove_all_influence('Cuba', 'usa')
         self.add_influence_to_control('Cuba', 'ussr')
+
+    def event_009(self):
+        """Vietnam Revolts"""
+        self.add_influence('Vietnam', 'ussr', 2)
 
     def event_010(self):
         """Blockade"""
@@ -2051,6 +2068,7 @@ class TwilightStruggleGame(CardGame):
               'Five Year Plan':                 event_005,
               'Socialist Governments':          event_007,
               'Fidel':                          event_008,
+              'Vietnam Revolts':                event_009,
               'Blockade':                       event_010,
               'Korean War':                     event_011,
               'Romanian Abdication':            event_012,
@@ -2179,11 +2197,20 @@ class TwilightStruggleGame(CardGame):
         adjusted_ops = ops
         latin_adjustment = 0
 
-        # Event 6 - China Card
+        # Event 006 - China Card
         if self.active_card == self.cards['China'] and country.region == 'Asia':
+            log_string = "Event 6 - China card: +1 operation point."
+            print(log_string)
             adjusted_ops = ops + 1
 
-        # Event 69 - Latin American Death Squads
+        # Event 009 - Vietnam Revolts
+        if self.cards['Vietnam Revolts'].effect_active and self.cards['Vietnam Revolts'].effect_side == side:
+            if country.subregion == 'Southeast Asia':
+                log_string = "Event 9 - Vietnam Revolts: +1 operation point."
+                print(log_string)
+                adjusted_ops = ops + 1
+
+        # Event 069 - Latin American Death Squads
         log_string_latin = ""
         if self.cards['Latin American Death Squads'].effect_active:
             if country.region == 'Central America' or country.region == 'South America':
@@ -2427,6 +2454,8 @@ class TwilightStruggleGame(CardGame):
         cancellation = False
         china_bonus_given = False
         china_bonus_taken = False
+        vietnam_bonus_given = False
+        vietnam_bonus_taken = False
 
         while not realignments_completed:
             possible_targets = []
@@ -2451,8 +2480,19 @@ class TwilightStruggleGame(CardGame):
                             realignments_completed = True
                             break
                     else:
-                        realignments_completed = True
-                        break
+                        if self.cards['Vietnam Revolts'].effect_active and side == 'ussr' and not vietnam_bonus_taken:
+                            vietnam_bonus = self.are_all_targets_in_subregion(targeted_countries, 'Southeast Asia')
+                            if vietnam_bonus:
+                                print('Vietnam bonus')
+                                realignments_to_attempt = 1
+                                vietnam_bonus_given = True
+                            else:
+                                realignments_completed = True
+                                break
+
+                        else:
+                            realignments_completed = True
+                            break
                 elif realignments_to_attempt < ops:
                     continue_confirmation = self.confirm_action("Continue realignment attempts")
                     if not continue_confirmation:
@@ -2463,6 +2503,9 @@ class TwilightStruggleGame(CardGame):
 
                 if china_bonus_given:
                     eligible_targets = self.checked_realignment_targets(self.countries_in_region('Asia'), side)
+
+                if vietnam_bonus_given:
+                    eligible_targets = self.checked_realignment_targets(self.countries_in_subregion('Southeast Asia'), side)
 
                 target = self.select_a_country(eligible_targets)
                 print(target)
@@ -2479,6 +2522,8 @@ class TwilightStruggleGame(CardGame):
                         targeted_countries.append(target)
                     if china_bonus_given:
                         china_bonus_taken = True
+                    if vietnam_bonus_given:
+                        vietnam_bonus_taken = True
 
             if cancellation:
                 continue_confirmation = self.confirm_action("Continue realignment attempts")
@@ -2534,6 +2579,7 @@ class TwilightStruggleGame(CardGame):
             targeted_countries = []
             cancelled = False
             china_bonus_given = False
+            vietnam_bonus_given = False
 
             if self.cards['Chernobyl'].effect_active and self.cards['Chernobyl'].effect_side == side:
                 log_string = "Event 94 - Chernoble in effect. {s} cannot place influece in {r}.".format(s=side.upper(),
@@ -2563,12 +2609,24 @@ class TwilightStruggleGame(CardGame):
 
                 if influence_to_place == 0:
                     check_for_china_bonus = self.are_all_targets_in_region(targeted_countries, 'Asia')
+                    check_for_vietnam_bonus = self.are_all_targets_in_subregion(targeted_countries, 'Southeast Asia')
                     if self.active_card == self.cards['China'] and check_for_china_bonus and not china_bonus_given:
+                        log_string = "Event 6 - China bonus"
+                        print(log_string)
                         influence_to_place = 1
                         china_bonus_given = True
                         possible_targets = []
                         for country in self.accessible_countries(side):
                             if country.region == 'Asia':
+                                possible_targets.append(country)
+                    elif self.cards['Vietnam Revolts'].effect_active and side == 'ussr' and check_for_vietnam_bonus and not vietnam_bonus_given:
+                        log_string = "Event 9 - Vietnam bonus"
+                        print(log_string)
+                        influence_to_place = 1
+                        vietnam_bonus_given = True
+                        possible_targets = []
+                        for country in self.accessible_countries(side):
+                            if country.subregion == 'Southeast Asia':
                                 possible_targets.append(country)
 
             if cancelled:
@@ -3165,8 +3223,6 @@ class TwilightStruggleGame(CardGame):
 
 
 g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-# g.action_round('ussr')
-
-g.trigger_event(g.cards['Chernobyl'])
+g.trigger_event(g.cards['Vietnam Revolts'])
 g.action_round('ussr')
 g.turn_cleanup()
