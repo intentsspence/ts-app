@@ -411,10 +411,10 @@ class TwilightStruggleGame(CardGame):
         if self.defcon < 2:
             self.defcon = 1
 
-        self.check_defcon_game_end()
-
         log_string = "DEFCON is now {d}".format(d=self.defcon)
         print(log_string)
+
+        self.check_defcon_game_end()
 
     def change_defcon_to_value(self, value):
         self.defcon = value
@@ -424,8 +424,11 @@ class TwilightStruggleGame(CardGame):
 
     def check_defcon_game_end(self):
         if self.defcon < 2:
+            log_string = "Game over. Winner: {s}".format(s=self.opponent[self.phasing].upper())
+            print(log_string)
             self.sides[self.opponent[self.phasing]].winner = True
             self.game_active = False
+            self.action_round_complete = True
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -531,11 +534,13 @@ class TwilightStruggleGame(CardGame):
         if self.score >= 20:
             self.sides['usa'].winner = True
             self.game_active = False
+            self.action_round_complete = True
             log_string = "Game over. Winner: USA"
             print(log_string)
         elif self.score <= -20:
             self.sides['ussr'].winner = True
             self.game_active = False
+            self.action_round_complete = True
             log_string = "Game over. Winner: USSR"
             print(log_string)
 
@@ -3222,7 +3227,33 @@ class TwilightStruggleGame(CardGame):
                 print(log_string)
 
 
-g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Vietnam Revolts'])
-g.action_round('ussr')
-g.turn_cleanup()
+def main():
+    game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+
+    for turn in range(1, game.turns + 1):
+        log_string = "\n--- TURN {t} ---\n".format(t=turn)
+        print(log_string)
+
+        game.headline_phase()
+
+        for ar in range(1, game.action_rounds[turn] + 1):
+            log_string = "\n--- TURN {t} | ACTION ROUND {a} ---\n".format(t=turn,
+                                                                          a=ar)
+            print(log_string)
+            if game.game_active:
+                game.action_round('ussr')
+            else:
+                break
+
+            if game.game_active:
+                game.action_round('usa')
+            else:
+                break
+
+        if not game.game_active:
+            break
+
+        game.turn_cleanup()
+
+
+main()
