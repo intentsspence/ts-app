@@ -3231,14 +3231,21 @@ def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
     for turn in range(1, game.turns + 1):
+
+        # Give players cards (not in turn one, those are dealt as part of setup)
+        if turn > 1:
+            game.deal_cards()
+
         log_string = "\n--- TURN {t} ---\n".format(t=turn)
         print(log_string)
 
         game.headline_phase()
 
         for ar in range(1, game.action_rounds[turn] + 1):
-            log_string = "\n--- TURN {t} | ACTION ROUND {a} ---\n".format(t=turn,
+            log_string = "\n--- TURN {t} | ACTION ROUND {a} ---".format(t=turn,
                                                                           a=ar)
+            print(log_string)
+            log_string = "Score: {s}\nDEFCON: {d}\n".format(s=game.score, d=game.defcon)
             print(log_string)
             if game.game_active:
                 game.action_round('ussr')
