@@ -595,7 +595,31 @@ class TwilightStruggleGame(CardGame):
         south_america = self.score_card('South America', 2, 5, 6, True)
         total = asia + europe + middle_east + central_america + africa + south_america
 
+        log_string = 'Final scoring:'
+        print(log_string)
         self.change_score(total)
+
+        # Score china card
+        owner = self.who_has_china()
+        log_string = "{s} collects bonus for holding China.".format(s=owner.upper())
+        print(log_string)
+        self.change_score_by_side(owner, 1)
+
+        # End the game
+        self.game_active = False
+        winner = ''
+        if self.score < 0:
+            winner = 'USSR'
+            self.sides['ussr'].winner = True
+        elif self.score > 0:
+            winner = 'USA'
+            self.sides['usa'].winner = True
+        elif self.score == 0:
+            winner = 'None - game ended in draw'
+
+        self.action_round_complete = True
+        log_string = "Game over. Winner: {w}".format(w=winner)
+        print(log_string)
 
     # Functions for space race
     def space_race_awards(self, s):
@@ -803,6 +827,15 @@ class TwilightStruggleGame(CardGame):
         else:
             log_string_2 = 'China card is face down.'
             print(log_string_2)
+
+    def who_has_china(self):
+        current_pile = self.which_pile(self.cards['China'])
+        owner = ''
+        if current_pile == 'USSR China':
+            owner = 'ussr'
+        elif current_pile == 'USA China':
+            owner = 'usa'
+        return owner
 
     def give_opponent_china_card(self, side):
         if side == 'usa':
@@ -3232,35 +3265,53 @@ def main():
 
     for turn in range(1, game.turns + 1):
 
-        # Give players cards (not in turn one, those are dealt as part of setup)
+        # Phase A - Improve DEFCON Status
+        game.change_defcon(1)
+
         if turn > 1:
+            # Phase B - Deal Cards
             game.deal_cards()
 
         log_string = "\n--- TURN {t} ---\n".format(t=turn)
         print(log_string)
 
+        # Phase C - Headline Phase
         game.headline_phase()
 
+        # Phase D - Action Rounds
         for ar in range(1, game.action_rounds[turn] + 1):
-            log_string = "\n--- TURN {t} | ACTION ROUND {a} ---".format(t=turn,
-                                                                          a=ar)
+            log_string = "\n--- TURN {t} | ACTION ROUND {a} ---".format(t=turn, a=ar)
             print(log_string)
+
             log_string = "Score: {s}\nDEFCON: {d}\n".format(s=game.score, d=game.defcon)
             print(log_string)
-            if game.game_active:
-                game.action_round('ussr')
-            else:
-                break
 
-            if game.game_active:
-                game.action_round('usa')
-            else:
-                break
-
-        if not game.game_active:
-            break
+            game.action_round('ussr')
+            game.action_round('usa')
 
         game.turn_cleanup()
 
+        # Phase E - Check Military Operations
+        game.check_required_military_ops()
+        game.reset_military_ops()
 
-main()
+        # Phase F - Reveal held card
+        #TODO - write function to check for held cards
+
+        # Phase G - Flip China Card
+        game.cards['China'].flip_face_up()
+
+        # Phase H - Advance turn marker (add in mid/late game cards)
+        if turn == 3:
+            game.move_all_cards('deck', 'mid war')
+        elif turn == 7:
+            game.move_all_cards('deck', 'late war')
+
+    game.final_scoring()
+
+
+# main()
+
+game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+game.change_score(4)
+game.final_scoring()
