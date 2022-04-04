@@ -411,10 +411,10 @@ class TwilightStruggleGame(CardGame):
         if self.defcon < 2:
             self.defcon = 1
 
-        self.check_defcon_game_end()
-
         log_string = "DEFCON is now {d}".format(d=self.defcon)
         print(log_string)
+
+        self.check_defcon_game_end()
 
     def change_defcon_to_value(self, value):
         self.defcon = value
@@ -424,8 +424,11 @@ class TwilightStruggleGame(CardGame):
 
     def check_defcon_game_end(self):
         if self.defcon < 2:
+            log_string = "Game over. Winner: {s}".format(s=self.opponent[self.phasing].upper())
+            print(log_string)
             self.sides[self.opponent[self.phasing]].winner = True
             self.game_active = False
+            self.action_round_complete = True
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -531,11 +534,13 @@ class TwilightStruggleGame(CardGame):
         if self.score >= 20:
             self.sides['usa'].winner = True
             self.game_active = False
+            self.action_round_complete = True
             log_string = "Game over. Winner: USA"
             print(log_string)
         elif self.score <= -20:
             self.sides['ussr'].winner = True
             self.game_active = False
+            self.action_round_complete = True
             log_string = "Game over. Winner: USSR"
             print(log_string)
 
@@ -590,7 +595,31 @@ class TwilightStruggleGame(CardGame):
         south_america = self.score_card('South America', 2, 5, 6, True)
         total = asia + europe + middle_east + central_america + africa + south_america
 
+        log_string = 'Final scoring:'
+        print(log_string)
         self.change_score(total)
+
+        # Score china card
+        owner = self.who_has_china()
+        log_string = "{s} collects bonus for holding China.".format(s=owner.upper())
+        print(log_string)
+        self.change_score_by_side(owner, 1)
+
+        # End the game
+        self.game_active = False
+        winner = ''
+        if self.score < 0:
+            winner = 'USSR'
+            self.sides['ussr'].winner = True
+        elif self.score > 0:
+            winner = 'USA'
+            self.sides['usa'].winner = True
+        elif self.score == 0:
+            winner = 'None - game ended in draw'
+
+        self.action_round_complete = True
+        log_string = "Game over. Winner: {w}".format(w=winner)
+        print(log_string)
 
     # Functions for space race
     def space_race_awards(self, s):
@@ -796,8 +825,18 @@ class TwilightStruggleGame(CardGame):
         if face_up:
             self.cards['China'].flip_face_up()
         else:
+            self.cards['China'].face_up = False
             log_string_2 = 'China card is face down.'
             print(log_string_2)
+
+    def who_has_china(self):
+        current_pile = self.which_pile(self.cards['China'])
+        owner = ''
+        if current_pile == 'USSR China':
+            owner = 'ussr'
+        elif current_pile == 'USA China':
+            owner = 'usa'
+        return owner
 
     def give_opponent_china_card(self, side):
         if side == 'usa':
@@ -1765,6 +1804,10 @@ class TwilightStruggleGame(CardGame):
             selected_card = self.select_a_card(eligible_cards, 'usa')
             self.trigger_event(selected_card)
 
+    def event_086(self):
+        """North Sea Oil"""
+        pass
+
     def event_087(self):
         """The Reformer"""
         eligible_countries = self.countries_in_region('Europe')
@@ -2136,6 +2179,7 @@ class TwilightStruggleGame(CardGame):
               'The Iron Lady':                  event_083,
               'Reagan Bombs Libya':             event_084,
               'Star Wars':                      event_085,
+              'North Sea Oil':                  event_086,
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
               'Soviets Shoot Down KAL-007':     event_089,
@@ -2923,6 +2967,11 @@ class TwilightStruggleGame(CardGame):
                     if not un_eligible:
                         eligible_cards.remove(card)
 
+            # Check to see if China is face up
+            if self.cards['China'] in eligible_cards:
+                if not self.cards['China'].face_up:
+                    eligible_cards.remove(self.cards['China'])
+
             selected_card = self.select_a_card(eligible_cards, side)
             self.active_card = selected_card
             adjusted_card_ops = self.adjust_ops(selected_card.ops, side, 1, 4)
@@ -3207,6 +3256,41 @@ class TwilightStruggleGame(CardGame):
 
         return adjusted_ops
 
+    def check_held_cards(self):
+        ussr_hand = self.get_available_cards('ussr', False)
+        usa_hand = self.get_available_cards('usa', False)
+        ussr_held_scoring = False
+        usa_held_scoring = False
+
+        if len(ussr_hand) > 0:
+            for card in ussr_hand:
+                if card.event_type == 'scoring':
+                    ussr_held_scoring = True
+
+        if len(usa_hand) > 0:
+            for card in usa_hand:
+                if card.event_type == 'scoring':
+                    usa_held_scoring = True
+
+        if usa_held_scoring and not ussr_held_scoring:
+            self.sides['ussr'].winner = True
+            self.game_active = False
+            self.action_round_complete = True
+            log_string = "Game over due to USA holding a score card. Winner: USSR"
+            print(log_string)
+        elif ussr_held_scoring and not usa_held_scoring:
+            self.sides['usa'].winner = True
+            self.game_active = False
+            self.action_round_complete = True
+            log_string = "Game over due to USSR holding a score card. Winner: USA"
+            print(log_string)
+        elif ussr_held_scoring and usa_held_scoring:
+            self.sides['usa'].winner = True
+            self.game_active = False
+            self.action_round_complete = True
+            log_string = "Game over due to both sides holding a score card. Winner: USA"
+            print(log_string)
+
     def turn_cleanup(self):
         for side in self.sides.values():
             side.space_attempts = 0
@@ -3222,7 +3306,61 @@ class TwilightStruggleGame(CardGame):
                 print(log_string)
 
 
-g = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-g.trigger_event(g.cards['Vietnam Revolts'])
-g.action_round('ussr')
-g.turn_cleanup()
+def main():
+    game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+
+    for turn in range(1, game.turns + 1):
+
+        log_string = "\n--- TURN {t} ---\n".format(t=turn)
+        print(log_string)
+
+        # Phase A - Improve DEFCON Status
+        game.change_defcon(1)
+
+        if turn > 1:
+            # Phase B - Deal Cards
+            game.deal_cards()
+
+        # Phase C - Headline Phase
+        game.headline_phase()
+
+        # Phase D - Action Rounds
+        for ar in range(1, game.action_rounds[turn] + 1):
+            log_string = "\n--- TURN {t} | ACTION ROUND {a} ---".format(t=turn, a=ar)
+            print(log_string)
+
+            log_string = "Score: {s}\nDEFCON: {d}\n".format(s=game.score, d=game.defcon)
+            print(log_string)
+
+            game.action_round('ussr')
+            game.action_round('usa')
+
+        if game.cards['North Sea Oil'].effect_active:
+            if len(game.get_available_cards('usa', False)) > 0:
+                log_string = 'Bonus USA action round from North Sea Oil'
+                print(log_string)
+                game.action_round('usa')
+
+        game.turn_cleanup()
+
+        # Phase E - Check Military Operations
+        game.check_required_military_ops()
+        game.reset_military_ops()
+
+        # Phase F - Check held card
+        game.check_held_cards()
+
+        # Phase G - Flip China Card
+        game.cards['China'].flip_face_up()
+
+        # Phase H - Advance turn marker (add in mid/late game cards)
+        if turn == 3:
+            game.move_all_cards('deck', 'mid war')
+        elif turn == 7:
+            game.move_all_cards('deck', 'late war')
+
+    game.final_scoring()
+
+
+main()
+
