@@ -3245,6 +3245,41 @@ class TwilightStruggleGame(CardGame):
 
         return adjusted_ops
 
+    def check_held_cards(self):
+        ussr_hand = self.get_available_cards('ussr', False)
+        usa_hand = self.get_available_cards('usa', False)
+        ussr_held_scoring = False
+        usa_held_scoring = False
+
+        if len(ussr_hand) > 0:
+            for card in ussr_hand:
+                if card.event_type == 'scoring':
+                    ussr_held_scoring = True
+
+        if len(usa_hand) > 0:
+            for card in usa_hand:
+                if card.event_type == 'scoring':
+                    usa_held_scoring = True
+
+        if usa_held_scoring and not ussr_held_scoring:
+            self.sides['ussr'].winner = True
+            self.game_active = False
+            self.action_round_complete = True
+            log_string = "Game over due to USA holding a score card. Winner: USSR"
+            print(log_string)
+        elif ussr_held_scoring and not usa_held_scoring:
+            self.sides['usa'].winner = True
+            self.game_active = False
+            self.action_round_complete = True
+            log_string = "Game over due to USSR holding a score card. Winner: USA"
+            print(log_string)
+        elif ussr_held_scoring and usa_held_scoring:
+            self.sides['usa'].winner = True
+            self.game_active = False
+            self.action_round_complete = True
+            log_string = "Game over due to both sides holding a score card. Winner: USA"
+            print(log_string)
+
     def turn_cleanup(self):
         for side in self.sides.values():
             side.space_attempts = 0
@@ -3295,8 +3330,8 @@ def main():
         game.check_required_military_ops()
         game.reset_military_ops()
 
-        # Phase F - Reveal held card
-        #TODO - write function to check for held cards
+        # Phase F - Check held card
+        game.check_held_cards()
 
         # Phase G - Flip China Card
         game.cards['China'].flip_face_up()
@@ -3313,5 +3348,4 @@ def main():
 # main()
 
 game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-game.change_score(4)
-game.final_scoring()
+game.check_held_cards()
