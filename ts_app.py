@@ -825,6 +825,7 @@ class TwilightStruggleGame(CardGame):
         if face_up:
             self.cards['China'].flip_face_up()
         else:
+            self.cards['China'].face_up = False
             log_string_2 = 'China card is face down.'
             print(log_string_2)
 
@@ -2961,6 +2962,11 @@ class TwilightStruggleGame(CardGame):
                     if not un_eligible:
                         eligible_cards.remove(card)
 
+            # Check to see if China is face up
+            if self.cards['China'] in eligible_cards:
+                if not self.cards['China'].face_up:
+                    eligible_cards.remove(self.cards['China'])
+
             selected_card = self.select_a_card(eligible_cards, side)
             self.active_card = selected_card
             adjusted_card_ops = self.adjust_ops(selected_card.ops, side, 1, 4)
@@ -3300,15 +3306,15 @@ def main():
 
     for turn in range(1, game.turns + 1):
 
+        log_string = "\n--- TURN {t} ---\n".format(t=turn)
+        print(log_string)
+
         # Phase A - Improve DEFCON Status
         game.change_defcon(1)
 
         if turn > 1:
             # Phase B - Deal Cards
             game.deal_cards()
-
-        log_string = "\n--- TURN {t} ---\n".format(t=turn)
-        print(log_string)
 
         # Phase C - Headline Phase
         game.headline_phase()
@@ -3345,7 +3351,8 @@ def main():
     game.final_scoring()
 
 
-# main()
+main()
 
 game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-game.check_held_cards()
+game.action_round('ussr')
+game.action_round('usa')
