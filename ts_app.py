@@ -1804,6 +1804,10 @@ class TwilightStruggleGame(CardGame):
             selected_card = self.select_a_card(eligible_cards, 'usa')
             self.trigger_event(selected_card)
 
+    def event_086(self):
+        """North Sea Oil"""
+        pass
+
     def event_087(self):
         """The Reformer"""
         eligible_countries = self.countries_in_region('Europe')
@@ -2175,6 +2179,7 @@ class TwilightStruggleGame(CardGame):
               'The Iron Lady':                  event_083,
               'Reagan Bombs Libya':             event_084,
               'Star Wars':                      event_085,
+              'North Sea Oil':                  event_086,
               'The Reformer':                   event_087,
               'Marine Barracks Bombing':        event_088,
               'Soviets Shoot Down KAL-007':     event_089,
@@ -3330,6 +3335,12 @@ def main():
             game.action_round('ussr')
             game.action_round('usa')
 
+        if game.cards['North Sea Oil'].effect_active:
+            if len(game.get_available_cards('usa', False)) > 0:
+                log_string = 'Bonus USA action round from North Sea Oil'
+                print(log_string)
+                game.action_round('usa')
+
         game.turn_cleanup()
 
         # Phase E - Check Military Operations
@@ -3353,6 +3364,3 @@ def main():
 
 main()
 
-game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-game.action_round('ussr')
-game.action_round('usa')
