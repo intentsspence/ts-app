@@ -3090,7 +3090,6 @@ class TwilightStruggleGame(CardGame):
         log_string = self.phase.upper()
         print(log_string)
         print(self.line)
-        # TODO - add check active action round effects
 
         if self.cards['Quagmire'].effect_active and side == 'usa':
             self.trigger_effect(self.cards['Quagmire'])
@@ -3190,6 +3189,7 @@ class TwilightStruggleGame(CardGame):
         if selected_action == 'e' or selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             self.trigger_effect(self.cards['Flower Power'])
 
+        # Selected action is '' only when Bear Trap or Quagmire are in play
         if selected_action != '':
             if selected_card.name == 'China':
                 self.give_opponent_china_card(side)
