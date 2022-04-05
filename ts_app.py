@@ -277,6 +277,7 @@ class TwilightStruggleGame(CardGame):
         self.defcon = 5
         self.score = 0
         self.turn = 1
+        self.ar = 1
         self.game_active = True
         self.phase = ''
         self.phasing = ''
@@ -796,6 +797,16 @@ class TwilightStruggleGame(CardGame):
         return target_check
 
     # Functions for moving cards around
+    def scoring_cards_in_hand(self, side):
+        scoring_cards = []
+        hand = self.get_available_cards(side, False)
+
+        for card in hand:
+            if card.event_type == 'scoring':
+                scoring_cards.append(card)
+
+        return scoring_cards
+
     def which_pile(self, c):
         for pile in self.piles:
             cards_in_pile = self.piles[pile].get_cards_in_pile()
@@ -959,6 +970,16 @@ class TwilightStruggleGame(CardGame):
             eligible = True
 
         return eligible
+
+    def quagmire_bear_trap_eligible(self, side):
+        eligible_cards = []
+        hand = self.get_available_cards(side, False)
+        for card in hand:
+            ops = self.adjust_ops(card.ops, side, 1, 4)
+            if ops >= 2:
+                eligible_cards.append(card)
+
+        return eligible_cards
 
     def check_event_eligibility(self, card):
         eligible = False
@@ -1450,6 +1471,9 @@ class TwilightStruggleGame(CardGame):
         """Nuclear Subs"""
         pass
 
+    def event_042(self):
+        """Quagmire"""
+        self.cards['NORAD'].effect_active = False
 
     def event_043(self):
         """SALT Negotiations"""
@@ -2141,6 +2165,7 @@ class TwilightStruggleGame(CardGame):
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
               'Nuclear Subs':                   event_041,
+              'Quagmire':                       event_042,
               'SALT Negotiations':              event_043,
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
@@ -2205,6 +2230,57 @@ class TwilightStruggleGame(CardGame):
               'AWACS Sale to Saudis':           event_110}
 
     # Effects
+    def effect_042(self):
+        """Quagmire - Effect"""
+        eligible_cards = self.quagmire_bear_trap_eligible('usa')
+        scoring_cards = self.scoring_cards_in_hand('usa')
+        card_options = []
+        scoring = False
+        ars_this_turn = self.action_rounds[self.turn]
+
+        if len(eligible_cards) == 0 and len(scoring_cards) == 0:
+            log_string = 'No eligible cards to discard to Quagmire.'
+            print(log_string)
+            self.action_round_complete = True
+            return
+        elif len(eligible_cards) == 0 and len(scoring_cards) > 0:
+            card_options = scoring_cards
+            scoring = True
+        elif len(eligible_cards) > 0 and len(scoring_cards) == 0:
+            card_options = eligible_cards
+        else:
+            if (ars_this_turn - self.ar + 1) == len(scoring_cards):
+                card_options = scoring_cards
+                scoring = True
+            else:
+                card_options = eligible_cards
+
+        if scoring:
+            ui_string = 'Must play scoring card'
+        else:
+            ui_string = "Discard to Quagmire"
+        print(ui_string)
+
+        selected_card = self.select_a_card(card_options, 'usa')
+        self.active_card = selected_card
+
+        if scoring:
+            self.trigger_event(selected_card)
+        else:
+            self.move_card(selected_card, 'discard')
+
+            roll = self.die_roll()
+
+            if roll <= 4:
+                log_string = "SUCCESS! USA rolled {r}. Quagmire is not longer active.".format(r=roll)
+                print(log_string)
+                self.cards['Quagmire'].effect_active = False
+            else:
+                log_string = "Failure. USA rolled {r}. Quagmire remains active.".format(r=roll)
+                print(log_string)
+
+        self.action_round_complete = True
+
     def effect_059(self):
         """Flower Power - Effect"""
         card = self.active_card
@@ -2226,7 +2302,8 @@ class TwilightStruggleGame(CardGame):
                     self.change_score_by_side('ussr', 2)
 
     # Dictionary of the effects
-    effects = {'Flower Power': effect_059}
+    effects = {'Quagmire':      effect_042,
+               'Flower Power':  effect_059}
 
     # Functions to manipulate effects
     def trigger_effect(self, effect_card):
@@ -2952,10 +3029,15 @@ class TwilightStruggleGame(CardGame):
         self.phase = "{s} action round".format(s=side)
         self.phasing = side
         self.active_player = self.sides[side]
+        self.active_card = None
         log_string = self.phase.upper()
         print(log_string)
         print(self.line)
         # TODO - add check active action round effects
+
+        if self.cards['Quagmire'].effect_active and side == 'usa':
+            self.trigger_effect(self.cards['Quagmire'])
+            selected_action = ''
 
         while not self.action_round_complete:
             eligible_cards = self.get_available_cards(side, True)
@@ -3047,8 +3129,9 @@ class TwilightStruggleGame(CardGame):
         if selected_action == 'e' or selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             self.trigger_effect(self.cards['Flower Power'])
 
-        if selected_card.name == 'China':
-            self.give_opponent_china_card(side)
+        if selected_action != '':
+            if selected_card.name == 'China':
+                self.give_opponent_china_card(side)
 
         log_string = "Action round complete."
         print(log_string)
@@ -3310,6 +3393,7 @@ def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
     for turn in range(1, game.turns + 1):
+        game.turn = turn
 
         log_string = "\n--- TURN {t} ---\n".format(t=turn)
         print(log_string)
@@ -3325,7 +3409,8 @@ def main():
         game.headline_phase()
 
         # Phase D - Action Rounds
-        for ar in range(1, game.action_rounds[turn] + 1):
+        for ar in range(1, game.action_rounds[game.turn] + 1):
+            game.ar = ar
             log_string = "\n--- TURN {t} | ACTION ROUND {a} ---".format(t=turn, a=ar)
             print(log_string)
 
