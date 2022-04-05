@@ -1482,6 +1482,10 @@ class TwilightStruggleGame(CardGame):
         selected_card = self.select_a_card(eligible_cards, self.phasing)
         self.move_card(selected_card, self.hands[self.phasing])
 
+    def event_044(self):
+        """Bear Trap"""
+        pass
+
     def event_046(self):
         """How I Learned to Stop Worrying"""
         options = [['5', "Set DEFCON to 5"],
@@ -2167,6 +2171,7 @@ class TwilightStruggleGame(CardGame):
               'Nuclear Subs':                   event_041,
               'Quagmire':                       event_042,
               'SALT Negotiations':              event_043,
+              'Bear Trap':                      event_044,
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
               'Kitchen Debates':                event_048,
@@ -2281,6 +2286,57 @@ class TwilightStruggleGame(CardGame):
 
         self.action_round_complete = True
 
+    def effect_044(self):
+        """Bear Trap - Effect"""
+        eligible_cards = self.quagmire_bear_trap_eligible('ussr')
+        scoring_cards = self.scoring_cards_in_hand('ussr')
+        card_options = []
+        scoring = False
+        ars_this_turn = self.action_rounds[self.turn]
+
+        if len(eligible_cards) == 0 and len(scoring_cards) == 0:
+            log_string = 'No eligible cards to discard to Bear Trap.'
+            print(log_string)
+            self.action_round_complete = True
+            return
+        elif len(eligible_cards) == 0 and len(scoring_cards) > 0:
+            card_options = scoring_cards
+            scoring = True
+        elif len(eligible_cards) > 0 and len(scoring_cards) == 0:
+            card_options = eligible_cards
+        else:
+            if (ars_this_turn - self.ar + 1) == len(scoring_cards):
+                card_options = scoring_cards
+                scoring = True
+            else:
+                card_options = eligible_cards
+
+        if scoring:
+            ui_string = 'Must play scoring card'
+        else:
+            ui_string = "Discard to Bear Trap"
+        print(ui_string)
+
+        selected_card = self.select_a_card(card_options, 'ussr')
+        self.active_card = selected_card
+
+        if scoring:
+            self.trigger_event(selected_card)
+        else:
+            self.move_card(selected_card, 'discard')
+
+            roll = self.die_roll()
+
+            if roll <= 4:
+                log_string = "SUCCESS! USSr rolled {r}. Bear Trap is not longer active.".format(r=roll)
+                print(log_string)
+                self.cards['Bear Trap'].effect_active = False
+            else:
+                log_string = "Failure. USSR rolled {r}. Bear Trap remains active.".format(r=roll)
+                print(log_string)
+
+        self.action_round_complete = True
+
     def effect_059(self):
         """Flower Power - Effect"""
         card = self.active_card
@@ -2303,6 +2359,7 @@ class TwilightStruggleGame(CardGame):
 
     # Dictionary of the effects
     effects = {'Quagmire':      effect_042,
+               'Bear Trap':     effect_044,
                'Flower Power':  effect_059}
 
     # Functions to manipulate effects
@@ -3039,6 +3096,10 @@ class TwilightStruggleGame(CardGame):
             self.trigger_effect(self.cards['Quagmire'])
             selected_action = ''
 
+        if self.cards['Bear Trap'].effect_active and side == 'ussr':
+            self.trigger_effect(self.cards['Bear Trap'])
+            selected_action = ''
+
         while not self.action_round_complete:
             eligible_cards = self.get_available_cards(side, True)
 
@@ -3391,6 +3452,7 @@ class TwilightStruggleGame(CardGame):
 
 def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+    game.move_card(game.cards['Bear Trap'], 'USA hand')
 
     for turn in range(1, game.turns + 1):
         game.turn = turn
