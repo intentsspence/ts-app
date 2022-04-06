@@ -1530,6 +1530,12 @@ class TwilightStruggleGame(CardGame):
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
 
+    def event_049(self):
+        """Missile Envy"""
+        opponent_hand = self.get_available_cards(self.opponent[self.phasing], False)
+        # max(node.y for node in path.nodes)
+        print(max(card.ops for card in opponent_hand))
+
     def event_050(self):
         """We Will Bury You"""
         self.change_defcon(-1)
@@ -2192,6 +2198,7 @@ class TwilightStruggleGame(CardGame):
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
               'Kitchen Debates':                event_048,
+              'Missile Envy':                   event_049,
               '"We Will Bury You"':             event_050,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
@@ -3492,7 +3499,6 @@ class TwilightStruggleGame(CardGame):
 
 def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-    game.move_card(game.cards['"We Will Bury You"'], 'USSR hand')
 
     for turn in range(1, game.turns + 1):
         game.turn = turn
@@ -3549,5 +3555,7 @@ def main():
     game.final_scoring()
 
 
-main()
-
+# main()
+game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+game.phasing = 'usa'
+game.trigger_event(game.cards['Missile Envy'])
