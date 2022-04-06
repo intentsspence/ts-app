@@ -286,6 +286,7 @@ class TwilightStruggleGame(CardGame):
         self.action_round_complete = False
         self.conduct_operations_complete = False
         self.chernobyl = ''
+        self.we_will_un_check = False
 
         self.cards = {}
         self.countries = {}
@@ -546,6 +547,12 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
 
     def change_score(self, points):
+        # Event 50 - "We Will Bury You" > give USSR 3 points first
+        if self.we_will_un_check and points > 0:
+            ui_string = 'Event 50 - We Will Bury You: USA did not play UN Intervention.'
+            print(ui_string)
+            self.change_score_by_side('ussr', 3)
+            self.we_will_un_check = False
         self.score = self.score + points
         if points > 0:
             log_string = "USA scored {p} points. Score is now {score}.".format(p=points, score=self.score)
@@ -558,6 +565,12 @@ class TwilightStruggleGame(CardGame):
 
     def change_score_by_side(self, side, points):
         if side == 'usa':
+            # Event 50 - "We Will Bury You" > give USSR 3 points first
+            if self.we_will_un_check:
+                ui_string = 'Event 50 - We Will Bury You: USA did not play UN Intervention.'
+                print(ui_string)
+                self.change_score_by_side('ussr', 3)
+                self.we_will_un_check = False
             self.score = self.score + points
         elif side == 'ussr':
             self.score = self.score - points
@@ -1517,6 +1530,10 @@ class TwilightStruggleGame(CardGame):
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
 
+    def event_050(self):
+        """We Will Bury You"""
+        self.change_defcon(-1)
+
     def event_051(self):
         """Brezhnev Doctrine"""
         self.sides['ussr'].ops_adjustment = 1
@@ -2175,6 +2192,7 @@ class TwilightStruggleGame(CardGame):
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
               'Kitchen Debates':                event_048,
+              '"We Will Bury You"':             event_050,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
               'South African Unrest':           event_053,
@@ -3091,13 +3109,21 @@ class TwilightStruggleGame(CardGame):
         print(log_string)
         print(self.line)
 
+        # Event 42 - Quagmire
         if self.cards['Quagmire'].effect_active and side == 'usa':
             self.trigger_effect(self.cards['Quagmire'])
             selected_action = ''
 
+        # Event 44 - Bear Trap
         if self.cards['Bear Trap'].effect_active and side == 'ussr':
             self.trigger_effect(self.cards['Bear Trap'])
             selected_action = ''
+
+        # Event 50 - "We Will Bury You"
+        if self.cards['"We Will Bury You"'].effect_active and side == 'usa':
+            ui_string = "! Event 50 - We Will Bury You active. USA must play UN Intervention or USSR scores 3 points!"
+            print(ui_string)
+            self.we_will_un_check = True
 
         while not self.action_round_complete:
             eligible_cards = self.get_available_cards(side, True)
@@ -3170,6 +3196,9 @@ class TwilightStruggleGame(CardGame):
                 else:
                     selected_action = self.select_action(selected_card)
                     if selected_action == 'e':
+                        # Event 50 - "We Will Bury You" > turn off UN check if UN is played
+                        if selected_card.name == 'UN Intervention':
+                            self.we_will_un_check = False
                         self.trigger_event(selected_card)
                         break
                     elif selected_action == 'c':
@@ -3193,6 +3222,17 @@ class TwilightStruggleGame(CardGame):
         if selected_action != '':
             if selected_card.name == 'China':
                 self.give_opponent_china_card(side)
+
+        # Event 50 - "We Will Bury You"
+        if self.cards['"We Will Bury You"'].effect_active and side == 'usa':
+            # If the USA played a card other than UN intervention that did not have a scoring element, score 3 to USSR
+            # If the card had a scoring element, the USSR will have already received points
+            if self.we_will_un_check:
+                ui_string = 'Event 50 - We Will Bury You: USA did not play UN Intervention.'
+                print(ui_string)
+                self.change_score_by_side('ussr', 3)
+            self.cards['"We Will Bury You"'].effect_active = False
+            self.we_will_un_check = False
 
         log_string = "Action round complete."
         print(log_string)
@@ -3452,7 +3492,7 @@ class TwilightStruggleGame(CardGame):
 
 def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-    game.move_card(game.cards['Bear Trap'], 'USA hand')
+    game.move_card(game.cards['"We Will Bury You"'], 'USSR hand')
 
     for turn in range(1, game.turns + 1):
         game.turn = turn
