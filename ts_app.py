@@ -1427,6 +1427,8 @@ class TwilightStruggleGame(CardGame):
     def event_031(self):
         """Red Scare/Purge"""
         self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
+        ui_string = "-1 to all {s} operations.".format(s=self.opponent[self.phasing].upper())
+        print(ui_string)
 
     def event_032(self):
         """UN Intervention"""
@@ -1533,8 +1535,28 @@ class TwilightStruggleGame(CardGame):
     def event_049(self):
         """Missile Envy"""
         opponent_hand = self.get_available_cards(self.opponent[self.phasing], False)
-        # max(node.y for node in path.nodes)
-        print(max(card.ops for card in opponent_hand))
+        highest_ops = max(card.ops for card in opponent_hand)
+        eligible_cards = []
+
+        for card in opponent_hand:
+            if card.ops == highest_ops:
+                eligible_cards.append(card)
+
+        ui_string = "Choose card to give to opponent."
+        print(ui_string)
+        selected_card = self.select_a_card(eligible_cards, self.opponent[self.phasing])
+
+        # Collected rulings - Missile Envy goes in opponent hand so it could be pulled by Grain Sales
+        self.move_card(self.cards['Missile Envy'], self.hands[self.opponent[self.phasing]])
+
+        if selected_card.event_type == self.opponent[self.phasing]:
+            self.conduct_operations(self.phasing, self.adjust_ops(selected_card.ops, self.phasing, 1, 4))
+            self.move_card(selected_card, 'discard')
+        else:
+            self.trigger_event(selected_card)
+
+        self.cards['Missile Envy'].effect_active = True
+        self.cards['Missile Envy'].effect_player = self.opponent[self.phasing]
 
     def event_050(self):
         """We Will Bury You"""
