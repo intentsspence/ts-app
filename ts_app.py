@@ -1046,7 +1046,10 @@ class TwilightStruggleGame(CardGame):
             if card.removed:
                 self.move_card(card, 'removed')
             else:
-                self.move_card(card, 'discard')
+                if card.name == 'Missile Envy':
+                    pass
+                else:
+                    self.move_card(card, 'discard')
         else:
             self.move_card(card, 'discard')
 
@@ -3155,7 +3158,13 @@ class TwilightStruggleGame(CardGame):
             self.we_will_un_check = True
 
         while not self.action_round_complete:
-            eligible_cards = self.get_available_cards(side, True)
+            # Set eligible cards
+            if self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
+                # Event 49 - Missile Envy
+                print('Test 1')
+                eligible_cards = [self.cards['Missile Envy']]
+            else:
+                eligible_cards = self.get_available_cards(side, True)
 
             # Check to see if UN intervention is in hand, if it is, make sure you can play it
             for card in eligible_cards:
@@ -3222,6 +3231,22 @@ class TwilightStruggleGame(CardGame):
                     elif selected_action == 'x':
                         pass
 
+                elif self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
+                    # Event 49 - Missile Envy
+                    print('Test 2')
+                    selected_action = self.select_action_limited(False, True, True, True, True)
+                    if selected_action == 'c':
+                        self.action_coup_attempt(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
+                    elif selected_action == 'i':
+                        self.action_place_influence(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
+                    elif selected_action == 'r':
+                        self.action_realignment_roll(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
+                    elif selected_action == 's':
+                        self.action_space_race(selected_card, adjusted_card_ops, side)
+
                 else:
                     selected_action = self.select_action(selected_card)
                     if selected_action == 'e':
@@ -3251,6 +3276,13 @@ class TwilightStruggleGame(CardGame):
         if selected_action != '':
             if selected_card.name == 'China':
                 self.give_opponent_china_card(side)
+
+            # Event 49 - Missile Envy (turn off missile envy)
+            if self.cards['Missile Envy'].effect_active \
+                    and selected_card == self.cards['Missile Envy'] \
+                    and side == self.cards['Missile Envy'].effect_player:
+                self.cards['Missile Envy'].effect_active = False
+                self.cards['Missile Envy'].effect_player = ''
 
         # Event 50 - "We Will Bury You"
         if self.cards['"We Will Bury You"'].effect_active and side == 'usa':
@@ -3579,5 +3611,9 @@ def main():
 
 # main()
 game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+game.trigger_event(game.cards['Bear Trap'])
 game.phasing = 'usa'
 game.trigger_event(game.cards['Missile Envy'])
+game.action_round('ussr')
+game.action_round('usa')
+game.action_round('ussr')
