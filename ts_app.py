@@ -987,10 +987,17 @@ class TwilightStruggleGame(CardGame):
     def quagmire_bear_trap_eligible(self, side):
         eligible_cards = []
         hand = self.get_available_cards(side, False)
-        for card in hand:
-            ops = self.adjust_ops(card.ops, side, 1, 4)
-            if ops >= 2:
-                eligible_cards.append(card)
+        # Event 49 - Missile Envy
+        if self.cards['Missile Envy'].effect_active \
+                and self.cards['Missile Envy'].effect_player == side \
+                and self.cards['Missile Envy'] in hand \
+                and (self.adjust_ops(self.cards['Missile Envy'].ops, side, 1, 4) >= 2):
+            eligible_cards.append(self.cards['Missile Envy'])
+        else:
+            for card in hand:
+                ops = self.adjust_ops(card.ops, side, 1, 4)
+                if ops >= 2:
+                    eligible_cards.append(card)
 
         return eligible_cards
 
@@ -2323,6 +2330,12 @@ class TwilightStruggleGame(CardGame):
             self.trigger_event(selected_card)
         else:
             self.move_card(selected_card, 'discard')
+            # Event 49 - Missile Envy: turn off missile envy if it was pitched to quagmire/trap
+            if selected_card == self.cards['Missile Envy'] \
+                    and self.cards['Missile Envy'].effect_active \
+                    and self.cards['Missile Envy'].effect_player == 'usa':
+                self.cards['Missile Envy'].effect_active = False
+                self.cards['Missile Envy'].effect_player = ''
 
             roll = self.die_roll()
 
@@ -2375,10 +2388,17 @@ class TwilightStruggleGame(CardGame):
         else:
             self.move_card(selected_card, 'discard')
 
+            # Event 49 - Missile Envy: turn off missile envy if it was pitched to quagmire/trap
+            if selected_card == self.cards['Missile Envy'] \
+                    and self.cards['Missile Envy'].effect_active \
+                    and self.cards['Missile Envy'].effect_player == 'ussr':
+                self.cards['Missile Envy'].effect_active = False
+                self.cards['Missile Envy'].effect_player = ''
+
             roll = self.die_roll()
 
             if roll <= 4:
-                log_string = "SUCCESS! USSr rolled {r}. Bear Trap is not longer active.".format(r=roll)
+                log_string = "SUCCESS! USSR rolled {r}. Bear Trap is not longer active.".format(r=roll)
                 print(log_string)
                 self.cards['Bear Trap'].effect_active = False
             else:
@@ -3161,7 +3181,6 @@ class TwilightStruggleGame(CardGame):
             # Set eligible cards
             if self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
                 # Event 49 - Missile Envy
-                print('Test 1')
                 eligible_cards = [self.cards['Missile Envy']]
             else:
                 eligible_cards = self.get_available_cards(side, True)
@@ -3233,7 +3252,6 @@ class TwilightStruggleGame(CardGame):
 
                 elif self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
                     # Event 49 - Missile Envy
-                    print('Test 2')
                     selected_action = self.select_action_limited(False, True, True, True, True)
                     if selected_action == 'c':
                         self.action_coup_attempt(adjusted_card_ops, side)
@@ -3609,11 +3627,4 @@ def main():
     game.final_scoring()
 
 
-# main()
-game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
-game.trigger_event(game.cards['Bear Trap'])
-game.phasing = 'usa'
-game.trigger_event(game.cards['Missile Envy'])
-game.action_round('ussr')
-game.action_round('usa')
-game.action_round('ussr')
+main()
