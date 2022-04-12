@@ -277,6 +277,7 @@ class TwilightStruggleGame(CardGame):
         self.defcon = 5
         self.score = 0
         self.turn = 1
+        self.ar = 1
         self.game_active = True
         self.phase = ''
         self.phasing = ''
@@ -285,6 +286,7 @@ class TwilightStruggleGame(CardGame):
         self.action_round_complete = False
         self.conduct_operations_complete = False
         self.chernobyl = ''
+        self.we_will_un_check = False
 
         self.cards = {}
         self.countries = {}
@@ -545,6 +547,12 @@ class TwilightStruggleGame(CardGame):
             print(log_string)
 
     def change_score(self, points):
+        # Event 50 - "We Will Bury You" > give USSR 3 points first
+        if self.we_will_un_check and points > 0:
+            ui_string = 'Event 50 - We Will Bury You: USA did not play UN Intervention.'
+            print(ui_string)
+            self.change_score_by_side('ussr', 3)
+            self.we_will_un_check = False
         self.score = self.score + points
         if points > 0:
             log_string = "USA scored {p} points. Score is now {score}.".format(p=points, score=self.score)
@@ -557,6 +565,12 @@ class TwilightStruggleGame(CardGame):
 
     def change_score_by_side(self, side, points):
         if side == 'usa':
+            # Event 50 - "We Will Bury You" > give USSR 3 points first
+            if self.we_will_un_check:
+                ui_string = 'Event 50 - We Will Bury You: USA did not play UN Intervention.'
+                print(ui_string)
+                self.change_score_by_side('ussr', 3)
+                self.we_will_un_check = False
             self.score = self.score + points
         elif side == 'ussr':
             self.score = self.score - points
@@ -796,6 +810,16 @@ class TwilightStruggleGame(CardGame):
         return target_check
 
     # Functions for moving cards around
+    def scoring_cards_in_hand(self, side):
+        scoring_cards = []
+        hand = self.get_available_cards(side, False)
+
+        for card in hand:
+            if card.event_type == 'scoring':
+                scoring_cards.append(card)
+
+        return scoring_cards
+
     def which_pile(self, c):
         for pile in self.piles:
             cards_in_pile = self.piles[pile].get_cards_in_pile()
@@ -960,6 +984,23 @@ class TwilightStruggleGame(CardGame):
 
         return eligible
 
+    def quagmire_bear_trap_eligible(self, side):
+        eligible_cards = []
+        hand = self.get_available_cards(side, False)
+        # Event 49 - Missile Envy
+        if self.cards['Missile Envy'].effect_active \
+                and self.cards['Missile Envy'].effect_player == side \
+                and self.cards['Missile Envy'] in hand \
+                and (self.adjust_ops(self.cards['Missile Envy'].ops, side, 1, 4) >= 2):
+            eligible_cards.append(self.cards['Missile Envy'])
+        else:
+            for card in hand:
+                ops = self.adjust_ops(card.ops, side, 1, 4)
+                if ops >= 2:
+                    eligible_cards.append(card)
+
+        return eligible_cards
+
     def check_event_eligibility(self, card):
         eligible = False
         if card.name in self.pre_reqs.keys():
@@ -1012,7 +1053,10 @@ class TwilightStruggleGame(CardGame):
             if card.removed:
                 self.move_card(card, 'removed')
             else:
-                self.move_card(card, 'discard')
+                if card.name == 'Missile Envy':
+                    pass
+                else:
+                    self.move_card(card, 'discard')
         else:
             self.move_card(card, 'discard')
 
@@ -1393,6 +1437,8 @@ class TwilightStruggleGame(CardGame):
     def event_031(self):
         """Red Scare/Purge"""
         self.sides[(self.opponent[self.phasing])].ops_adjustment = -1
+        ui_string = "-1 to all {s} operations.".format(s=self.opponent[self.phasing].upper())
+        print(ui_string)
 
     def event_032(self):
         """UN Intervention"""
@@ -1450,6 +1496,9 @@ class TwilightStruggleGame(CardGame):
         """Nuclear Subs"""
         pass
 
+    def event_042(self):
+        """Quagmire"""
+        self.cards['NORAD'].effect_active = False
 
     def event_043(self):
         """SALT Negotiations"""
@@ -1457,6 +1506,10 @@ class TwilightStruggleGame(CardGame):
         eligible_cards = self.get_available_cards_in_discard()
         selected_card = self.select_a_card(eligible_cards, self.phasing)
         self.move_card(selected_card, self.hands[self.phasing])
+
+    def event_044(self):
+        """Bear Trap"""
+        pass
 
     def event_046(self):
         """How I Learned to Stop Worrying"""
@@ -1488,6 +1541,36 @@ class TwilightStruggleGame(CardGame):
 
         if usa_battlegrounds > ussr_battlegrounds:
             self.change_score_by_side('usa', 2)
+
+    def event_049(self):
+        """Missile Envy"""
+        opponent_hand = self.get_available_cards(self.opponent[self.phasing], False)
+        highest_ops = max(card.ops for card in opponent_hand)
+        eligible_cards = []
+
+        for card in opponent_hand:
+            if card.ops == highest_ops:
+                eligible_cards.append(card)
+
+        ui_string = "Choose card to give to opponent."
+        print(ui_string)
+        selected_card = self.select_a_card(eligible_cards, self.opponent[self.phasing])
+
+        # Collected rulings - Missile Envy goes in opponent hand so it could be pulled by Grain Sales
+        self.move_card(self.cards['Missile Envy'], self.hands[self.opponent[self.phasing]])
+
+        if selected_card.event_type == self.opponent[self.phasing]:
+            self.conduct_operations(self.phasing, self.adjust_ops(selected_card.ops, self.phasing, 1, 4))
+            self.move_card(selected_card, 'discard')
+        else:
+            self.trigger_event(selected_card)
+
+        self.cards['Missile Envy'].effect_active = True
+        self.cards['Missile Envy'].effect_player = self.opponent[self.phasing]
+
+    def event_050(self):
+        """We Will Bury You"""
+        self.change_defcon(-1)
 
     def event_051(self):
         """Brezhnev Doctrine"""
@@ -2141,10 +2224,14 @@ class TwilightStruggleGame(CardGame):
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
               'Nuclear Subs':                   event_041,
+              'Quagmire':                       event_042,
               'SALT Negotiations':              event_043,
+              'Bear Trap':                      event_044,
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
               'Kitchen Debates':                event_048,
+              'Missile Envy':                   event_049,
+              '"We Will Bury You"':             event_050,
               'Brezhnev Doctrine':              event_051,
               'Portuguese Empire Crumbles':     event_052,
               'South African Unrest':           event_053,
@@ -2205,6 +2292,121 @@ class TwilightStruggleGame(CardGame):
               'AWACS Sale to Saudis':           event_110}
 
     # Effects
+    def effect_042(self):
+        """Quagmire - Effect"""
+        eligible_cards = self.quagmire_bear_trap_eligible('usa')
+        scoring_cards = self.scoring_cards_in_hand('usa')
+        card_options = []
+        scoring = False
+        ars_this_turn = self.action_rounds[self.turn]
+
+        if len(eligible_cards) == 0 and len(scoring_cards) == 0:
+            log_string = 'No eligible cards to discard to Quagmire.'
+            print(log_string)
+            self.action_round_complete = True
+            return
+        elif len(eligible_cards) == 0 and len(scoring_cards) > 0:
+            card_options = scoring_cards
+            scoring = True
+        elif len(eligible_cards) > 0 and len(scoring_cards) == 0:
+            card_options = eligible_cards
+        else:
+            if (ars_this_turn - self.ar + 1) == len(scoring_cards):
+                card_options = scoring_cards
+                scoring = True
+            else:
+                card_options = eligible_cards
+
+        if scoring:
+            ui_string = 'Must play scoring card'
+        else:
+            ui_string = "Discard to Quagmire"
+        print(ui_string)
+
+        selected_card = self.select_a_card(card_options, 'usa')
+        self.active_card = selected_card
+
+        if scoring:
+            self.trigger_event(selected_card)
+        else:
+            self.move_card(selected_card, 'discard')
+            # Event 49 - Missile Envy: turn off missile envy if it was pitched to quagmire/trap
+            if selected_card == self.cards['Missile Envy'] \
+                    and self.cards['Missile Envy'].effect_active \
+                    and self.cards['Missile Envy'].effect_player == 'usa':
+                self.cards['Missile Envy'].effect_active = False
+                self.cards['Missile Envy'].effect_player = ''
+
+            roll = self.die_roll()
+
+            if roll <= 4:
+                log_string = "SUCCESS! USA rolled {r}. Quagmire is not longer active.".format(r=roll)
+                print(log_string)
+                self.cards['Quagmire'].effect_active = False
+            else:
+                log_string = "Failure. USA rolled {r}. Quagmire remains active.".format(r=roll)
+                print(log_string)
+
+        self.action_round_complete = True
+
+    def effect_044(self):
+        """Bear Trap - Effect"""
+        eligible_cards = self.quagmire_bear_trap_eligible('ussr')
+        scoring_cards = self.scoring_cards_in_hand('ussr')
+        card_options = []
+        scoring = False
+        ars_this_turn = self.action_rounds[self.turn]
+
+        if len(eligible_cards) == 0 and len(scoring_cards) == 0:
+            log_string = 'No eligible cards to discard to Bear Trap.'
+            print(log_string)
+            self.action_round_complete = True
+            return
+        elif len(eligible_cards) == 0 and len(scoring_cards) > 0:
+            card_options = scoring_cards
+            scoring = True
+        elif len(eligible_cards) > 0 and len(scoring_cards) == 0:
+            card_options = eligible_cards
+        else:
+            if (ars_this_turn - self.ar + 1) == len(scoring_cards):
+                card_options = scoring_cards
+                scoring = True
+            else:
+                card_options = eligible_cards
+
+        if scoring:
+            ui_string = 'Must play scoring card'
+        else:
+            ui_string = "Discard to Bear Trap"
+        print(ui_string)
+
+        selected_card = self.select_a_card(card_options, 'ussr')
+        self.active_card = selected_card
+
+        if scoring:
+            self.trigger_event(selected_card)
+        else:
+            self.move_card(selected_card, 'discard')
+
+            # Event 49 - Missile Envy: turn off missile envy if it was pitched to quagmire/trap
+            if selected_card == self.cards['Missile Envy'] \
+                    and self.cards['Missile Envy'].effect_active \
+                    and self.cards['Missile Envy'].effect_player == 'ussr':
+                self.cards['Missile Envy'].effect_active = False
+                self.cards['Missile Envy'].effect_player = ''
+
+            roll = self.die_roll()
+
+            if roll <= 4:
+                log_string = "SUCCESS! USSR rolled {r}. Bear Trap is not longer active.".format(r=roll)
+                print(log_string)
+                self.cards['Bear Trap'].effect_active = False
+            else:
+                log_string = "Failure. USSR rolled {r}. Bear Trap remains active.".format(r=roll)
+                print(log_string)
+
+        self.action_round_complete = True
+
     def effect_059(self):
         """Flower Power - Effect"""
         card = self.active_card
@@ -2226,7 +2428,9 @@ class TwilightStruggleGame(CardGame):
                     self.change_score_by_side('ussr', 2)
 
     # Dictionary of the effects
-    effects = {'Flower Power': effect_059}
+    effects = {'Quagmire':      effect_042,
+               'Bear Trap':     effect_044,
+               'Flower Power':  effect_059}
 
     # Functions to manipulate effects
     def trigger_effect(self, effect_card):
@@ -2952,13 +3156,34 @@ class TwilightStruggleGame(CardGame):
         self.phase = "{s} action round".format(s=side)
         self.phasing = side
         self.active_player = self.sides[side]
+        self.active_card = None
         log_string = self.phase.upper()
         print(log_string)
         print(self.line)
-        # TODO - add check active action round effects
+
+        # Event 42 - Quagmire
+        if self.cards['Quagmire'].effect_active and side == 'usa':
+            self.trigger_effect(self.cards['Quagmire'])
+            selected_action = ''
+
+        # Event 44 - Bear Trap
+        if self.cards['Bear Trap'].effect_active and side == 'ussr':
+            self.trigger_effect(self.cards['Bear Trap'])
+            selected_action = ''
+
+        # Event 50 - "We Will Bury You"
+        if self.cards['"We Will Bury You"'].effect_active and side == 'usa':
+            ui_string = "! Event 50 - We Will Bury You active. USA must play UN Intervention or USSR scores 3 points!"
+            print(ui_string)
+            self.we_will_un_check = True
 
         while not self.action_round_complete:
-            eligible_cards = self.get_available_cards(side, True)
+            # Set eligible cards
+            if self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
+                # Event 49 - Missile Envy
+                eligible_cards = [self.cards['Missile Envy']]
+            else:
+                eligible_cards = self.get_available_cards(side, True)
 
             # Check to see if UN intervention is in hand, if it is, make sure you can play it
             for card in eligible_cards:
@@ -3025,9 +3250,27 @@ class TwilightStruggleGame(CardGame):
                     elif selected_action == 'x':
                         pass
 
+                elif self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
+                    # Event 49 - Missile Envy
+                    selected_action = self.select_action_limited(False, True, True, True, True)
+                    if selected_action == 'c':
+                        self.action_coup_attempt(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
+                    elif selected_action == 'i':
+                        self.action_place_influence(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
+                    elif selected_action == 'r':
+                        self.action_realignment_roll(adjusted_card_ops, side)
+                        self.move_card(selected_card, 'discard')
+                    elif selected_action == 's':
+                        self.action_space_race(selected_card, adjusted_card_ops, side)
+
                 else:
                     selected_action = self.select_action(selected_card)
                     if selected_action == 'e':
+                        # Event 50 - "We Will Bury You" > turn off UN check if UN is played
+                        if selected_card.name == 'UN Intervention':
+                            self.we_will_un_check = False
                         self.trigger_event(selected_card)
                         break
                     elif selected_action == 'c':
@@ -3047,8 +3290,28 @@ class TwilightStruggleGame(CardGame):
         if selected_action == 'e' or selected_action == 'c' or selected_action == 'i' or selected_action == 'r':
             self.trigger_effect(self.cards['Flower Power'])
 
-        if selected_card.name == 'China':
-            self.give_opponent_china_card(side)
+        # Selected action is '' only when Bear Trap or Quagmire are in play
+        if selected_action != '':
+            if selected_card.name == 'China':
+                self.give_opponent_china_card(side)
+
+            # Event 49 - Missile Envy (turn off missile envy)
+            if self.cards['Missile Envy'].effect_active \
+                    and selected_card == self.cards['Missile Envy'] \
+                    and side == self.cards['Missile Envy'].effect_player:
+                self.cards['Missile Envy'].effect_active = False
+                self.cards['Missile Envy'].effect_player = ''
+
+        # Event 50 - "We Will Bury You"
+        if self.cards['"We Will Bury You"'].effect_active and side == 'usa':
+            # If the USA played a card other than UN intervention that did not have a scoring element, score 3 to USSR
+            # If the card had a scoring element, the USSR will have already received points
+            if self.we_will_un_check:
+                ui_string = 'Event 50 - We Will Bury You: USA did not play UN Intervention.'
+                print(ui_string)
+                self.change_score_by_side('ussr', 3)
+            self.cards['"We Will Bury You"'].effect_active = False
+            self.we_will_un_check = False
 
         log_string = "Action round complete."
         print(log_string)
@@ -3310,6 +3573,7 @@ def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
 
     for turn in range(1, game.turns + 1):
+        game.turn = turn
 
         log_string = "\n--- TURN {t} ---\n".format(t=turn)
         print(log_string)
@@ -3325,7 +3589,8 @@ def main():
         game.headline_phase()
 
         # Phase D - Action Rounds
-        for ar in range(1, game.action_rounds[turn] + 1):
+        for ar in range(1, game.action_rounds[game.turn] + 1):
+            game.ar = ar
             log_string = "\n--- TURN {t} | ACTION ROUND {a} ---".format(t=turn, a=ar)
             print(log_string)
 
@@ -3363,4 +3628,3 @@ def main():
 
 
 main()
-
