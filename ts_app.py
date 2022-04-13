@@ -3568,9 +3568,16 @@ class TwilightStruggleGame(CardGame):
                 log_string = "{c} is no longer active.".format(c=card.name)
                 print(log_string)
 
+    def initial_placement(self):
+        self.ask_to_place_influence(self.countries_in_subregion('Eastern Europe'), 6, 'ussr')
+        self.ask_to_place_influence(self.countries_in_subregion('Western Europe'), 7, 'usa')
+
+
 
 def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+
+    game.initial_placement()
 
     for turn in range(1, game.turns + 1):
         game.turn = turn
