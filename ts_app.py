@@ -267,12 +267,16 @@ class TwilightStruggleGame(CardGame):
     turns = 10
     action_rounds = {1: 6, 2: 6, 3: 6, 4: 7, 5: 7, 6: 7, 7: 7, 8: 7, 9: 7, 10: 7}
 
-    def __init__(self, n, d, opt):
+    def __init__(self, n, d, opt, extra):
         CardGame.__init__(self, n, d)
 
         if not opt.isdigit() and int(opt) != 1 and int(opt) != 0:
             raise ValueError("Error creating Twilight Struggle game. Optional cards parameter must be a 1 or a 0.")
         self.optional_cards = True if int(opt) == 1 else False
+
+        if extra not in ['', 'bid', 'handicap']:
+            raise ValueError("Error creating Twilight Struggle game. Extra influence must be one of: '', 'bid', or 'handicap'")
+        self.extra_inf = extra
 
         self.defcon = 5
         self.score = 0
@@ -287,6 +291,8 @@ class TwilightStruggleGame(CardGame):
         self.conduct_operations_complete = False
         self.chernobyl = ''
         self.we_will_un_check = False
+        self.usa_handicap = 0
+        self.ussr_handicap = 0
 
         self.cards = {}
         self.countries = {}
@@ -3568,15 +3574,42 @@ class TwilightStruggleGame(CardGame):
                 log_string = "{c} is no longer active.".format(c=card.name)
                 print(log_string)
 
+    # Initial influence placement
+    def extra_initial_influence(self):
+        if self.extra_inf == 'bid':
+            self.bid_for_sides()
+        elif self.extra_inf == 'handicap':
+            options = [['a', "Give USA bonus influence"],
+                       ['b', "Give USSR bonus influence"]]
+            response = self.select_option(options)
+            if response == 'a':
+                side = 'usa'
+            elif response == 'b':
+                side = 'ussr'
+
+            while True:
+                user_input = input("How many bonus influence to give to {s}?: ".format(s=side.upper()))
+                if user_input.isdigit():
+                    selection_amount = int(user_input)
+                    break
+
+            if side == 'usa':
+                self.usa_handicap = selection_amount
+            elif side == 'ussr':
+                self.ussr_handicap = selection_amount
+
+    def bid_for_sides(self):
+        pass
+
     def initial_placement(self):
         self.ask_to_place_influence(self.countries_in_subregion('Eastern Europe'), 6, 'ussr')
         self.ask_to_place_influence(self.countries_in_subregion('Western Europe'), 7, 'usa')
 
 
-
 def main():
-    game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1")
+    game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "handicap")
 
+    game.extra_initial_influence()
     game.initial_placement()
 
     for turn in range(1, game.turns + 1):
