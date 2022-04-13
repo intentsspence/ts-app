@@ -3603,7 +3603,12 @@ class TwilightStruggleGame(CardGame):
 
     def initial_placement(self):
         self.ask_to_place_influence(self.countries_in_subregion('Eastern Europe'), 6, 'ussr')
+        if self.ussr_handicap > 0:
+            self.ask_to_place_influence(self.countries_with_influence('ussr'), self.ussr_handicap, 'ussr')
+
         self.ask_to_place_influence(self.countries_in_subregion('Western Europe'), 7, 'usa')
+        if self.usa_handicap > 0:
+            self.ask_to_place_influence(self.countries_with_influence('usa'), self.usa_handicap, 'usa')
 
 
 def main():
