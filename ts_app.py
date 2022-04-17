@@ -409,6 +409,7 @@ class TwilightStruggleGame(CardGame):
 
     # Function to adjust defcon
     def change_defcon(self, adjustment_value):
+        initial_defcon = self.defcon
         self.defcon = self.defcon + adjustment_value
         log_string = "DEFCON changed by {a}".format(a=adjustment_value)
         print(log_string)
@@ -425,11 +426,20 @@ class TwilightStruggleGame(CardGame):
 
         self.check_defcon_game_end()
 
+        # Event 106 - NORAD
+        if initial_defcon != 2 and self.defcon == 2:
+            self.norad_check = True
+
     def change_defcon_to_value(self, value):
+        initial_defcon = self.defcon
         self.defcon = value
         self.check_defcon_game_end()
         log_string = "DEFCON is now {d}".format(d=self.defcon)
         print(log_string)
+
+        # Event 106 - NORAD
+        if initial_defcon != 2 and self.defcon == 2:
+            self.norad_check = True
 
     def check_defcon_game_end(self):
         if self.defcon < 2:
