@@ -2455,6 +2455,8 @@ class TwilightStruggleGame(CardGame):
         if self.cards['NORAD'].effect_active \
                 and self.norad_check \
                 and self.countries['Canada'].controlled == 'usa':
+            ui_string = 'Event 106 - NORAD active. Add 1 influence in a single country containing USA influence.'
+            print(ui_string)
             self.ask_to_place_influence(self.countries_with_influence('usa'), 1, 'usa', 1, 1)
             self.norad_check = False
 
@@ -3644,10 +3646,8 @@ class TwilightStruggleGame(CardGame):
 def main():
     game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
 
-    # Test code
-    # game.extra_initial_influence()
-    # game.initial_placement()
-    game.trigger_event(game.cards['NORAD'])
+    game.extra_initial_influence()
+    game.initial_placement()
 
     for turn in range(1, game.turns + 1):
         game.turn = turn
