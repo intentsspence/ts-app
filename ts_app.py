@@ -291,6 +291,7 @@ class TwilightStruggleGame(CardGame):
         self.conduct_operations_complete = False
         self.chernobyl = ''
         self.we_will_un_check = False
+        self.norad_check = False
         self.usa_handicap = 0
         self.ussr_handicap = 0
 
@@ -408,6 +409,7 @@ class TwilightStruggleGame(CardGame):
 
     # Function to adjust defcon
     def change_defcon(self, adjustment_value):
+        initial_defcon = self.defcon
         self.defcon = self.defcon + adjustment_value
         log_string = "DEFCON changed by {a}".format(a=adjustment_value)
         print(log_string)
@@ -424,11 +426,20 @@ class TwilightStruggleGame(CardGame):
 
         self.check_defcon_game_end()
 
+        # Event 106 - NORAD
+        if initial_defcon != 2 and self.defcon == 2:
+            self.norad_check = True
+
     def change_defcon_to_value(self, value):
+        initial_defcon = self.defcon
         self.defcon = value
         self.check_defcon_game_end()
         log_string = "DEFCON is now {d}".format(d=self.defcon)
         print(log_string)
+
+        # Event 106 - NORAD
+        if initial_defcon != 2 and self.defcon == 2:
+            self.norad_check = True
 
     def check_defcon_game_end(self):
         if self.defcon < 2:
@@ -2138,6 +2149,11 @@ class TwilightStruggleGame(CardGame):
                 eligible_countries = self.adjacent_country_objects(self.countries['UK'])
                 self.ask_to_place_influence(eligible_countries, 1, 'usa', 1, 1)
 
+    def event_106(self):
+        """NORAD"""
+        pass
+
+
     def event_107(self):
         """Che"""
         possible_countries = (self.nonbattleground_countries_in_region('Central America') +
@@ -2292,6 +2308,7 @@ class TwilightStruggleGame(CardGame):
               'Defectors':                      event_103,
               'The Cambridge Five':             event_104,
               'Special Relationship':           event_105,
+              'NORAD':                          event_106,
               'Che':                            event_107,
               'Our Man in Tehran':              event_108,
               'Yuri and Samantha':              event_109,
@@ -2433,10 +2450,21 @@ class TwilightStruggleGame(CardGame):
                     print(log_string)
                     self.change_score_by_side('ussr', 2)
 
+    def effect_106(self):
+        """NORAD - Effect"""
+        if self.cards['NORAD'].effect_active \
+                and self.norad_check \
+                and self.countries['Canada'].controlled == 'usa':
+            ui_string = 'Event 106 - NORAD active. Add 1 influence in a single country containing USA influence.'
+            print(ui_string)
+            self.ask_to_place_influence(self.countries_with_influence('usa'), 1, 'usa', 1, 1)
+            self.norad_check = False
+
     # Dictionary of the effects
     effects = {'Quagmire':      effect_042,
                'Bear Trap':     effect_044,
-               'Flower Power':  effect_059}
+               'Flower Power':  effect_059,
+               'NORAD':         effect_106}
 
     # Functions to manipulate effects
     def trigger_effect(self, effect_card):
@@ -3163,6 +3191,7 @@ class TwilightStruggleGame(CardGame):
         self.phasing = side
         self.active_player = self.sides[side]
         self.active_card = None
+        self.norad_check = False
         log_string = self.phase.upper()
         print(log_string)
         print(self.line)
@@ -3318,6 +3347,9 @@ class TwilightStruggleGame(CardGame):
                 self.change_score_by_side('ussr', 3)
             self.cards['"We Will Bury You"'].effect_active = False
             self.we_will_un_check = False
+
+        # Event 106 - NORAD
+        self.trigger_effect(self.cards['NORAD'])
 
         log_string = "Action round complete."
         print(log_string)
@@ -3612,7 +3644,7 @@ class TwilightStruggleGame(CardGame):
 
 
 def main():
-    game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "handicap")
+    game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
 
     game.extra_initial_influence()
     game.initial_placement()
