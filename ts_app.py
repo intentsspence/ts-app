@@ -443,11 +443,12 @@ class TwilightStruggleGame(CardGame):
 
     def check_defcon_game_end(self):
         if self.defcon < 2:
-            log_string = "Game over. Winner: {s}".format(s=self.opponent[self.phasing].upper())
+            log_string = "Game over by DEFCON. Winner: {s}".format(s=self.opponent[self.phasing].upper())
             print(log_string)
             self.sides[self.opponent[self.phasing]].winner = True
             self.game_active = False
             self.action_round_complete = True
+            quit()
 
     # Functions to modify influence
     def check_for_control(self, c):
@@ -554,14 +555,16 @@ class TwilightStruggleGame(CardGame):
             self.sides['usa'].winner = True
             self.game_active = False
             self.action_round_complete = True
-            log_string = "Game over. Winner: USA"
+            log_string = "Game over by score. Winner: USA"
             print(log_string)
+            quit()
         elif self.score <= -20:
             self.sides['ussr'].winner = True
             self.game_active = False
             self.action_round_complete = True
-            log_string = "Game over. Winner: USSR"
+            log_string = "Game over by score. Winner: USSR"
             print(log_string)
+            quit()
 
     def change_score(self, points):
         # Event 50 - "We Will Bury You" > give USSR 3 points first
@@ -3704,4 +3707,9 @@ def main():
     game.final_scoring()
 
 
-main()
+# main()
+
+game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
+game.phasing = 'usa'
+game.change_defcon(-4)
+game.change_defcon(2)
