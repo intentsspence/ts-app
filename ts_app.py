@@ -1512,6 +1512,11 @@ class TwilightStruggleGame(CardGame):
         elif (phasing_mil_ops > opponent_mil_ops) and (phasing_mil_ops >= self.defcon):
             self.change_score_by_side(self.phasing, 3)
 
+    def event_040(self):
+        """Cuban Missile Crisis"""
+        self.change_defcon_to_value(2)
+        self.cards['Cuban Missile Crisis'].effect_player = self.opponent[self.phasing]
+
     def event_041(self):
         """Nuclear Subs"""
         pass
