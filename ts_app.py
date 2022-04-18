@@ -2499,6 +2499,28 @@ class TwilightStruggleGame(CardGame):
             self.ask_to_place_influence(self.countries_with_influence('usa'), 1, 'usa', 1, 1)
             self.norad_check = False
 
+    def space_6_effect(self):
+        """Eagle/Bear has Landed"""
+        if self.sides['usa'].space_level >= 6 \
+                and self.sides['ussr'].space_level < 6 \
+                and len(self.get_available_cards('usa', False)) > 0:
+            ui_string = 'Eagle has Landed. USA may discard held card.'
+            print(ui_string)
+            confirmation = self.confirm_action('Discard held card')
+            if confirmation:
+                card = self.select_a_card(self.get_available_cards('usa', False), 'usa')
+                self.move_card(card, 'discard')
+
+        elif self.sides['ussr'].space_level >= 6 \
+                and self.sides['usa'].space_level < 6 \
+                and len(self.get_available_cards('ussr', False)) > 0:
+            ui_string = 'Bear has Landed. USSR may discard held card.'
+            print(ui_string)
+            confirmation = self.confirm_action('Discard held card')
+            if confirmation:
+                card = self.select_a_card(self.get_available_cards('ussr', False), 'ussr')
+                self.move_card(card, 'discard')
+
     # Dictionary of the effects
     effects = {'Cuban Missile Crisis':  effect_040,
                'Quagmire':              effect_042,
@@ -3745,6 +3767,9 @@ def main():
 
         # Phase F - Check held card
         game.check_held_cards()
+
+        # Space Race 6 - Eagle/Bear has Landed
+        game.space_6_effect()
 
         # Phase G - Flip China Card
         game.cards['China'].flip_face_up()
