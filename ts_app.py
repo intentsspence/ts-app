@@ -667,8 +667,11 @@ class TwilightStruggleGame(CardGame):
                 self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
-        self.sides[s].space_level += 1
-        self.space_race_awards(s)
+        if self.sides[s].space_level == 8:
+            pass
+        else:
+            self.sides[s].space_level += 1
+            self.space_race_awards(s)
 
     # Functions for checking access
     def countries_with_influence(self, s):
