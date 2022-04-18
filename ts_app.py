@@ -2324,6 +2324,36 @@ class TwilightStruggleGame(CardGame):
               'AWACS Sale to Saudis':           event_110}
 
     # Effects
+    def effect_040(self):
+        """Cuban Missile Crisis - Effect"""
+        ui_string = 'Event 40 - Cuban Missile Crisis in effect.'
+        print(ui_string)
+        if self.phasing == 'ussr':
+            if self.countries['Cuba'].ussr_influence >= 2:
+                confirmation = self.confirm_action("Remove influence from Cuba to cancel Cuban Missile Crisis")
+                if confirmation:
+                    self.remove_influence('Cuba', 'ussr', 2)
+                    self.cards['Cuban Missile Crisis'].effect_active = False
+                    self.cards['Cuban Missile Crisis'].effect_player = 'choose'
+        elif self.phasing == 'usa':
+            if self.countries['W. Germany'].usa_influence >= 2 or self.countries['Turkey'].usa_influence >= 2:
+                confirmation = self.confirm_action("Remove influence from W. Germany or Turkey to cancel Cuban Missile Crisis")
+                if confirmation:
+                    options = []
+                    if self.countries['W. Germany'].usa_influence >= 2:
+                        options.append(['w', "Remove 2 influence from W. Germany"])
+                    if self.countries['Turkey'].usa_influence >= 2:
+                        options.append(['t', "Remove 2 influence from Turkey"])
+                    response = self.select_option(options)
+
+                    if response == 'w':
+                        self.remove_influence('W. Germany', 'usa', 2)
+                    elif response == 't':
+                        self.remove_influence('Turkey', 'usa', 2)
+
+                    self.cards['Cuban Missile Crisis'].effect_active = False
+                    self.cards['Cuban Missile Crisis'].effect_player = 'choose'
+
     def effect_042(self):
         """Quagmire - Effect"""
         eligible_cards = self.quagmire_bear_trap_eligible('usa')
@@ -2470,10 +2500,11 @@ class TwilightStruggleGame(CardGame):
             self.norad_check = False
 
     # Dictionary of the effects
-    effects = {'Quagmire':      effect_042,
-               'Bear Trap':     effect_044,
-               'Flower Power':  effect_059,
-               'NORAD':         effect_106}
+    effects = {'Cuban Missile Crisis':  effect_040,
+               'Quagmire':              effect_042,
+               'Bear Trap':             effect_044,
+               'Flower Power':          effect_059,
+               'NORAD':                 effect_106}
 
     # Functions to manipulate effects
     def trigger_effect(self, effect_card):
@@ -3230,6 +3261,11 @@ class TwilightStruggleGame(CardGame):
             print(ui_string)
             self.we_will_un_check = True
 
+        # Event 40 - Cuban Missile Crisis
+        if self.cards['Cuban Missile Crisis'].effect_active and self.cards['Cuban Missile Crisis'].effect_player == side:
+            self.trigger_effect(self.cards['Cuban Missile Crisis'])
+
+
         while not self.action_round_complete:
             # Set eligible cards
             if self.cards['Missile Envy'].effect_active and side == self.cards['Missile Envy'].effect_player:
@@ -3722,11 +3758,4 @@ def main():
     game.final_scoring()
 
 
-# main()
-
-game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
-game.add_influence_to_control('Colombia', 'usa')
-game.phasing = 'usa'
-game.trigger_event(game.cards['Cuban Missile Crisis'])
-game.action_round('ussr')
-game.action_round('usa')
+main()
