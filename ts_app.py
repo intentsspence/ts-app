@@ -2566,6 +2566,15 @@ class TwilightStruggleGame(CardGame):
                 print(log_string)
                 self.change_score_by_side('ussr', 1)
 
+        # Event 40 - Cuban Missile Crisis
+        if self.cards['Cuban Missile Crisis'].effect_active \
+                and self.cards['Cuban Missile Crisis'].effect_player == side:
+            log_string = "Game over due to Cuban Missile Crisis. Winner: {s}".format(s=self.opponent[side].upper())
+            print(log_string)
+            self.sides[self.opponent[side]].winner = True
+            self.game_active = False
+            quit()
+
         return coup_successful
 
     def action_coup_attempt(self, ops, side):
