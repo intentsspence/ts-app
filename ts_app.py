@@ -2253,6 +2253,7 @@ class TwilightStruggleGame(CardGame):
               'Central America Scoring':        event_037,
               'Southeast Asia Scoring':         event_038,
               'Arms Race':                      event_039,
+              'Cuban Missile Crisis':           event_040,
               'Nuclear Subs':                   event_041,
               'Quagmire':                       event_042,
               'SALT Negotiations':              event_043,
@@ -3724,6 +3725,8 @@ def main():
 # main()
 
 game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
+game.add_influence_to_control('Colombia', 'usa')
 game.phasing = 'usa'
-game.change_defcon(-4)
-game.change_defcon(2)
+game.trigger_event(game.cards['Cuban Missile Crisis'])
+game.action_round('ussr')
+game.action_round('usa')
