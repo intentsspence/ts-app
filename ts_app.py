@@ -2521,6 +2521,26 @@ class TwilightStruggleGame(CardGame):
                 card = self.select_a_card(self.get_available_cards('ussr', False), 'ussr')
                 self.move_card(card, 'discard')
 
+    def space_8_effect(self):
+        """Space Station"""
+        if self.sides['usa'].space_level >= 8 \
+                and self.sides['ussr'].space_level < 8 \
+                and len(self.get_available_cards('usa', False)) > 0:
+            ui_string = 'Space Station. USA may play additional action round.'
+            print(ui_string)
+            confirmation = self.confirm_action('Play additional action round')
+            if confirmation:
+                self.action_round('usa')
+
+        elif self.sides['ussr'].space_level >= 8 \
+                and self.sides['usa'].space_level < 8 \
+                and len(self.get_available_cards('ussr', False)) > 0:
+            ui_string = 'Space Station. USSR may play additional action round.'
+            print(ui_string)
+            confirmation = self.confirm_action('Play additional action round')
+            if confirmation:
+                self.action_round('ussr')
+
     # Dictionary of the effects
     effects = {'Cuban Missile Crisis':  effect_040,
                'Quagmire':              effect_042,
@@ -3512,6 +3532,9 @@ class TwilightStruggleGame(CardGame):
         opponent_space_level = self.sides[self.opponent[side]].space_level
         required_ops = {1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 4}
 
+        if phasing_space_level == 8:
+            return False
+
         if phasing_space_level >= 2 and opponent_space_level < 2:
             max_space_attempts = 2
 
@@ -3784,3 +3807,6 @@ def main():
 
 
 main()
+
+# # Test code
+# game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
