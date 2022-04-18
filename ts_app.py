@@ -667,8 +667,11 @@ class TwilightStruggleGame(CardGame):
                 self.change_score_by_side(s, space_race_points[level][1])
 
     def increase_space_level(self, s):
-        self.sides[s].space_level += 1
-        self.space_race_awards(s)
+        if self.sides[s].space_level == 8:
+            pass
+        else:
+            self.sides[s].space_level += 1
+            self.space_race_awards(s)
 
     # Functions for checking access
     def countries_with_influence(self, s):
@@ -2499,6 +2502,48 @@ class TwilightStruggleGame(CardGame):
             self.ask_to_place_influence(self.countries_with_influence('usa'), 1, 'usa', 1, 1)
             self.norad_check = False
 
+    def space_6_effect(self):
+        """Eagle/Bear has Landed"""
+        if self.sides['usa'].space_level >= 6 \
+                and self.sides['ussr'].space_level < 6 \
+                and len(self.get_available_cards('usa', False)) > 0:
+            ui_string = 'Eagle has Landed. USA may discard held card.'
+            print(ui_string)
+            confirmation = self.confirm_action('Discard held card')
+            if confirmation:
+                card = self.select_a_card(self.get_available_cards('usa', False), 'usa')
+                self.move_card(card, 'discard')
+
+        elif self.sides['ussr'].space_level >= 6 \
+                and self.sides['usa'].space_level < 6 \
+                and len(self.get_available_cards('ussr', False)) > 0:
+            ui_string = 'Bear has Landed. USSR may discard held card.'
+            print(ui_string)
+            confirmation = self.confirm_action('Discard held card')
+            if confirmation:
+                card = self.select_a_card(self.get_available_cards('ussr', False), 'ussr')
+                self.move_card(card, 'discard')
+
+    def space_8_effect(self):
+        """Space Station"""
+        if self.sides['usa'].space_level >= 8 \
+                and self.sides['ussr'].space_level < 8 \
+                and len(self.get_available_cards('usa', False)) > 0:
+            ui_string = 'Space Station. USA may play additional action round.'
+            print(ui_string)
+            confirmation = self.confirm_action('Play additional action round')
+            if confirmation:
+                self.action_round('usa')
+
+        elif self.sides['ussr'].space_level >= 8 \
+                and self.sides['usa'].space_level < 8 \
+                and len(self.get_available_cards('ussr', False)) > 0:
+            ui_string = 'Space Station. USSR may play additional action round.'
+            print(ui_string)
+            confirmation = self.confirm_action('Play additional action round')
+            if confirmation:
+                self.action_round('ussr')
+
     # Dictionary of the effects
     effects = {'Cuban Missile Crisis':  effect_040,
                'Quagmire':              effect_042,
@@ -3490,6 +3535,9 @@ class TwilightStruggleGame(CardGame):
         opponent_space_level = self.sides[self.opponent[side]].space_level
         required_ops = {1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 4}
 
+        if phasing_space_level == 8:
+            return False
+
         if phasing_space_level >= 2 and opponent_space_level < 2:
             max_space_attempts = 2
 
@@ -3746,6 +3794,9 @@ def main():
         # Phase F - Check held card
         game.check_held_cards()
 
+        # Space Race 6 - Eagle/Bear has Landed
+        game.space_6_effect()
+
         # Phase G - Flip China Card
         game.cards['China'].flip_face_up()
 
@@ -3759,3 +3810,6 @@ def main():
 
 
 main()
+
+# # Test code
+# game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
