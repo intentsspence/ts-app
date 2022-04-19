@@ -1123,6 +1123,12 @@ class TwilightStruggleGame(CardGame):
         usa_bgs = len(self.battlegrounds_controlled_in_region(region, 'usa'))
         ussr_bgs = len(self.battlegrounds_controlled_in_region(region, 'ussr'))
 
+        # Event 73 - Shuttle Diplomacy
+        if self.cards['Shuttle Diplomacy'].effect_active and (region == 'Asia' or region == 'Middle East'):
+            if ussr_bgs > 0:
+                ussr_bgs = ussr_bgs - 1
+                ussr_countries = ussr_countries - 1
+
         if usa_countries > 0:
             usa_type = 'presence'
         if (usa_countries > ussr_countries) and (usa_bgs > ussr_bgs) and (usa_countries > usa_bgs):
@@ -1140,8 +1146,9 @@ class TwilightStruggleGame(CardGame):
         return [usa_type, ussr_type]
 
     def score_card(self, region, presence, domination, control, log=False):
-        usa_score_type = self.score_type(region)[0]
-        ussr_score_type = self.score_type(region)[1]
+        score_types = self.score_type(region)
+        usa_score_type = score_types[0]
+        ussr_score_type = score_types[1]
         usa_adjacent_bonus = 0
         ussr_adjacent_bonus = 0
         usa_bg_bonus = len(self.battlegrounds_controlled_in_region(region, 'usa'))
@@ -1159,6 +1166,22 @@ class TwilightStruggleGame(CardGame):
                 elif border == 'USA':
                     if country.controlled == 'ussr':
                         ussr_adjacent_bonus += 1
+
+        # Event 73 - Shuttle Diplomacy
+        if self.cards['Shuttle Diplomacy'].effect_active and (region == 'Asia' or region == 'Middle East'):
+            if self.countries['Japan'] in self.battlegrounds_controlled_in_region(region, 'ussr'):
+                ussr_bg_bonus = ussr_bg_bonus - 1
+                ussr_adjacent_bonus = ussr_adjacent_bonus - 1
+                ui_string = "Event 40 - Shuttle Diplomacy in effect. " \
+                            "Japan is removed from total - USSR loses battleground & adjacent bonus."
+                print(ui_string)
+
+            elif ussr_bg_bonus > 0:
+                ussr_bg_bonus = ussr_bg_bonus - 1
+                ui_string = "Event 40 - Shuttle Diplomacy in effect. USSR loses 1 battleground from total."
+                print(ui_string)
+
+            self.cards['Shuttle Diplomacy'].effect_active = False
 
         usa_total = score_dict[usa_score_type] + usa_adjacent_bonus + usa_bg_bonus
         ussr_total = score_dict[ussr_score_type] + ussr_adjacent_bonus + ussr_bg_bonus
@@ -1812,6 +1835,10 @@ class TwilightStruggleGame(CardGame):
         self.remove_all_influence('Egypt', 'ussr')
         self.add_influence('Egypt', 'usa', 1)
 
+    def event_073(self):
+        """Shuttle Diplomacy"""
+        pass
+
     def event_074(self):
         """The Voice of America"""
         eligible_countries = (self.countries_in_region('Asia') +
@@ -2164,7 +2191,6 @@ class TwilightStruggleGame(CardGame):
         """NORAD"""
         pass
 
-
     def event_107(self):
         """Che"""
         possible_countries = (self.nonbattleground_countries_in_region('Central America') +
@@ -2288,6 +2314,7 @@ class TwilightStruggleGame(CardGame):
               'OAS Founded':                    event_070,
               'Nixon Plays the China Card':     event_071,
               'Sadat Expels Soviets':           event_072,
+              'Shuttle Diplomacy':              event_073,
               'The Voice of America':           event_074,
               'Liberation Theology':            event_075,
               'Ussuri River Skirmish':          event_076,
