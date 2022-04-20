@@ -1146,6 +1146,13 @@ class TwilightStruggleGame(CardGame):
         return [usa_type, ussr_type]
 
     def score_card(self, region, presence, domination, control, log=False):
+        # Event 35 - Formosan Resolution
+        if self.cards['Formosan Resolution'].effect_active and region == 'Asia':
+            if self.countries['Taiwan'].controlled == 'usa':
+                self.countries['Taiwan'].battleground = True
+                ui_string = 'Effect 35 - Formosan Resolution: Taiwan counts as battleground.'
+                print(ui_string)
+
         score_types = self.score_type(region)
         usa_score_type = score_types[0]
         ussr_score_type = score_types[1]
@@ -1211,6 +1218,10 @@ class TwilightStruggleGame(CardGame):
         if log:
             print(log_string_usa)
             print(log_string_ussr)
+
+        # Event 35 - Formosan Resolution: Turn off Taiwan as battleground.
+        self.countries['Taiwan'].battleground = False
+
         return usa_total - ussr_total
 
     def southeast_asia_scoring(self, log=False):
@@ -1506,6 +1517,10 @@ class TwilightStruggleGame(CardGame):
         points = self.defcon - 2
         self.change_score_by_side(self.phasing, points)
         self.change_defcon(2)
+
+    def event_035(self):
+        """Formosan Resolution"""
+        pass
 
     def event_036(self):
         """Brush War"""
@@ -2278,6 +2293,7 @@ class TwilightStruggleGame(CardGame):
               'Red Scare/Purge':                event_031,
               'UN Intervention':                event_032,
               'Nuclear Test Ban':               event_034,
+              'Formosan Resolution':            event_035,
               'Brush War':                      event_036,
               'Central America Scoring':        event_037,
               'Southeast Asia Scoring':         event_038,
@@ -3455,6 +3471,12 @@ class TwilightStruggleGame(CardGame):
         if selected_action != '':
             if selected_card.name == 'China':
                 self.give_opponent_china_card(side)
+
+                # Event 35 - Formosan Resolution
+                if side == 'usa' and self.cards['Formosan Resolution'].effect_active:
+                    self.cards['Formosan Resolution'].effect_active = False
+                    ui_string = 'Event 35 - Formosan Resolution: Effect cancelled.'
+                    print(ui_string)
 
             # Event 49 - Missile Envy (turn off missile envy)
             if self.cards['Missile Envy'].effect_active \
