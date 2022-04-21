@@ -1512,6 +1512,43 @@ class TwilightStruggleGame(CardGame):
 
         self.move_card(selected_card, 'discard')
 
+    def event_033(self):
+        """De-Stalinization"""
+        influence_removed = 0
+        influence_to_remove = 4
+        target_list = []
+        possible_targets = self.countries_with_influence('ussr')
+
+        while influence_to_remove > 0:
+            confirmation = self.confirm_action("Continue removing influence")
+            if confirmation:
+                print("Remove {i} influence".format(i=influence_to_remove))
+                target = self.select_a_country(possible_targets)
+                if target is None:
+                    break
+                amount = self.select_influence_amount(target, influence_to_remove, 1, target.ussr_influence)
+                if amount is None:
+                    break
+                target_list.append([target, amount])
+                possible_targets.remove(target)
+                influence_to_remove = influence_to_remove - amount
+                influence_removed = influence_removed + amount
+                if len(possible_targets) == 0:
+                    break
+            else:
+                break
+
+        if influence_removed > 0:
+            # This uses USA since the function switches to the opponent
+            self.remove_influence_from_list(target_list, 'usa')
+
+            eligible_countries = []
+            for country in self.countries.values():
+                if country.controlled != 'usa':
+                    eligible_countries.append(country)
+
+            self.ask_to_place_influence(eligible_countries, influence_removed, 'ussr', 1, 2)
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
@@ -2292,6 +2329,7 @@ class TwilightStruggleGame(CardGame):
               'Decolonization':                 event_030,
               'Red Scare/Purge':                event_031,
               'UN Intervention':                event_032,
+              'De-Stalinization':               event_033,
               'Nuclear Test Ban':               event_034,
               'Formosan Resolution':            event_035,
               'Brush War':                      event_036,
