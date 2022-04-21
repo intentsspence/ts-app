@@ -1512,6 +1512,24 @@ class TwilightStruggleGame(CardGame):
 
         self.move_card(selected_card, 'discard')
 
+    def event_033(self):
+        """De-Stalinization"""
+        influence_removed = 0
+
+        while influence_removed < 4:
+            confirmation = self.confirm_action("Remove more influence ({i} remaining)".format(i=(4 - influence_removed)))
+
+            if confirmation:
+                #TODO remove influence function
+                pass
+            else:
+                break
+
+        if influence_removed > 0:
+            #TODO write function to pull all countries not controlled by USA
+            eligible_countries = []
+            self.ask_to_place_influence(eligible_countries, influence_removed, 'ussr', 1, 2)
+
     def event_034(self):
         """Nuclear Test Ban"""
         points = self.defcon - 2
