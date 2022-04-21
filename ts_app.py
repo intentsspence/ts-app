@@ -1614,6 +1614,68 @@ class TwilightStruggleGame(CardGame):
         """Bear Trap"""
         pass
 
+    def event_045(self):
+        """Summit"""
+        usa_roll = self.die_roll()
+        usa_bonus = 0
+        usa_total = 0
+        ussr_roll = self.die_roll()
+        ussr_bonus = 0
+        ussr_total = 0
+        winner = ''
+
+        all_regions = ['Europe', 'Asia', 'Middle East', 'Africa', 'Central America', 'South America']
+
+        for region in all_regions:
+            score_type = self.score_type(region)
+            if score_type[0] == 'domination' or score_type[0] == 'control':
+                usa_bonus = usa_bonus + 1
+            elif score_type[1] == 'domination' or score_type[1] == 'control':
+                ussr_bonus = ussr_bonus + 1
+
+        usa_total = usa_roll + usa_bonus
+        ussr_total = ussr_roll + ussr_bonus
+
+        ui_string = "USA Total:    {at}\n" \
+                    "Roll:         {ar}\n" \
+                    "Region bonus: {ab}\n\n" \
+                    "USSR Total:   {bt}\n" \
+                    "Roll:         {br}\n" \
+                    "Region bonus: {bb}\n".format(at=usa_total,
+                                                  ar=usa_roll,
+                                                  ab=usa_bonus,
+                                                  bt=ussr_total,
+                                                  br=ussr_roll,
+                                                  bb=ussr_bonus)
+
+        print(ui_string)
+
+        if usa_total > ussr_total:
+            winner = 'usa'
+            ui_string = "Winner: {w}".format(w=winner.upper())
+            print(ui_string)
+            self.change_score_by_side('usa', 2)
+
+        elif ussr_total > usa_total:
+            winner = 'ussr'
+            ui_string = "Winner: {w}".format(w=winner.upper())
+            print(ui_string)
+            self.change_score_by_side('ussr', 2)
+
+        else:
+            ui_string = "Tie: no effect."
+            print(ui_string)
+
+        if winner != '':
+            options = [['+', "Improve DEFCON + 1"],
+                       ['-', "Reduce DEFCON - 1"],
+                       ['0', "No change"]]
+            response = self.select_option(options)
+            if response == '+':
+                self.change_defcon(1)
+            elif response == '-':
+                self.change_defcon(-1)
+
     def event_046(self):
         """How I Learned to Stop Worrying"""
         options = [['5', "Set DEFCON to 5"],
@@ -2341,6 +2403,7 @@ class TwilightStruggleGame(CardGame):
               'Quagmire':                       event_042,
               'SALT Negotiations':              event_043,
               'Bear Trap':                      event_044,
+              'Summit':                         event_045,
               'How I Learned to Stop Worrying': event_046,
               'Junta':                          event_047,
               'Kitchen Debates':                event_048,
@@ -3896,7 +3959,4 @@ def main():
     game.final_scoring()
 
 
-main()
-
-# # Test code
-# game = TwilightStruggleGame("Game 2022-02-01", "2022-02-01", "1", "")
+# main()
