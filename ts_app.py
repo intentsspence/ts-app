@@ -3959,4 +3959,4 @@ def main():
     game.final_scoring()
 
 
-# main()
+main()
